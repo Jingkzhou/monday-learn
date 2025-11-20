@@ -14,6 +14,7 @@ import { Profile } from './pages/Profile';
 import { Welcome } from './pages/Welcome';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { Library } from './pages/Library';
 import { FlashcardMode } from './pages/FlashcardMode';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
@@ -129,7 +130,7 @@ const App: React.FC = () => {
         <Route path="/library" element={
           <ProtectedRoute>
             <MainLayout>
-              <Folders />
+              <Library />
             </MainLayout>
           </ProtectedRoute>
         } />

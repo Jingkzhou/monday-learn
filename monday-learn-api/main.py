@@ -11,6 +11,7 @@ from app.db.base import Base
 from app.models.user import User
 from app.models.login_log import LoginLog
 from app.models.study_set import StudySet, Term
+from app.models.material import Material
 
 # Create tables
 Base.metadata.create_all(bind=engine)

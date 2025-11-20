@@ -1,10 +1,11 @@
 from fastapi import APIRouter
-from app.api.endpoints import auth, study_sets
+from app.api.endpoints import auth, study_sets, materials
 
 router = APIRouter()
 
 router.include_router(auth.router, prefix="/auth", tags=["auth"])
 router.include_router(study_sets.router, prefix="/study-sets", tags=["study_sets"])
+router.include_router(materials.router, prefix="/materials", tags=["materials"])
 
 @router.get("/health")
 async def health_check():
