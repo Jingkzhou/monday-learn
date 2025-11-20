@@ -36,6 +36,8 @@ export const SetView: React.FC = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [editInProgress, setEditInProgress] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const autoPlayTimeout = useRef<number | null>(null);
   const pauseTimeout = useRef<number | null>(null);
@@ -45,6 +47,7 @@ export const SetView: React.FC = () => {
     const fetchStudySet = async () => {
       setLoading(true);
       setError('');
+      setActionError('');
       try {
         const data = await api.get<any>(`/study-sets/${id}`);
         const preparedTerms: Term[] = (data.terms || []).map((term: any, index: number) => ({
@@ -63,6 +66,7 @@ export const SetView: React.FC = () => {
           author: data.author_username,
           authorUsername: data.author_username,
           authorId: data.author_id,
+          isOwner: data.is_owner ?? false,
           termCount: preparedTerms.length,
           terms: preparedTerms,
           createdAt: data.created_at,
@@ -192,6 +196,29 @@ export const SetView: React.FC = () => {
     setIsAutoPlaying((prev) => !prev);
   };
 
+  const handleEditClick = async () => {
+    if (!studySet) return;
+    setActionError('');
+
+    if (studySet.isOwner) {
+      navigate(`/set/${studySet.id}/edit`);
+      return;
+    }
+
+    setEditInProgress(true);
+    try {
+      const cloned = await api.post<StudySet>(`/study-sets/${studySet.id}/clone`, {
+        title: `${studySet.title}（我的版本）`,
+        is_public: false,
+      });
+      navigate(`/set/${cloned.id}/edit`);
+    } catch (err: any) {
+      setActionError(err.message || '保存副本失败，请稍后重试');
+    } finally {
+      setEditInProgress(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
@@ -250,14 +277,25 @@ export const SetView: React.FC = () => {
             <button className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors" title="分享">
                 <Share2 className="w-5 h-5" />
             </button>
-            <button onClick={() => navigate(`/set/${id}/edit`)} className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors" title="编辑">
-                <PenSquare className="w-5 h-5" />
+            <button 
+                onClick={handleEditClick}
+                disabled={editInProgress}
+                className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed" 
+                title={studySet.isOwner ? "编辑" : "保存副本并编辑"}
+            >
+                {editInProgress ? <Loader2 className="w-5 h-5 animate-spin" /> : <PenSquare className="w-5 h-5" />}
             </button>
             <button className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors" title="更多">
                 <MoreHorizontal className="w-5 h-5" />
             </button>
           </div>
         </div>
+        {actionError && (
+          <div className="mt-3 text-sm text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            {actionError}
+          </div>
+        )}
       </div>
 
       {/* Study Modes Grid */}

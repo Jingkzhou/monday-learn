@@ -25,6 +25,7 @@ class TermResponse(TermBase):
 class StudySetBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=500)
+    is_public: bool = Field(default=True)
 
 
 class StudySetCreate(StudySetBase):
@@ -39,10 +40,18 @@ class StudySetResponse(StudySetBase):
     id: int
     author_id: int
     author_username: Optional[str] = None
+    is_owner: bool = False
     term_count: int
+    view_count: int = 0
     created_at: datetime
     updated_at: Optional[datetime]
     terms: List[TermResponse] = Field(default_factory=list)
 
     class Config:
         from_attributes = True
+
+
+class StudySetCloneRequest(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    is_public: bool = False

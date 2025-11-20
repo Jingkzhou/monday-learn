@@ -8,13 +8,15 @@ from app.schemas.study_set import (
     StudySetResponse,
     StudySetUpdate,
     TermResponse,
+    StudySetCloneRequest,
 )
 
 
 router = APIRouter()
 
 
-def serialize_study_set(study_set: StudySet) -> StudySetResponse:
+def serialize_study_set(study_set: StudySet, current_user=None) -> StudySetResponse:
+    is_owner = bool(current_user and study_set.author_id == current_user.id)
     term_items = sorted(study_set.terms, key=lambda t: t.order or 0)
     return StudySetResponse(
         id=study_set.id,
@@ -22,6 +24,9 @@ def serialize_study_set(study_set: StudySet) -> StudySetResponse:
         description=study_set.description,
         author_id=study_set.author_id,
         author_username=study_set.author.username if study_set.author else None,
+        is_owner=is_owner,
+        is_public=study_set.is_public,
+        view_count=study_set.view_count or 0,
         term_count=len(term_items),
         created_at=study_set.created_at,
         updated_at=study_set.updated_at,
@@ -39,6 +44,24 @@ def serialize_study_set(study_set: StudySet) -> StudySetResponse:
     )
 
 
+@router.get("/public/top", response_model=list[StudySetResponse])
+def get_public_top_study_sets(
+    limit: int = 5,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    limit = max(1, min(limit, 50))
+    study_sets = (
+        db.query(StudySet)
+        .options(selectinload(StudySet.terms), selectinload(StudySet.author))
+        .filter(StudySet.is_public.is_(True))
+        .order_by(StudySet.view_count.desc(), StudySet.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return [serialize_study_set(study_set, current_user) for study_set in study_sets]
+
+
 @router.post("", response_model=StudySetResponse, status_code=status.HTTP_201_CREATED)
 def create_study_set(
     payload: StudySetCreate,
@@ -49,6 +72,7 @@ def create_study_set(
         title=payload.title,
         description=payload.description,
         author_id=current_user.id,
+        is_public=payload.is_public,
     )
     db.add(study_set)
     db.flush()
@@ -72,7 +96,7 @@ def create_study_set(
         .first()
     )
 
-    return serialize_study_set(study_set)
+    return serialize_study_set(study_set, current_user)
 
 
 @router.get("/{study_set_id}", response_model=StudySetResponse)
@@ -87,10 +111,19 @@ def get_study_set(
         .filter(StudySet.id == study_set_id)
         .first()
     )
-    if not study_set or study_set.author_id != current_user.id:
+    if not study_set:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study set not found")
 
-    return serialize_study_set(study_set)
+    is_owner = study_set.author_id == current_user.id
+    if not is_owner and not study_set.is_public:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study set not found")
+
+    study_set.view_count = (study_set.view_count or 0) + 1
+    db.add(study_set)
+    db.commit()
+    db.refresh(study_set)
+
+    return serialize_study_set(study_set, current_user)
 
 
 @router.get("", response_model=list[StudySetResponse])
@@ -109,7 +142,7 @@ def list_study_sets(
         .limit(limit)
         .all()
     )
-    return [serialize_study_set(study_set) for study_set in study_sets]
+    return [serialize_study_set(study_set, current_user) for study_set in study_sets]
 
 
 @router.put("/{study_set_id}", response_model=StudySetResponse)
@@ -131,6 +164,7 @@ def update_study_set(
 
     study_set.title = payload.title
     study_set.description = payload.description
+    study_set.is_public = payload.is_public
 
     db.query(Term).filter(Term.study_set_id == study_set.id).delete()
     db.flush()
@@ -154,4 +188,54 @@ def update_study_set(
         .first()
     )
 
-    return serialize_study_set(study_set)
+    return serialize_study_set(study_set, current_user)
+
+
+@router.post("/{study_set_id}/clone", response_model=StudySetResponse, status_code=status.HTTP_201_CREATED)
+def clone_study_set(
+    study_set_id: int,
+    payload: StudySetCloneRequest | None = None,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    payload = payload or StudySetCloneRequest()
+    source_set = (
+        db.query(StudySet)
+        .options(selectinload(StudySet.terms), selectinload(StudySet.author))
+        .filter(StudySet.id == study_set_id, StudySet.is_public.is_(True))
+        .first()
+    )
+
+    if not source_set:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study set not found or not public")
+
+    new_set = StudySet(
+        title=payload.title or f"{source_set.title}（副本）",
+        description=payload.description if payload.description is not None else source_set.description,
+        author_id=current_user.id,
+        is_public=payload.is_public,
+        view_count=0,
+    )
+    db.add(new_set)
+    db.flush()
+
+    for idx, term_payload in enumerate(source_set.terms):
+        term = Term(
+            study_set_id=new_set.id,
+            term=term_payload.term,
+            definition=term_payload.definition,
+            image_url=term_payload.image_url,
+            order=term_payload.order if term_payload.order is not None else idx,
+        )
+        db.add(term)
+
+    db.commit()
+
+    new_set = (
+        db.query(StudySet)
+        .options(selectinload(StudySet.terms), selectinload(StudySet.author))
+        .filter(StudySet.id == new_set.id)
+        .first()
+    )
+
+    return serialize_study_set(new_set, current_user)

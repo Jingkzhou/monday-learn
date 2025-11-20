@@ -16,8 +16,12 @@ export interface StudySet {
   authorAvatar?: string;
   authorId?: number;
   authorUsername?: string;
+  isOwner?: boolean;
   termCount?: number;
   term_count?: number;
+  viewCount?: number;
+  view_count?: number;
+  isPublic?: boolean;
   terms: Term[];
   createdAt?: string;
   updatedAt?: string;

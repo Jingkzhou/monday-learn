@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, TrendingUp, AlertCircle, BookOpen, BrainCircuit, Loader2 } from 'lucide-react';
+import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, TrendingUp, AlertCircle, BrainCircuit, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { StudySet } from '../types';
 import { api } from '../utils/api';
@@ -14,8 +14,21 @@ export const Home: React.FC = () => {
   const [studySets, setStudySets] = useState<StudySet[]>([]);
   const [loadingSets, setLoadingSets] = useState(true);
   const [setsError, setSetsError] = useState('');
+  const [recommendedSets, setRecommendedSets] = useState<StudySet[]>([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(true);
+  const [recommendedError, setRecommendedError] = useState('');
+  const recentRef = useRef<HTMLDivElement | null>(null);
+  const recommendedRef = useRef<HTMLDivElement | null>(null);
 
   const timeframes = ['本周', '本月', '半年', '本年'];
+
+  const normalizeSet = (item: any): StudySet => ({
+    ...item,
+    termCount: item.termCount ?? item.term_count ?? item.terms?.length ?? 0,
+    viewCount: item.viewCount ?? item.view_count ?? 0,
+    isPublic: item.isPublic ?? item.is_public ?? true,
+    isOwner: item.isOwner ?? item.is_owner ?? false,
+  });
 
   useEffect(() => {
     const fetchSets = async () => {
@@ -23,10 +36,7 @@ export const Home: React.FC = () => {
       setSetsError('');
       try {
         const data = await api.get<StudySet[]>('/study-sets');
-        const normalized = (data || []).map((item) => ({
-          ...item,
-          termCount: item.termCount ?? item.term_count ?? item.terms?.length ?? 0
-        }));
+        const normalized = (data || []).map(normalizeSet);
         setStudySets(normalized);
       } catch (err: any) {
         setSetsError(err.message || '加载学习集失败');
@@ -36,6 +46,24 @@ export const Home: React.FC = () => {
     };
 
     fetchSets();
+  }, []);
+
+  useEffect(() => {
+    const fetchRecommended = async () => {
+      setLoadingRecommended(true);
+      setRecommendedError('');
+      try {
+        const data = await api.get<StudySet[]>('/study-sets/public/top?limit=5');
+        const normalized = (data || []).map(normalizeSet);
+        setRecommendedSets(normalized);
+      } catch (err: any) {
+        setRecommendedError(err.message || '加载推荐内容失败');
+      } finally {
+        setLoadingRecommended(false);
+      }
+    };
+
+    fetchRecommended();
   }, []);
 
   const heroSet = useMemo(() => studySets[0], [studySets]);
@@ -106,6 +134,107 @@ export const Home: React.FC = () => {
     setReportStatus('idle');
     setReportContent('');
   };
+
+  const scrollBy = (ref: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
+    const node = ref.current;
+    if (!node) return;
+    const delta = direction === 'left' ? -node.clientWidth * 0.9 : node.clientWidth * 0.9;
+    node.scrollBy({ left: delta, behavior: 'smooth' });
+  };
+
+  const renderCard = (set: StudySet) => {
+    const termCount = set.termCount || set.terms?.length || 0;
+    return (
+      <div
+        key={set.id}
+        className="relative min-w-[260px] max-w-[320px] sm:min-w-[300px] sm:max-w-[360px] md:min-w-[320px] md:max-w-[400px] bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200 cursor-pointer active:scale-[0.98] transition-transform"
+        onClick={() => navigate(`/set/${set.id}`)}
+      >
+        <div className="relative p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-gray-100 text-indigo-700 text-xs font-bold flex items-center gap-1">
+              <Copy className="w-4 h-4" />
+              {termCount} 个词语
+            </span>
+            {set.isPublic && (
+              <span className="px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold flex items-center gap-1 border border-indigo-100">
+                <ImageIcon className="w-3 h-3" />
+                公开
+              </span>
+            )}
+          </div>
+          <div className="text-lg sm:text-xl font-bold text-gray-900 leading-snug line-clamp-2">{set.title}</div>
+          <div className="flex items-center gap-2 text-gray-700">
+            <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center text-sm font-bold uppercase">
+              {set.authorUsername?.[0] || 'U'}
+            </div>
+            <span className="text-sm font-semibold truncate">{set.authorUsername || '其他学员'}</span>
+            {set.viewCount !== undefined && (
+              <span className="ml-auto text-xs text-gray-500 flex items-center gap-1">
+                <TrendingUp className="w-4 h-4" />
+                {set.viewCount || 0} 次打开
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCarousel = (
+    title: string,
+    sets: StudySet[],
+    loading: boolean,
+    error: string,
+    ref: React.RefObject<HTMLDivElement>
+  ) => (
+    <section className="mb-10">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => scrollBy(ref, 'left')}
+            className="p-2 rounded-full bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors"
+            aria-label="上一页"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scrollBy(ref, 'right')}
+            className="p-2 rounded-full bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors"
+            aria-label="下一页"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-3 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          {error}
+        </div>
+      )}
+
+      <div
+        ref={ref}
+        className="flex gap-4 overflow-x-auto pb-3 no-scrollbar"
+      >
+        {loading ? (
+          <div className="flex items-center gap-2 text-slate-200">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            正在加载...
+          </div>
+        ) : sets.length > 0 ? (
+          sets.map(renderCard)
+        ) : (
+          <div className="bg-white text-gray-500 rounded-xl border border-dashed border-gray-200 p-6 min-w-[260px]">
+            暂无内容
+          </div>
+        )}
+      </div>
+    </section>
+  );
 
   return (
     <main className="pt-20 px-4 md:px-8 md:ml-64 pb-24 md:pb-10 min-h-screen bg-bg-gray">
@@ -187,75 +316,11 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Recent Content List */}
-      <section className="mb-8">
-          <h2 className="text-lg font-bold text-gray-800 mb-3">近期内容</h2>
-          {setsError && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-3 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              {setsError}
-            </div>
-          )}
-          <div className="flex flex-col gap-3">
-              {loadingSets ? (
-                <div className="flex items-center gap-2 text-gray-500">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  正在加载你的学习集...
-                </div>
-              ) : studySets.length > 0 ? (
-                studySets.map(set => (
-                    <div 
-                        key={set.id} 
-                        onClick={() => navigate(`/set/${set.id}`)}
-                        className="bg-white rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform cursor-pointer flex items-center justify-between"
-                    >
-                        <div className="flex items-center gap-4 overflow-hidden">
-                             {/* Set Icon Placeholder */}
-                             <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                                  <Copy className="w-6 h-6 transform rotate-90" />
-                             </div>
-                             
-                             <div className="min-w-0">
-                                <div className="text-base font-bold text-gray-900 truncate">{set.title}</div>
-                                <div className="text-xs text-gray-500 font-medium mt-0.5">
-                                  {(set.termCount || set.terms?.length || 0)}张卡片 • 由您制作
-                                </div>
-                             </div>
-                        </div>
-                        
-                        <div className="flex-shrink-0 w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 ml-2">
-                            <Copy className="w-5 h-5" />
-                        </div>
-                    </div>
-                ))
-              ) : (
-                <div className="bg-white rounded-xl border border-dashed border-gray-200 p-6 text-center text-gray-500">
-                  还没有学习内容，去创建你的第一套吧！
-                </div>
-              )}
-          </div>
-      </section>
+      {/* Recent Content Carousel */}
+      {renderCarousel('近期内容', studySets, loadingSets, setsError, recentRef)}
 
-      {/* Recommended Section */}
-      <section className="mb-10">
-          <h2 className="text-lg font-bold text-gray-800 mb-3">其他学员喜爱的内容</h2>
-          <div className="flex flex-col gap-3">
-               <div className="bg-white rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform cursor-pointer flex items-center justify-between">
-                   <div className="flex items-center gap-4 overflow-hidden">
-                       <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                            <Copy className="w-6 h-6 transform rotate-90" />
-                       </div>
-                       <div className="min-w-0">
-                          <div className="text-base font-bold text-gray-900 truncate">C16. T2. P3. How to make wise decisions</div>
-                          <div className="text-xs text-gray-500 font-medium mt-0.5">97张卡片 • Linh_30_12</div>
-                       </div>
-                   </div>
-                   <div className="flex-shrink-0 w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 ml-2">
-                        <Copy className="w-5 h-5" />
-                   </div>
-               </div>
-          </div>
-      </section>
+      {/* Recommended Section Carousel */}
+      {renderCarousel('其他学员喜爱的内容', recommendedSets, loadingRecommended, recommendedError, recommendedRef)}
 
       {/* AI Summary Button Section */}
       <section className="mb-8">
