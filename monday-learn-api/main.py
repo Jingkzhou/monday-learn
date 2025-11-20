@@ -4,7 +4,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.api import routes
 from app.core.logger import setup_logging
-from app.db.session import get_db
+from app.db.session import get_db, engine
+from app.db.base import Base
+# Import models to ensure they are registered
+from app.models.user import User
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 # Setup logging
 setup_logging()
@@ -25,7 +31,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(routes.router)
+from app.core.config import settings
+
+app.include_router(routes.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():
