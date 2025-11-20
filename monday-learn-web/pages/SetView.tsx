@@ -314,7 +314,10 @@ export const SetView: React.FC = () => {
 
       {/* Study Modes Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-        <button className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group">
+        <button
+          onClick={() => navigate(`/set/${id}/flashcards`)}
+          className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+        >
           <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-100">
             <Copy className="w-5 h-5" />
           </div>

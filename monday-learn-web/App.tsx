@@ -14,12 +14,13 @@ import { Profile } from './pages/Profile';
 import { Welcome } from './pages/Welcome';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { FlashcardMode } from './pages/FlashcardMode';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { MobileNav } from './components/MobileNav';
 
 // Layout wrapper for pages that have the standard sidebar/topbar
-const MainLayout: React.FC<{children: React.ReactNode}> = ({ children }) => (
+const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="min-h-screen bg-bg-gray pb-20 md:pb-0">
     <TopBar />
     <Sidebar />
@@ -29,7 +30,7 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({ children }) => (
 );
 
 // Guard to ensure user is authenticated before accessing protected routes
-const ProtectedRoute: React.FC<{children: React.ReactElement}> = ({ children }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('token');
 
   if (!isAuthenticated) {
@@ -56,7 +57,7 @@ const App: React.FC = () => {
             </MainLayout>
           </ProtectedRoute>
         } />
-        
+
         <Route path="/set/:id" element={
           <ProtectedRoute>
             <MainLayout>
@@ -64,7 +65,13 @@ const App: React.FC = () => {
             </MainLayout>
           </ProtectedRoute>
         } />
-        
+
+        <Route path="/set/:id/flashcards" element={
+          <ProtectedRoute>
+            <FlashcardMode />
+          </ProtectedRoute>
+        } />
+
         <Route path="/set/:id/learn" element={
           <ProtectedRoute>
             <LearnMode />
@@ -90,13 +97,13 @@ const App: React.FC = () => {
             <AIExamMode />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/set/:id/edit" element={
           <ProtectedRoute>
             <EditSet />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/folders" element={
           <ProtectedRoute>
             <MainLayout>
