@@ -34,12 +34,20 @@ export interface NavItem {
 }
 
 export interface Folder {
-  id: string;
+  id: number;
   title: string;
   description?: string;
-  setIds: string[]; // List of Set IDs contained in this folder
-  author: string;
-  createdAt: string;
+  author_id: number;
+  author_username: string;
+  created_at: string;
+  updated_at: string;
+  study_sets: {
+    id: number;
+    title: string;
+    term_count: number;
+    author_username: string;
+  }[];
+  set_count: number;
 }
 
 export interface UserResponse {
