@@ -7,3 +7,5 @@ python-dotenv
 pydantic-settings
 bcrypt
 email-validator
+python-jose[cryptography]
+python-multipart

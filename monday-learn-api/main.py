@@ -8,6 +8,7 @@ from app.db.session import get_db, engine
 from app.db.base import Base
 # Import models to ensure they are registered
 from app.models.user import User
+from app.models.login_log import LoginLog
 
 # Create tables
 Base.metadata.create_all(bind=engine)

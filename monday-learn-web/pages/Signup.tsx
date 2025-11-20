@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { api } from '../utils/api';
 
 export const Signup: React.FC = () => {
     const navigate = useNavigate();
@@ -22,22 +23,11 @@ export const Signup: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'}/auth/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    username,
-                    password,
-                }),
+            await api.post('/auth/signup', {
+                email,
+                username,
+                password,
             });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Registration failed');
-            }
 
             // Success
             navigate('/login');
