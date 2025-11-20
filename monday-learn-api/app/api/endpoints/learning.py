@@ -114,14 +114,17 @@ def update_progress(
             user_id=current_user.id,
             study_set_id=study_set_id,
             term_id=term_id,
-            status=LearningStatus.NOT_STARTED
+            status=LearningStatus.NOT_STARTED,
+            consecutive_correct=0,
+            total_correct=0,
+            total_incorrect=0
         )
         db.add(progress)
     
     # Update logic
     if payload.is_correct:
-        progress.consecutive_correct += 1
-        progress.total_correct += 1
+        progress.consecutive_correct = (progress.consecutive_correct or 0) + 1
+        progress.total_correct = (progress.total_correct or 0) + 1
         
         # Mastery Rule: 2 consecutive correct
         if progress.consecutive_correct >= 2:
@@ -131,8 +134,8 @@ def update_progress(
             
     else:
         progress.consecutive_correct = 0
-        progress.total_incorrect += 1
-        progress.status = LearningStatus.FAMILIAR # Demote or keep as familiar
+        progress.total_incorrect = (progress.total_incorrect or 0) + 1
+        progress.status = LearningStatus.NOT_STARTED
     
     progress.last_reviewed = datetime.now()
     

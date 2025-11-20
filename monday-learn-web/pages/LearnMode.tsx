@@ -142,6 +142,13 @@ export const LearnMode: React.FC = () => {
         const updatedTerm = { ...currentTerm };
         let newCounts = { ...counts };
 
+        console.log("handleContinue:", {
+            term: currentTerm.term,
+            status: currentTerm.learning_status,
+            isCorrect,
+            currentCounts: counts
+        });
+
         if (isCorrect) {
             updatedTerm.consecutive_correct += 1;
 
@@ -186,11 +193,12 @@ export const LearnMode: React.FC = () => {
             // Incorrect
             updatedTerm.consecutive_correct = 0;
 
-            if (currentTerm.learning_status === 'not_started') {
-                newCounts.new = Math.max(0, newCounts.new - 1);
-                newCounts.familiar += 1;
-                updatedTerm.learning_status = 'familiar';
+            if (currentTerm.learning_status === 'familiar') {
+                newCounts.familiar = Math.max(0, newCounts.familiar - 1);
+                newCounts.new += 1;
+                updatedTerm.learning_status = 'not_started';
             }
+            // If it was 'not_started', it stays 'not_started'
 
             const newQueue = [...queue];
             newQueue.splice(currentIndex, 1);
@@ -200,6 +208,7 @@ export const LearnMode: React.FC = () => {
                 setCurrentIndex(0);
             }
         }
+        console.log("New Counts:", newCounts);
         setCounts(newCounts);
     };
 
