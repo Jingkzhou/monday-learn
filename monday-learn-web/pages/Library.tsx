@@ -115,6 +115,61 @@ export const Library: React.FC = () => {
         return <File className="w-8 h-8 text-indigo-500" />;
     };
 
+    const handlePreview = (file: Material) => {
+        const token = localStorage.getItem('token');
+        const url = `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'}/materials/${file.id}/file?token=${token}`;
+        // Since we can't easily pass headers in a new tab open, we might need a way to auth via query param or cookie.
+        // For now, let's assume the browser session or a query param token (if backend supported it) would work.
+        // But wait, my backend expects Bearer token in header.
+        // Opening in new tab directly won't send the header.
+        // I'll implement a fetch-and-blob approach for preview if possible, or just open it and hope for the best (it will fail 401).
+        // Actually, for a simple "preview", if it's a PDF, we can fetch it as blob, create object URL, and open that.
+
+        handleDownload(file, true);
+    };
+
+    const handleDownload = async (file: Material, preview = false) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'}/materials/${file.id}/file`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) throw new Error('Download failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            if (!preview) {
+                a.download = file.filename;
+            } else {
+                a.target = '_blank';
+            }
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err) {
+            console.error('Download error:', err);
+            setError('下载失败');
+        }
+    };
+
+    const handleDelete = async (file: Material) => {
+        if (!confirm(`确定要删除 ${file.filename} 吗？`)) return;
+
+        try {
+            await api.delete(`/materials/${file.id}`);
+            setMaterials(materials.filter(m => m.id !== file.id));
+        } catch (err: any) {
+            console.error('Delete error:', err);
+            setError('删除失败');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-bg-gray pt-20 px-4 md:px-8 md:ml-64 pb-20">
             <div className="flex items-center justify-between mb-8">
@@ -183,7 +238,12 @@ export const Library: React.FC = () => {
                                         {getFileIcon(file.filename)}
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-gray-900 mb-1">{file.filename}</h4>
+                                        <h4
+                                            className="font-bold text-gray-900 mb-1 cursor-pointer hover:text-indigo-600 hover:underline"
+                                            onClick={() => handlePreview(file)}
+                                        >
+                                            {file.filename}
+                                        </h4>
                                         <div className="flex items-center gap-3 text-xs text-gray-500">
                                             <span>{formatSize(file.file_size)}</span>
                                             <span>•</span>
@@ -192,10 +252,18 @@ export const Library: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors" title="下载">
+                                    <button
+                                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+                                        title="下载"
+                                        onClick={() => handleDownload(file)}
+                                    >
                                         <Download className="w-5 h-5" />
                                     </button>
-                                    <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors" title="删除">
+                                    <button
+                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                        title="删除"
+                                        onClick={() => handleDelete(file)}
+                                    >
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 </div>
