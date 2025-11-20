@@ -29,7 +29,7 @@ origins = [o.strip() for o in env_origins.split(",") if o.strip()]
 # Allow common LAN IPs by default so 192.168.x.x / 10.x.x.x hosts can call the API
 origin_regex = os.getenv(
     "CORS_ORIGIN_REGEX",
-    r"http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?",
+    r"http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.\d+\.\d+\.\d+)(:\d+)?",
 )
 
 app.add_middleware(

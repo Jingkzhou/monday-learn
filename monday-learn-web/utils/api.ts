@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.0.115:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://172.16.93.25:8000/api/v1';
 
 interface RequestOptions extends RequestInit {
     headers?: Record<string, string>;
