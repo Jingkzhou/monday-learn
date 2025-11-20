@@ -2,6 +2,17 @@
 
 ## 启动说明
 
+### 根目录快捷脚本
+
+在仓库根目录提供了两个一键脚本：
+
+*   启动后台：`./start-backend.sh [dev|sit|prod]`  
+    * 可选参数指定 `APP_ENV`（默认 `dev`），也可通过环境变量 `APP_ENV` 设置。  
+    * 可通过环境变量覆盖 `HOST`/`PORT`（默认 `0.0.0.0:8000`）。  
+    * 会自动创建/激活 `venv` 并安装 `requirements.txt`。
+*   启动前端：`./start-frontend.sh`  
+    * 如未安装依赖会自动执行 `npm install`，然后运行 `npm run dev`（http://localhost:5173）。
+
 ### 后台服务 (Backend)
 
 确保已安装 Python 3.12+ 和 MySQL。

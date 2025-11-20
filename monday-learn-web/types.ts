@@ -37,3 +37,11 @@ export interface Folder {
   author: string;
   createdAt: string;
 }
+
+export interface UserResponse {
+  id: number;
+  email: string;
+  username: string;
+  is_active: boolean;
+  created_at: string;
+}

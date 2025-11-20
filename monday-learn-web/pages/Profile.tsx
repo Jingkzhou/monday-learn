@@ -1,21 +1,66 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, CreditCard, Bell, Moon, LogOut, Award, Flame, Calendar, MapPin } from 'lucide-react';
+import { User, Settings, CreditCard, Bell, Moon, LogOut, Award, Flame, Calendar, MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
+import { UserResponse } from '../types';
 
 export const Profile: React.FC = () => {
     const navigate = useNavigate();
-    const user = {
-        username: 'Linh_30_12',
-        name: 'Linh Nguyen',
-        email: 'linh.nguyen@example.com',
-        role: '教师', // Teacher
-        school: '阳光小学',
-        joinDate: '2023年11月',
-        streak: 12,
-        setsCreated: 24,
-        totalStudyTime: '48小时'
+    const [user, setUser] = useState<UserResponse | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/welcome', { replace: true });
+        window.location.href = '/#/welcome';
     };
+
+    useEffect(() => {
+        const fetchMe = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const data = await api.get<UserResponse>('/auth/me');
+                setUser(data);
+            } catch (err: any) {
+                setError(err.message || '加载用户信息失败');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMe();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="pt-20 px-4 md:px-8 md:ml-64 pb-10 min-h-screen bg-bg-gray flex items-center justify-center text-gray-600">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                正在加载用户信息...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="pt-20 px-4 md:px-8 md:ml-64 pb-10 min-h-screen bg-bg-gray flex flex-col items-center justify-center text-center text-gray-700 space-y-4">
+                <AlertCircle className="w-10 h-10 text-red-500" />
+                <div className="font-bold text-lg">无法加载账户信息</div>
+                <div className="text-sm text-gray-500">{error}</div>
+                <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary-dark transition-colors"
+                >
+                    重新登录
+                </button>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <div className="pt-20 px-4 md:px-8 md:ml-64 pb-10 min-h-screen bg-bg-gray">
@@ -33,15 +78,15 @@ export const Profile: React.FC = () => {
                     <div className="px-8 pb-8 relative">
                         <div className="flex flex-col md:flex-row items-start md:items-end -mt-12 mb-6 gap-6">
                             <div className="w-24 h-24 rounded-full bg-purple-600 text-white text-4xl font-bold flex items-center justify-center border-4 border-white shadow-md relative">
-                                L
+                                {user.username?.[0]?.toUpperCase() || 'U'}
                                 <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full" title="在线"></div>
                             </div>
                             <div className="flex-1 mb-2">
                                 <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
                                 <div className="text-gray-500 font-medium flex flex-wrap gap-4 mt-1 text-sm">
-                                    <span className="flex items-center gap-1"><User className="w-4 h-4" /> {user.name}</span>
-                                    <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {user.school}</span>
-                                    <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> 加入于 {user.joinDate}</span>
+                                    <span className="flex items-center gap-1"><User className="w-4 h-4" /> {user.email}</span>
+                                    <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> 学校未填写</span>
+                                    <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> 加入时间未知</span>
                                 </div>
                             </div>
                             <div className="flex gap-3 w-full md:w-auto">
@@ -54,12 +99,12 @@ export const Profile: React.FC = () => {
                         {/* Stats Grid */}
                         <div className="grid grid-cols-3 gap-4 border-t border-gray-100 pt-6">
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-gray-900">{user.setsCreated}</div>
+                                <div className="text-2xl font-bold text-gray-900">--</div>
                                 <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">学习集</div>
                             </div>
                             <div className="text-center border-l border-gray-100">
                                 <div className="text-2xl font-bold text-gray-900 flex items-center justify-center gap-1">
-                                    {user.streak} <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
+                                    -- <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
                                 </div>
                                 <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">周连胜</div>
                             </div>
@@ -141,7 +186,7 @@ export const Profile: React.FC = () => {
                                     <span className="flex-1 font-medium text-sm">深色模式</span>
                                 </button>
                                 <button
-                                    onClick={() => navigate('/login')}
+                                    onClick={handleLogout}
                                     className="w-full flex items-center gap-3 px-3 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
                                 >
                                     <LogOut className="w-5 h-5" />
