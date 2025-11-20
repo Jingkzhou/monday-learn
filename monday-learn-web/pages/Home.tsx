@@ -1,24 +1,9 @@
-import React, { useState } from 'react';
-import { RECENT_SETS, MOCK_SET } from '../constants';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Image as ImageIcon, Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, TrendingUp, AlertCircle, BookOpen, BrainCircuit, Loader2 } from 'lucide-react';
+import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, TrendingUp, AlertCircle, BookOpen, BrainCircuit, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
-
-// Mock history data generator to simulate user activity for the AI
-const getMockHistory = (timeframe: string) => {
-  return {
-    timeframe,
-    totalStudyTime: timeframe === '本周' ? '4.5小时' : '120小时',
-    setsCompleted: timeframe === '本周' ? 3 : 15,
-    averageScore: '78%',
-    weakPoints: ['多音字辨析', '生僻字书写', '形近字混淆'],
-    recentTests: [
-      { name: MOCK_SET.title, score: '85%', date: '2024-11-15' },
-      { name: 'Fast Phonics Peak 2', score: '60%', date: '2024-11-12' },
-      { name: '古诗词填空', score: '92%', date: '2024-11-10' }
-    ]
-  };
-};
+import { StudySet } from '../types';
+import { api } from '../utils/api';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -26,8 +11,52 @@ export const Home: React.FC = () => {
   const [reportStatus, setReportStatus] = useState<'idle' | 'generating' | 'complete'>('idle');
   const [reportContent, setReportContent] = useState<string>('');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('本周');
+  const [studySets, setStudySets] = useState<StudySet[]>([]);
+  const [loadingSets, setLoadingSets] = useState(true);
+  const [setsError, setSetsError] = useState('');
 
   const timeframes = ['本周', '本月', '半年', '本年'];
+
+  useEffect(() => {
+    const fetchSets = async () => {
+      setLoadingSets(true);
+      setSetsError('');
+      try {
+        const data = await api.get<StudySet[]>('/study-sets');
+        const normalized = (data || []).map((item) => ({
+          ...item,
+          termCount: item.termCount ?? item.term_count ?? item.terms?.length ?? 0
+        }));
+        setStudySets(normalized);
+      } catch (err: any) {
+        setSetsError(err.message || '加载学习集失败');
+      } finally {
+        setLoadingSets(false);
+      }
+    };
+
+    fetchSets();
+  }, []);
+
+  const heroSet = useMemo(() => studySets[0], [studySets]);
+
+  const setTitleForReport = heroSet?.title || '示例学习集';
+
+  // Mock history data generator to simulate user activity for the AI
+  const getMockHistory = (timeframe: string) => {
+    return {
+      timeframe,
+      totalStudyTime: timeframe === '本周' ? '4.5小时' : '120小时',
+      setsCompleted: timeframe === '本周' ? 3 : 15,
+      averageScore: '78%',
+      weakPoints: ['多音字辨析', '生僻字书写', '形近字混淆'],
+      recentTests: [
+        { name: setTitleForReport, score: '85%', date: '2024-11-15' },
+        { name: 'Fast Phonics Peak 2', score: '60%', date: '2024-11-12' },
+        { name: '古诗词填空', score: '92%', date: '2024-11-10' }
+      ]
+    };
+  };
 
   const generateReport = async () => {
     setReportStatus('generating');
@@ -100,63 +129,110 @@ export const Home: React.FC = () => {
         <h2 className="text-lg font-bold text-gray-800 mb-3">继续上次的学习</h2>
         
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 relative">
-            <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold text-gray-900 text-lg pr-8">{MOCK_SET.title}</h3>
-                <button className="text-gray-400">
-                    <MoreVertical className="w-5 h-5" />
-                </button>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="mb-2">
-                <div className="h-2.5 bg-emerald-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 w-full rounded-full"></div>
+            {loadingSets ? (
+              <div className="flex items-center gap-2 text-gray-500">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                正在为你加载学习集...
+              </div>
+            ) : heroSet ? (
+              <>
+                <div className="flex justify-between items-start mb-4">
+                    <h3 className="font-bold text-gray-900 text-lg pr-8">{heroSet.title}</h3>
+                    <button className="text-gray-400">
+                        <MoreVertical className="w-5 h-5" />
+                    </button>
                 </div>
-            </div>
-            
-            <div className="flex items-center gap-2 mb-6">
-                <span className="text-sm font-bold text-gray-600">所有问题已完成</span>
-                <PartyPopper className="w-4 h-4 text-yellow-500" />
-            </div>
+                
+                {/* Progress Bar */}
+                <div className="mb-2">
+                    <div className="h-2.5 bg-emerald-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 w-full rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-2 mb-6">
+                    <span className="text-sm font-bold text-gray-600">
+                      {heroSet.termCount || heroSet.terms?.length || 0} 张卡片 • 由你创建
+                    </span>
+                    <PartyPopper className="w-4 h-4 text-yellow-500" />
+                </div>
 
-            <button 
-                onClick={() => navigate(`/set/${MOCK_SET.id}/test`)}
-                className="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-primary-dark transition-colors shadow-lg shadow-indigo-200"
-            >
-                开始测试
-            </button>
+                <button 
+                    onClick={() => navigate(`/set/${heroSet.id}/test`)}
+                    className="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-primary-dark transition-colors shadow-lg shadow-indigo-200"
+                >
+                    开始测试
+                </button>
+              </>
+            ) : (
+              <div className="flex flex-col gap-3 text-gray-600">
+                <div className="font-bold">还没有学习集</div>
+                <p className="text-sm text-gray-500">去创建你的第一套卡片，开始学习之旅。</p>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => navigate('/create')}
+                    className="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-primary-dark transition-colors"
+                  >
+                    创建学习集
+                  </button>
+                  <button 
+                    onClick={() => navigate('/folders')}
+                    className="px-4 py-2 border border-gray-200 rounded-lg font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    查看文件夹
+                  </button>
+                </div>
+              </div>
+            )}
         </div>
       </section>
 
       {/* Recent Content List */}
       <section className="mb-8">
           <h2 className="text-lg font-bold text-gray-800 mb-3">近期内容</h2>
+          {setsError && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-3 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {setsError}
+            </div>
+          )}
           <div className="flex flex-col gap-3">
-              {RECENT_SETS.map(set => (
-                  <div 
-                      key={set.id} 
-                      onClick={() => navigate(`/set/${set.id}`)}
-                      className="bg-white rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform cursor-pointer flex items-center justify-between"
-                  >
-                      <div className="flex items-center gap-4 overflow-hidden">
-                           {/* Set Icon Placeholder */}
-                           <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                                <Copy className="w-6 h-6 transform rotate-90" />
-                           </div>
-                           
-                           <div className="min-w-0">
-                              <div className="text-base font-bold text-gray-900 truncate">{set.title}</div>
-                              <div className="text-xs text-gray-500 font-medium mt-0.5">
-                                {set.termCount}张卡片 • 由您制作
-                              </div>
-                           </div>
-                      </div>
-                      
-                      <div className="flex-shrink-0 w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 ml-2">
-                          <Copy className="w-5 h-5" />
-                      </div>
-                  </div>
-              ))}
+              {loadingSets ? (
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  正在加载你的学习集...
+                </div>
+              ) : studySets.length > 0 ? (
+                studySets.map(set => (
+                    <div 
+                        key={set.id} 
+                        onClick={() => navigate(`/set/${set.id}`)}
+                        className="bg-white rounded-xl p-4 shadow-sm active:scale-[0.98] transition-transform cursor-pointer flex items-center justify-between"
+                    >
+                        <div className="flex items-center gap-4 overflow-hidden">
+                             {/* Set Icon Placeholder */}
+                             <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                  <Copy className="w-6 h-6 transform rotate-90" />
+                             </div>
+                             
+                             <div className="min-w-0">
+                                <div className="text-base font-bold text-gray-900 truncate">{set.title}</div>
+                                <div className="text-xs text-gray-500 font-medium mt-0.5">
+                                  {(set.termCount || set.terms?.length || 0)}张卡片 • 由您制作
+                                </div>
+                             </div>
+                        </div>
+                        
+                        <div className="flex-shrink-0 w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 ml-2">
+                            <Copy className="w-5 h-5" />
+                        </div>
+                    </div>
+                ))
+              ) : (
+                <div className="bg-white rounded-xl border border-dashed border-gray-200 p-6 text-center text-gray-500">
+                  还没有学习内容，去创建你的第一套吧！
+                </div>
+              )}
           </div>
       </section>
 

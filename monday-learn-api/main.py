@@ -9,6 +9,7 @@ from app.db.base import Base
 # Import models to ensure they are registered
 from app.models.user import User
 from app.models.login_log import LoginLog
+from app.models.study_set import StudySet, Term
 
 # Create tables
 Base.metadata.create_all(bind=engine)

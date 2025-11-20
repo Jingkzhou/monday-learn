@@ -1,21 +1,26 @@
 export interface Term {
-  id: string;
+  id: string | number;
   term: string;
   definition: string;
-  imageUrl?: string;
-  status: 'learning' | 'mastered' | 'not_started';
+  imageUrl?: string | null;
+  status?: 'learning' | 'mastered' | 'not_started';
+  order?: number;
   starred?: boolean;
 }
 
 export interface StudySet {
-  id: string;
+  id: string | number;
   title: string;
-  description?: string;
-  author: string;
+  description?: string | null;
+  author?: string;
   authorAvatar?: string;
-  termCount: number;
+  authorId?: number;
+  authorUsername?: string;
+  termCount?: number;
+  term_count?: number;
   terms: Term[];
-  createdAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NavItem {

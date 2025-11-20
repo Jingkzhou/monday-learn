@@ -1,33 +1,127 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MOCK_SET } from '../constants';
 import { Term } from '../types';
-import { ArrowLeft, Settings, Trash2, Image as ImageIcon, GripVertical } from 'lucide-react';
+import { ArrowLeft, Settings, Trash2, Image as ImageIcon, GripVertical, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { api } from '../utils/api';
+
+const createEmptyTerm = (index: number): Term => ({
+  id: `new-${Date.now()}-${index}`,
+  term: '',
+  definition: '',
+  status: 'not_started',
+  order: index,
+});
 
 export const EditSet: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [title, setTitle] = useState(MOCK_SET.title);
-  const [description, setDescription] = useState(MOCK_SET.description || '');
-  const [terms, setTerms] = useState<Term[]>(MOCK_SET.terms);
+  const isEditing = useMemo(() => Boolean(id), [id]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [terms, setTerms] = useState<Term[]>([createEmptyTerm(0)]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleTermChange = (id: string, field: 'term' | 'definition', value: string) => {
+  useEffect(() => {
+    if (isEditing) {
+      fetchStudySet();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const fetchStudySet = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await api.get<any>(`/study-sets/${id}`);
+      setTitle(data.title || '');
+      setDescription(data.description || '');
+      const fetchedTerms: Term[] = (data.terms || []).map((term: any, index: number) => ({
+        id: term.id,
+        term: term.term,
+        definition: term.definition,
+        imageUrl: term.image_url,
+        status: 'not_started',
+        order: term.order ?? index,
+      }));
+      setTerms(fetchedTerms.length ? fetchedTerms : [createEmptyTerm(0)]);
+    } catch (err: any) {
+      setError(err.message || '加载学习集失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTermChange = (id: string | number, field: 'term' | 'definition', value: string) => {
     setTerms(terms.map(t => t.id === id ? { ...t, [field]: value } : t));
   };
 
-  const handleDeleteTerm = (id: string) => {
+  const handleDeleteTerm = (id: string | number) => {
     setTerms(terms.filter(t => t.id !== id));
   };
 
   const handleAddCard = () => {
-    const newTerm: Term = {
-        id: Date.now().toString(),
-        term: '',
-        definition: '',
-        status: 'not_started'
-    };
+    const newTerm = createEmptyTerm(terms.length);
     setTerms([...terms, newTerm]);
   };
+
+  const buildPayloadTerms = () => {
+    return terms
+      .filter(t => t.term.trim() || t.definition.trim())
+      .map((t, index) => ({
+        term: t.term.trim(),
+        definition: t.definition.trim(),
+        image_url: t.imageUrl || null,
+        order: t.order ?? index,
+      }));
+  };
+
+  const handleSave = async () => {
+    if (!title.trim()) {
+      setError('请输入标题');
+      return;
+    }
+
+    const preparedTerms = buildPayloadTerms();
+    if (preparedTerms.length === 0) {
+      setError('至少需要填写一张卡片');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const payload = {
+        title: title.trim(),
+        description: description.trim() || null,
+        terms: preparedTerms,
+      };
+
+      const data = isEditing
+        ? await api.put<any>(`/study-sets/${id}`, payload)
+        : await api.post<any>('/study-sets', payload);
+
+      setSuccessMessage('保存成功');
+      navigate(`/set/${data.id}`);
+    } catch (err: any) {
+      setError(err.message || '保存失败，请稍后重试');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-600">
+        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+        正在加载学习集...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -45,15 +139,30 @@ export const EditSet: React.FC = () => {
         
         <div className="flex items-center gap-4">
             <button 
-                onClick={() => navigate(`/set/${id}`)}
-                className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors"
+                onClick={handleSave}
+                disabled={saving}
+                className="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
             >
+                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                 完成
             </button>
         </div>
       </header>
 
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
+        {error && (
+          <div className="flex items-center gap-2 bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm font-medium">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 p-3 rounded-lg mb-4 text-sm font-medium">
+            <CheckCircle2 className="w-4 h-4" />
+            {successMessage}
+          </div>
+        )}
+
         {/* Title Info */}
         <div className="mb-8 space-y-4">
             <div>

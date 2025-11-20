@@ -1,7 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MOCK_SET } from '../constants';
+import { StudySet, Term } from '../types';
 import { Flashcard } from '../components/Flashcard';
 import { 
     MoreHorizontal, 
@@ -14,7 +13,6 @@ import {
     Settings2,
     Keyboard,
     Sparkles,
-    BookOpen,
     ScrollText,
     Gamepad2,
     Star,
@@ -22,24 +20,74 @@ import {
     PenLine,
     FileText,
     Rocket,
-    FolderPlus
+    FolderPlus,
+    Loader2,
+    AlertCircle
 } from 'lucide-react';
+import { api } from '../utils/api';
 
 export const SetView: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [studySet, setStudySet] = useState<StudySet | null>(null);
+  const [terms, setTerms] = useState<Term[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [terms, setTerms] = useState(MOCK_SET.terms);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchStudySet = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await api.get<any>(`/study-sets/${id}`);
+        const preparedTerms: Term[] = (data.terms || []).map((term: any, index: number) => ({
+          id: term.id,
+          term: term.term,
+          definition: term.definition,
+          imageUrl: term.image_url,
+          status: term.status || 'not_started',
+          order: term.order ?? index,
+        }));
+
+        setStudySet({
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          author: data.author_username,
+          authorUsername: data.author_username,
+          authorId: data.author_id,
+          termCount: preparedTerms.length,
+          terms: preparedTerms,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+        });
+        setTerms(preparedTerms);
+        setCurrentCardIndex(0);
+      } catch (err: any) {
+        setError(err.message || '加载学习集失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudySet();
+  }, [id]);
+
+  const authorName = studySet?.authorUsername || '你';
+  const hasTerms = terms.length > 0;
 
   const nextCard = () => {
+    if (!hasTerms) return;
     setCurrentCardIndex((prev) => (prev + 1) % terms.length);
   };
 
   const prevCard = () => {
+    if (!hasTerms) return;
     setCurrentCardIndex((prev) => (prev - 1 + terms.length) % terms.length);
   };
 
-  const handleToggleStar = (termId: string) => {
+  const handleToggleStar = (termId: string | number) => {
     setTerms(prevTerms => 
       prevTerms.map(term => 
         term.id === termId ? { ...term, starred: !term.starred } : term
@@ -47,20 +95,50 @@ export const SetView: React.FC = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-600">
+        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+        正在加载学习集...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 text-gray-700">
+        <AlertCircle className="w-10 h-10 text-red-500 mb-3" />
+        <p className="font-bold text-lg mb-2">无法加载学习集</p>
+        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <button
+          onClick={() => navigate('/create')}
+          className="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary-dark transition-colors"
+        >
+          创建新的学习集
+        </button>
+      </div>
+    );
+  }
+
+  if (!studySet) {
+    return null;
+  }
+
   return (
     <div className="pt-20 pb-10 px-4 md:px-8 max-w-7xl mx-auto ml-0 md:ml-64">
       {/* Header Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{MOCK_SET.title}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{studySet.title}</h1>
+        {studySet.description && <p className="text-gray-500 mb-4">{studySet.description}</p>}
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img 
-              src={MOCK_SET.authorAvatar} 
-              alt={MOCK_SET.author} 
-              className="w-8 h-8 rounded-full bg-gray-200"
-            />
-            <span className="text-sm font-semibold text-gray-700 hover:underline cursor-pointer">{MOCK_SET.author}</span>
+            <div className="w-8 h-8 rounded-full bg-indigo-100 text-primary font-bold flex items-center justify-center">
+              {authorName?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <span className="text-sm font-semibold text-gray-700 hover:underline cursor-pointer">
+              {authorName}
+            </span>
             <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-md">教师</span>
           </div>
           
@@ -144,49 +222,57 @@ export const SetView: React.FC = () => {
 
       {/* Flashcard Preview Area */}
       <div className="mb-12">
-        <Flashcard 
-            term={terms[currentCardIndex]}
-            total={terms.length}
-            current={currentCardIndex + 1}
-            onNext={nextCard}
-            onPrev={prevCard}
-            onToggleStar={() => handleToggleStar(terms[currentCardIndex].id)}
-        />
-        
-        {/* Flashcard Controls */}
-        <div className="flex items-center justify-between mt-6 max-w-3xl mx-auto px-4">
-            <div className="flex gap-4">
-                <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="播放">
-                    <div className="border-2 border-gray-400 rounded-full w-6 h-6 flex items-center justify-center">
-                        <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-gray-500 border-b-[4px] border-b-transparent ml-0.5"></div>
-                    </div>
-                </button>
-                <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="乱序">
-                    <Settings2 className="w-6 h-6" />
-                </button>
-            </div>
+        {hasTerms ? (
+          <>
+            <Flashcard 
+                term={terms[currentCardIndex]}
+                total={terms.length}
+                current={currentCardIndex + 1}
+                onNext={nextCard}
+                onPrev={prevCard}
+                onToggleStar={() => handleToggleStar(terms[currentCardIndex].id)}
+            />
+            
+            {/* Flashcard Controls */}
+            <div className="flex items-center justify-between mt-6 max-w-3xl mx-auto px-4">
+                <div className="flex gap-4">
+                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="播放">
+                        <div className="border-2 border-gray-400 rounded-full w-6 h-6 flex items-center justify-center">
+                            <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-gray-500 border-b-[4px] border-b-transparent ml-0.5"></div>
+                        </div>
+                    </button>
+                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="乱序">
+                        <Settings2 className="w-6 h-6" />
+                    </button>
+                </div>
 
-            <div className="flex items-center gap-6">
-                <button onClick={prevCard} className="p-3 rounded-full bg-white border border-gray-200 hover:bg-gray-50 shadow-sm text-primary disabled:opacity-50">
-                    <ArrowLeft className="w-6 h-6" />
-                </button>
-                <span className="font-bold text-gray-600 min-w-[60px] text-center">
-                    {currentCardIndex + 1} / {terms.length}
-                </span>
-                <button onClick={nextCard} className="p-3 rounded-full bg-white border border-gray-200 hover:bg-gray-50 shadow-sm text-primary">
-                    <ArrowRight className="w-6 h-6" />
-                </button>
-            </div>
+                <div className="flex items-center gap-6">
+                    <button onClick={prevCard} className="p-3 rounded-full bg-white border border-gray-200 hover:bg-gray-50 shadow-sm text-primary disabled:opacity-50">
+                        <ArrowLeft className="w-6 h-6" />
+                    </button>
+                    <span className="font-bold text-gray-600 min-w-[60px] text-center">
+                        {currentCardIndex + 1} / {terms.length}
+                    </span>
+                    <button onClick={nextCard} className="p-3 rounded-full bg-white border border-gray-200 hover:bg-gray-50 shadow-sm text-primary">
+                        <ArrowRight className="w-6 h-6" />
+                    </button>
+                </div>
 
-             <div className="flex gap-4">
-                <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="快捷键">
-                    <Keyboard className="w-6 h-6" />
-                </button>
-                <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="全屏">
-                    <Maximize2 className="w-6 h-6" />
-                </button>
+                 <div className="flex gap-4">
+                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="快捷键">
+                        <Keyboard className="w-6 h-6" />
+                    </button>
+                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="全屏">
+                        <Maximize2 className="w-6 h-6" />
+                    </button>
+                </div>
             </div>
-        </div>
+          </>
+        ) : (
+          <div className="bg-white border border-dashed border-gray-300 rounded-xl p-10 text-center text-gray-500">
+            暂无卡片，请在编辑页添加一些术语。
+          </div>
+        )}
       </div>
 
       {/* Terms List Header */}
@@ -203,8 +289,8 @@ export const SetView: React.FC = () => {
 
       {/* Terms Status Banner */}
       <div className="bg-indigo-50 rounded-lg p-4 mb-6 flex items-center gap-3">
-        <div className="text-primary font-bold">正在学习 (1)</div>
-        <div className="text-gray-500 text-sm">继续加油！你已经开始学习这些术语了。</div>
+        <div className="text-primary font-bold">术语总数 {terms.length}</div>
+        <div className="text-gray-500 text-sm">加油！坚持练习能带来最大的收获。</div>
       </div>
 
       {/* Term List */}
