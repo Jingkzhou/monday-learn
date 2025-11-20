@@ -2,7 +2,12 @@ import os
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
-load_dotenv()
+# Determine environment
+APP_ENV = os.getenv("APP_ENV", "dev")
+env_file = f".env.{APP_ENV}"
+
+# Load specific env file
+load_dotenv(env_file)
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Monday Learn API"
