@@ -9,14 +9,12 @@ engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
 def check_tables():
     inspector = inspect(engine)
     tables = inspector.get_table_names()
-    print(f"Tables in DB: {tables}")
+    print("Tables found:", tables)
     
-    if "materials" in tables:
-        print("Table 'materials' exists.")
-        columns = [c['name'] for c in inspector.get_columns("materials")]
-        print(f"Columns in 'materials': {columns}")
+    if "learning_progress" in tables:
+        print("✅ LearningProgress table exists")
     else:
-        print("Table 'materials' does NOT exist.")
+        print("❌ LearningProgress table MISSING")
 
 if __name__ == "__main__":
     check_tables()

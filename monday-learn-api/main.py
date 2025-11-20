@@ -13,6 +13,7 @@ from app.models.login_log import LoginLog
 from app.models.study_set import StudySet, Term
 from app.models.material import Material
 from app.models.folder import Folder
+from app.models.learning_progress import LearningProgress
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -42,7 +43,7 @@ app.add_middleware(
 
 from app.core.config import settings
 
-app.include_router(routes.router, prefix=settings.API_V1_STR)
+app.include_router(routes.api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():
