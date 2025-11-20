@@ -36,6 +36,7 @@ def serialize_study_set(study_set: StudySet, current_user=None) -> StudySetRespo
                 term=term.term,
                 definition=term.definition,
                 image_url=term.image_url,
+                starred=term.starred,
                 order=term.order or 0,
                 created_at=term.created_at,
             )
@@ -239,3 +240,44 @@ def clone_study_set(
     )
 
     return serialize_study_set(new_set, current_user)
+
+
+@router.patch("/terms/{term_id}/star", response_model=TermResponse)
+def toggle_term_star(
+    term_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    term = db.query(Term).filter(Term.id == term_id).first()
+    if not term:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Term not found")
+
+    # Check if user has access to the study set (owner or public)
+    # For starring, maybe we allow anyone to star if it's public?
+    # But wait, starring modifies the term in the DB.
+    # If starring is global (modifies the term itself), only the owner should be able to do it.
+    # If starring is per-user, we need a separate table.
+    # The requirement implies "mark the record", and since I added `starred` to `Term` table, it is GLOBAL.
+    # So only the owner can star.
+
+    study_set = db.query(StudySet).filter(StudySet.id == term.study_set_id).first()
+    if not study_set:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study set not found")
+
+    if study_set.author_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the owner can star terms")
+
+    term.starred = not term.starred
+    db.add(term)
+    db.commit()
+    db.refresh(term)
+
+    return TermResponse(
+        id=term.id,
+        term=term.term,
+        definition=term.definition,
+        image_url=term.image_url,
+        starred=term.starred,
+        order=term.order or 0,
+        created_at=term.created_at,
+    )

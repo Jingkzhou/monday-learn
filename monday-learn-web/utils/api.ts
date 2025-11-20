@@ -54,5 +54,6 @@ export const api = {
         });
     },
     put: <T>(endpoint: string, body: any, options?: RequestOptions) => request<T>(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json', ...options?.headers } }),
+    patch: <T>(endpoint: string, body: any = {}, options?: RequestOptions) => request<T>(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json', ...options?.headers } }),
     delete: <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, { ...options, method: 'DELETE' }),
 };

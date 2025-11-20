@@ -28,6 +28,7 @@ class Term(Base):
     term = Column(String(255), nullable=False)
     definition = Column(String(1000), nullable=False)
     image_url = Column(String(500), nullable=True)
+    starred = Column(Boolean, default=False, nullable=False)
     order = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

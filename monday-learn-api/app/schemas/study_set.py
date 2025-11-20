@@ -7,6 +7,7 @@ class TermBase(BaseModel):
     term: str = Field(..., min_length=1, max_length=255)
     definition: str = Field(..., min_length=1, max_length=1000)
     image_url: Optional[str] = None
+    starred: bool = False
     order: int = 0
 
 
