@@ -1,0 +1,348 @@
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Folder, StudySet } from '../types';
+import { MOCK_FOLDERS, RECENT_SETS } from '../constants';
+import { 
+    Folder as FolderIcon, 
+    Plus, 
+    MoreVertical, 
+    Search, 
+    User, 
+    ArrowLeft,
+    Copy,
+    Trash2,
+    FolderPlus,
+    X
+} from 'lucide-react';
+
+export const Folders: React.FC = () => {
+  const navigate = useNavigate();
+  
+  // State
+  const [folders, setFolders] = useState<Folder[]>(MOCK_FOLDERS);
+  const [currentFolder, setCurrentFolder] = useState<Folder | null>(null);
+  
+  // Modals
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAddSetModal, setShowAddSetModal] = useState(false);
+  
+  // Form Inputs
+  const [newFolderTitle, setNewFolderTitle] = useState('');
+  const [newFolderDesc, setNewFolderDesc] = useState('');
+
+  // Handlers
+  const handleCreateFolder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFolderTitle.trim()) return;
+
+    const newFolder: Folder = {
+        id: Date.now().toString(),
+        title: newFolderTitle,
+        description: newFolderDesc,
+        setIds: [],
+        author: 'Linh_30_12', // Mock current user
+        createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    setFolders([newFolder, ...folders]);
+    setShowCreateModal(false);
+    setNewFolderTitle('');
+    setNewFolderDesc('');
+    setCurrentFolder(newFolder); // Auto open new folder
+  };
+
+  const handleAddSetToFolder = (setId: string) => {
+    if (!currentFolder) return;
+    
+    if (currentFolder.setIds.includes(setId)) {
+        // Remove if already exists
+        const updatedFolder = {
+            ...currentFolder,
+            setIds: currentFolder.setIds.filter(id => id !== setId)
+        };
+        updateFolder(updatedFolder);
+    } else {
+        // Add
+        const updatedFolder = {
+            ...currentFolder,
+            setIds: [...currentFolder.setIds, setId]
+        };
+        updateFolder(updatedFolder);
+    }
+  };
+
+  const updateFolder = (updated: Folder) => {
+    setFolders(prev => prev.map(f => f.id === updated.id ? updated : f));
+    setCurrentFolder(updated);
+  };
+
+  const handleDeleteFolder = () => {
+      if (!currentFolder) return;
+      if (confirm('确定要删除这个文件夹吗？包含的学习集不会被删除。')) {
+          setFolders(prev => prev.filter(f => f.id !== currentFolder.id));
+          setCurrentFolder(null);
+      }
+  };
+
+  // Resolve sets for current folder
+  const currentFolderSets = currentFolder 
+    ? RECENT_SETS.filter(set => currentFolder.setIds.includes(set.id))
+    : [];
+
+  // --- RENDER: Detail View ---
+  if (currentFolder) {
+      return (
+        <div className="min-h-screen bg-bg-gray pt-20 px-4 md:px-8 md:ml-64 pb-20">
+            {/* Header */}
+            <div className="mb-6">
+                <button 
+                    onClick={() => setCurrentFolder(null)}
+                    className="text-gray-500 hover:text-gray-900 flex items-center gap-2 text-sm font-bold mb-4 transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" /> 所有文件夹
+                </button>
+                
+                <div className="flex items-start justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
+                            <FolderIcon className="w-4 h-4" />
+                            {currentFolderSets.length} 个学习集
+                        </div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentFolder.title}</h1>
+                        <p className="text-gray-600">{currentFolder.description}</p>
+                        <div className="flex items-center gap-2 mt-4">
+                             <div className="w-6 h-6 bg-purple-500 rounded-full text-white flex items-center justify-center text-xs font-bold">L</div>
+                             <span className="text-sm font-bold text-gray-700">{currentFolder.author}</span>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => setShowAddSetModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md font-bold shadow-sm hover:bg-primary-dark transition-colors"
+                        >
+                            <Plus className="w-5 h-5" />
+                            添加学习集
+                        </button>
+                        <button 
+                            onClick={handleDeleteFolder}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                            title="删除文件夹"
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sets Grid */}
+            <div className="grid grid-cols-1 gap-4">
+                {currentFolderSets.length > 0 ? (
+                    currentFolderSets.map(set => (
+                        <div 
+                            key={set.id}
+                            onClick={() => navigate(`/set/${set.id}`)}
+                            className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-primary cursor-pointer transition-colors group"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                        <Copy className="w-6 h-6 transform rotate-90" />
+                                     </div>
+                                     <div>
+                                         <h3 className="font-bold text-gray-900 group-hover:text-primary transition-colors">{set.title}</h3>
+                                         <div className="text-xs text-gray-500 font-medium mt-1">{set.termCount} 个词语 • {set.author}</div>
+                                     </div>
+                                </div>
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddSetToFolder(set.id); // Toggle off
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                                    title="从文件夹移除"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+                        <FolderIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-lg font-bold text-gray-900">这个文件夹是空的</h3>
+                        <p className="text-gray-500 mb-6">添加学习集来整理您的内容</p>
+                        <button 
+                            onClick={() => setShowAddSetModal(true)}
+                            className="text-primary font-bold hover:underline"
+                        >
+                            添加学习集
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Add Set Modal */}
+            {showAddSetModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+                        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                            <h3 className="font-bold text-gray-900">添加到文件夹</h3>
+                            <button onClick={() => setShowAddSetModal(false)} className="p-2 hover:bg-gray-100 rounded-full"><X className="w-5 h-5 text-gray-500"/></button>
+                        </div>
+                        <div className="p-4 border-b border-gray-100">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input type="text" placeholder="搜索您的学习集" className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-2">
+                            {RECENT_SETS.map(set => {
+                                const isAdded = currentFolder.setIds.includes(set.id);
+                                return (
+                                    <div 
+                                        key={set.id} 
+                                        onClick={() => handleAddSetToFolder(set.id)}
+                                        className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                             <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+                                                <Copy className="w-5 h-5 transform rotate-90" />
+                                             </div>
+                                             <div className="flex flex-col">
+                                                 <span className="font-bold text-sm text-gray-800">{set.title}</span>
+                                                 <span className="text-xs text-gray-500">{set.termCount} 个词语</span>
+                                             </div>
+                                        </div>
+                                        <button 
+                                            className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${isAdded ? 'bg-primary border-primary text-white' : 'border-gray-300 group-hover:border-primary'}`}
+                                        >
+                                            {isAdded && <Plus className="w-4 h-4 transform rotate-45" />}
+                                            {!isAdded && <Plus className="w-4 h-4 text-gray-400 group-hover:text-primary" />}
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div className="p-4 border-t border-gray-100 flex justify-end">
+                            <button onClick={() => setShowAddSetModal(false)} className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark">
+                                完成
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+      );
+  }
+
+  // --- RENDER: List View ---
+  return (
+    <div className="min-h-screen bg-bg-gray pt-20 px-4 md:px-8 md:ml-64 pb-20">
+      <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+               <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-primary">
+                   <FolderIcon className="w-6 h-6" />
+               </div>
+               <h1 className="text-2xl font-bold text-gray-900">您的文件夹</h1>
+          </div>
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-primary text-white px-4 py-2 rounded-md font-bold hover:bg-primary-dark transition-colors shadow-sm flex items-center gap-2"
+          >
+             <Plus className="w-5 h-5" />
+             <span className="hidden sm:inline">创建文件夹</span>
+          </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+         {folders.map(folder => (
+             <div 
+                key={folder.id}
+                onClick={() => setCurrentFolder(folder)}
+                className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover:border-primary hover:shadow-md transition-all cursor-pointer group flex flex-col h-40 justify-between relative overflow-hidden"
+             >
+                 {/* Decor */}
+                 <div className="absolute -right-4 -top-4 w-20 h-20 bg-gray-50 rounded-full group-hover:bg-indigo-50 transition-colors"></div>
+
+                 <div className="relative z-10">
+                     <div className="flex items-start justify-between mb-2">
+                         <FolderIcon className="w-8 h-8 text-gray-400 group-hover:text-primary transition-colors" />
+                         {/* <MoreVertical className="w-5 h-5 text-gray-400 hover:text-gray-600" /> */}
+                     </div>
+                     <h3 className="font-bold text-lg text-gray-900 line-clamp-1">{folder.title}</h3>
+                     <p className="text-xs text-gray-500 mt-1 line-clamp-1">{folder.description || "无描述"}</p>
+                 </div>
+
+                 <div className="relative z-10 flex items-center gap-2 text-xs font-bold text-gray-400 group-hover:text-gray-600">
+                     <div className="bg-gray-100 px-2 py-1 rounded group-hover:bg-white group-hover:shadow-sm transition-all">
+                        {folder.setIds.length} 个学习集
+                     </div>
+                     <div className="flex items-center gap-1">
+                        <User className="w-3 h-3" /> {folder.author}
+                     </div>
+                 </div>
+             </div>
+         ))}
+         
+         {/* Create New Placeholder Card */}
+         <button 
+            onClick={() => setShowCreateModal(true)}
+            className="border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center text-gray-400 hover:text-primary hover:border-primary hover:bg-indigo-50/30 transition-all h-40"
+         >
+             <FolderPlus className="w-8 h-8 mb-2" />
+             <span className="font-bold">新建文件夹</span>
+         </button>
+      </div>
+
+      {/* Create Folder Modal */}
+      {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+               <form onSubmit={handleCreateFolder} className="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 animate-in zoom-in-95 duration-200">
+                   <div className="flex justify-between items-center mb-6">
+                       <h2 className="text-xl font-bold text-gray-900">创建新文件夹</h2>
+                       <button type="button" onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-gray-100 rounded-full">
+                           <X className="w-6 h-6 text-gray-400" />
+                       </button>
+                   </div>
+                   
+                   <div className="space-y-4 mb-8">
+                       <div>
+                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">标题</label>
+                           <input 
+                                type="text" 
+                                value={newFolderTitle}
+                                onChange={(e) => setNewFolderTitle(e.target.value)}
+                                placeholder="输入文件夹标题" 
+                                className="w-full p-2 border-b-2 border-gray-200 focus:border-primary outline-none text-lg font-medium transition-colors"
+                                autoFocus
+                            />
+                       </div>
+                       <div>
+                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">描述（可选）</label>
+                           <input 
+                                type="text" 
+                                value={newFolderDesc}
+                                onChange={(e) => setNewFolderDesc(e.target.value)}
+                                placeholder="输入描述..." 
+                                className="w-full p-2 border-b-2 border-gray-200 focus:border-primary outline-none transition-colors"
+                            />
+                       </div>
+                   </div>
+
+                   <div className="flex justify-end">
+                       <button 
+                            type="submit" 
+                            className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!newFolderTitle.trim()}
+                        >
+                           创建文件夹
+                       </button>
+                   </div>
+               </form>
+          </div>
+      )}
+
+    </div>
+  );
+};

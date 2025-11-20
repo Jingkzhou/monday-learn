@@ -1,0 +1,5 @@
+{
+  "name": "Quizlet Clone",
+  "description": "A high-fidelity clone of the Quizlet learning interface featuring Flashcards, Learn Mode, and Set Creation tools.",
+  "requestFramePermissions": []
+}
