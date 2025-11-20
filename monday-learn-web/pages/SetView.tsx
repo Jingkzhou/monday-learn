@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StudySet, Term } from '../types';
 import { Flashcard } from '../components/Flashcard';
@@ -22,7 +22,9 @@ import {
     Rocket,
     FolderPlus,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    Play,
+    Pause
 } from 'lucide-react';
 import { api } from '../utils/api';
 
@@ -34,6 +36,10 @@ export const SetView: React.FC = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const autoPlayTimeout = useRef<number | null>(null);
+  const pauseTimeout = useRef<number | null>(null);
+  const isAutoPlayingRef = useRef(isAutoPlaying);
 
   useEffect(() => {
     const fetchStudySet = async () => {
@@ -93,6 +99,97 @@ export const SetView: React.FC = () => {
         term.id === termId ? { ...term, starred: !term.starred } : term
       )
     );
+  };
+
+  const clearAutoPlay = (cancelSpeech = false) => {
+    if (autoPlayTimeout.current) {
+      clearTimeout(autoPlayTimeout.current);
+      autoPlayTimeout.current = null;
+    }
+    if (pauseTimeout.current) {
+      clearTimeout(pauseTimeout.current);
+      pauseTimeout.current = null;
+    }
+    if (cancelSpeech && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  useEffect(() => {
+    isAutoPlayingRef.current = isAutoPlaying;
+  }, [isAutoPlaying]);
+
+  const scheduleNextCard = () => {
+    if (!isAutoPlayingRef.current) return;
+    clearAutoPlay();
+
+    autoPlayTimeout.current = window.setTimeout(() => {
+      setCurrentCardIndex((prev) => {
+        if (prev >= terms.length - 1) {
+          setIsAutoPlaying(false);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 5000);
+  };
+
+  const speakCurrentCard = () => {
+    if (!isAutoPlayingRef.current) return;
+    const currentTerm = terms[currentCardIndex];
+    if (!currentTerm) {
+      setIsAutoPlaying(false);
+      return;
+    }
+
+    clearAutoPlay(true);
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const synth = window.speechSynthesis;
+
+      const speakDefinition = () => {
+        if (!isAutoPlayingRef.current) return;
+        const definitionUtterance = new SpeechSynthesisUtterance(currentTerm.definition);
+        definitionUtterance.onend = scheduleNextCard;
+        definitionUtterance.onerror = scheduleNextCard;
+        synth.speak(definitionUtterance);
+      };
+
+      const termUtterance = new SpeechSynthesisUtterance(currentTerm.term);
+      termUtterance.onend = () => {
+        pauseTimeout.current = window.setTimeout(() => {
+          speakDefinition();
+        }, 2000);
+      };
+      termUtterance.onerror = scheduleNextCard;
+      synth.speak(termUtterance);
+    } else {
+      scheduleNextCard();
+    }
+  };
+
+  useEffect(() => {
+    if (isAutoPlaying) {
+      speakCurrentCard();
+    } else {
+      clearAutoPlay(true);
+    }
+  }, [isAutoPlaying]);
+
+  useEffect(() => {
+    if (isAutoPlaying) {
+      speakCurrentCard();
+    }
+  }, [currentCardIndex]);
+
+  useEffect(() => {
+    return () => {
+      clearAutoPlay(true);
+    };
+  }, []);
+
+  const toggleAutoPlay = () => {
+    setIsAutoPlaying((prev) => !prev);
   };
 
   if (loading) {
@@ -236,9 +333,17 @@ export const SetView: React.FC = () => {
             {/* Flashcard Controls */}
             <div className="flex items-center justify-between mt-6 max-w-3xl mx-auto px-4">
                 <div className="flex gap-4">
-                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="播放">
-                        <div className="border-2 border-gray-400 rounded-full w-6 h-6 flex items-center justify-center">
-                            <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-gray-500 border-b-[4px] border-b-transparent ml-0.5"></div>
+                    <button 
+                        onClick={toggleAutoPlay}
+                        className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                        title={isAutoPlaying ? "暂停自动播放" : "自动朗读"}
+                    >
+                        <div className="border-2 border-gray-400 rounded-full w-8 h-8 flex items-center justify-center">
+                            {isAutoPlaying ? (
+                                <Pause className="w-4 h-4 text-gray-700" />
+                            ) : (
+                                <Play className="w-4 h-4 text-gray-700" />
+                            )}
                         </div>
                     </button>
                     <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="乱序">
