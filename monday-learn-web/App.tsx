@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { SetView } from './pages/SetView';
 import { LearnMode } from './pages/LearnMode';
@@ -28,6 +28,17 @@ const MainLayout: React.FC<{children: React.ReactNode}> = ({ children }) => (
   </div>
 );
 
+// Guard to ensure user is authenticated before accessing protected routes
+const ProtectedRoute: React.FC<{children: React.ReactElement}> = ({ children }) => {
+  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('token');
+
+  if (!isAuthenticated) {
+    return <Navigate to="/welcome" replace />;
+  }
+
+  return children;
+};
+
 const App: React.FC = () => {
   return (
     <Router>
@@ -39,43 +50,81 @@ const App: React.FC = () => {
 
         {/* Protected App Routes */}
         <Route path="/" element={
-          <MainLayout>
-            <Home />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Home />
+            </MainLayout>
+          </ProtectedRoute>
         } />
         
         <Route path="/set/:id" element={
-          <MainLayout>
-            <SetView />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <SetView />
+            </MainLayout>
+          </ProtectedRoute>
         } />
         
-        <Route path="/set/:id/learn" element={<LearnMode />} />
-        <Route path="/set/:id/test" element={<TestMode />} />
-        <Route path="/set/:id/match" element={<MatchMode />} />
-        <Route path="/set/:id/blast" element={<BlastMode />} />
-        <Route path="/set/:id/ai-exam" element={<AIExamMode />} />
+        <Route path="/set/:id/learn" element={
+          <ProtectedRoute>
+            <LearnMode />
+          </ProtectedRoute>
+        } />
+        <Route path="/set/:id/test" element={
+          <ProtectedRoute>
+            <TestMode />
+          </ProtectedRoute>
+        } />
+        <Route path="/set/:id/match" element={
+          <ProtectedRoute>
+            <MatchMode />
+          </ProtectedRoute>
+        } />
+        <Route path="/set/:id/blast" element={
+          <ProtectedRoute>
+            <BlastMode />
+          </ProtectedRoute>
+        } />
+        <Route path="/set/:id/ai-exam" element={
+          <ProtectedRoute>
+            <AIExamMode />
+          </ProtectedRoute>
+        } />
         
-        <Route path="/set/:id/edit" element={<EditSet />} />
+        <Route path="/set/:id/edit" element={
+          <ProtectedRoute>
+            <EditSet />
+          </ProtectedRoute>
+        } />
         
         <Route path="/folders" element={
-           <MainLayout>
-            <Folders />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Folders />
+            </MainLayout>
+          </ProtectedRoute>
         } />
 
         <Route path="/profile" element={
-           <MainLayout>
-            <Profile />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Profile />
+            </MainLayout>
+          </ProtectedRoute>
         } />
 
         {/* Fallback routes */}
-        <Route path="/create" element={<EditSet />} />
+        <Route path="/create" element={
+          <ProtectedRoute>
+            <EditSet />
+          </ProtectedRoute>
+        } />
         <Route path="/library" element={
-          <MainLayout>
-            <Folders />
-          </MainLayout>
+          <ProtectedRoute>
+            <MainLayout>
+              <Folders />
+            </MainLayout>
+          </ProtectedRoute>
         } />
       </Routes>
     </Router>

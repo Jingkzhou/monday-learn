@@ -5,6 +5,7 @@
 ### 后台服务 (Backend)
 
 确保已安装 Python 3.12+ 和 MySQL。
+kill -9 $(lsof -t -i:8000)
 
 1.  进入 API 目录：
     ```bash
