@@ -402,3 +402,29 @@ def toggle_term_star(
         order=term.order or 0,
         created_at=term.created_at,
     )
+
+
+@router.post("/{study_set_id:int}/reset-progress", status_code=status.HTTP_200_OK)
+def reset_study_set_progress(
+    study_set_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Reset the learning progress for the current user on the specified study set.
+    This deletes all LearningProgress records for this user and study set.
+    """
+    # Check if study set exists
+    study_set = db.query(StudySet).filter(StudySet.id == study_set_id).first()
+    if not study_set:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study set not found")
+
+    # Delete progress
+    db.query(LearningProgress).filter(
+        LearningProgress.study_set_id == study_set_id,
+        LearningProgress.user_id == current_user.id
+    ).delete()
+    
+    db.commit()
+    
+    return {"message": "Progress reset successfully"}

@@ -24,7 +24,8 @@ import {
   Loader2,
   AlertCircle,
   Play,
-  Pause
+  Pause,
+  RotateCcw
 } from 'lucide-react';
 import { api } from '../utils/api';
 
@@ -39,6 +40,7 @@ export const SetView: React.FC = () => {
   const [actionError, setActionError] = useState('');
   const [editInProgress, setEditInProgress] = useState(false);
   const [filterStarred, setFilterStarred] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const autoPlayTimeout = useRef<number | null>(null);
   const pauseTimeout = useRef<number | null>(null);
@@ -234,6 +236,22 @@ export const SetView: React.FC = () => {
     }
   };
 
+  const handleResetProgress = async () => {
+    if (!studySet) return;
+    if (!window.confirm('确定要重置此学习集的学习进度吗？这将清除所有的学习记录。')) {
+      return;
+    }
+
+    try {
+      await api.post(`/study-sets/${studySet.id}/reset-progress`);
+      // Refresh the page or data to reflect changes
+      // For now, just reload the page to be safe and simple, or re-fetch data
+      window.location.reload();
+    } catch (err: any) {
+      setActionError(err.message || '重置进度失败');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
@@ -281,28 +299,65 @@ export const SetView: React.FC = () => {
             <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-md">教师</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative">
             <button
-              onClick={() => navigate('/folders')}
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
               className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors"
-              title="添加到文件夹"
+              title="更多"
             >
-              <FolderPlus className="w-5 h-5" />
-            </button>
-            <button className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors" title="分享">
-              <Share2 className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleEditClick}
-              disabled={editInProgress}
-              className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              title={studySet.isOwner ? "编辑" : "保存副本并编辑"}
-            >
-              {editInProgress ? <Loader2 className="w-5 h-5 animate-spin" /> : <PenSquare className="w-5 h-5" />}
-            </button>
-            <button className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors" title="更多">
               <MoreHorizontal className="w-5 h-5" />
             </button>
+
+            {showMoreMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowMoreMenu(false)}
+                ></div>
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-20 overflow-hidden">
+                  <button
+                    onClick={() => {
+                      navigate('/folders');
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                  >
+                    <FolderPlus className="w-4 h-4 text-gray-500" />
+                    添加到文件夹
+                  </button>
+                  <button
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                    onClick={() => setShowMoreMenu(false)}
+                  >
+                    <Share2 className="w-4 h-4 text-gray-500" />
+                    分享
+                  </button>
+                  <div className="h-px bg-gray-100 my-1"></div>
+                  <button
+                    onClick={() => {
+                      handleEditClick();
+                      setShowMoreMenu(false);
+                    }}
+                    disabled={editInProgress}
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors disabled:opacity-50"
+                  >
+                    {editInProgress ? <Loader2 className="w-4 h-4 animate-spin text-primary" /> : <PenSquare className="w-4 h-4 text-gray-500" />}
+                    {studySet.isOwner ? "编辑学习集" : "保存副本并编辑"}
+                  </button>
+                  <div className="h-px bg-gray-100 my-1"></div>
+                  <button
+                    onClick={() => {
+                      handleResetProgress();
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4 text-red-500" />
+                    重置学习进度
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
