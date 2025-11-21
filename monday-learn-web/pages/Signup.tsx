@@ -14,13 +14,53 @@ export const Signup: React.FC = () => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState<'student' | 'teacher'>('student');
     const [showPassword, setShowPassword] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
+
+        if (!birthday.day || !birthday.month || !birthday.year) {
+            newErrors.birthday = '请填写完整的出生日期';
+        }
+
+        if (!email) {
+            newErrors.email = '请输入电子邮件';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = '请输入有效的电子邮件地址';
+        }
+
+        if (!username) {
+            newErrors.username = '请输入用户名';
+        } else if (username.length < 3) {
+            newErrors.username = '用户名至少需要3个字符';
+        }
+
+        if (!password) {
+            newErrors.password = '请输入密码';
+        } else if (password.length < 8) {
+            newErrors.password = '密码至少需要8个字符';
+        }
+
+        if (!termsAccepted) {
+            newErrors.terms = '请接受服务条款和隐私政策';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        setApiError('');
+
+        if (!validateForm()) {
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -34,7 +74,7 @@ export const Signup: React.FC = () => {
             // Success
             navigate('/login');
         } catch (err: any) {
-            setError(err.message);
+            setApiError(err.message || '注册失败，请稍后重试');
         } finally {
             setLoading(false);
         }
@@ -55,23 +95,24 @@ export const Signup: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex-1 px-6 max-w-md mx-auto w-full pt-4">
+            <div className="flex-1 px-6 max-w-md mx-auto w-full pt-4 pb-10">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">创建一个账户</h1>
                 <p className="text-gray-500 mb-8 font-medium">快速、免费。</p>
 
-                {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm font-medium">
-                        {error}
+                {apiError && (
+                    <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                        {apiError}
                     </div>
                 )}
 
                 <form onSubmit={handleSignup} className="space-y-6">
 
-                    {/* Birthday Inputs - Quizlet usually asks this first for COPPA compliance */}
+                    {/* Birthday Inputs */}
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-500 uppercase">出生日期</label>
                         <div className="flex gap-2">
-                            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg relative">
+                            <div className={`flex-1 bg-gray-50 border rounded-lg relative ${errors.birthday ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
                                 <select
                                     className="w-full h-full p-3 bg-transparent appearance-none outline-none font-medium text-gray-900 z-10 relative"
                                     value={birthday.day}
@@ -84,7 +125,7 @@ export const Signup: React.FC = () => {
                                 </select>
                                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             </div>
-                            <div className="flex-[2] bg-gray-50 border border-gray-200 rounded-lg relative">
+                            <div className={`flex-[2] bg-gray-50 border rounded-lg relative ${errors.birthday ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
                                 <select
                                     className="w-full h-full p-3 bg-transparent appearance-none outline-none font-medium text-gray-900 z-10 relative"
                                     value={birthday.month}
@@ -97,7 +138,7 @@ export const Signup: React.FC = () => {
                                 </select>
                                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             </div>
-                            <div className="flex-[1.5] bg-gray-50 border border-gray-200 rounded-lg relative">
+                            <div className={`flex-[1.5] bg-gray-50 border rounded-lg relative ${errors.birthday ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
                                 <select
                                     className="w-full h-full p-3 bg-transparent appearance-none outline-none font-medium text-gray-900 z-10 relative"
                                     value={birthday.year}
@@ -111,6 +152,7 @@ export const Signup: React.FC = () => {
                                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             </div>
                         </div>
+                        {errors.birthday && <p className="text-xs text-red-500 font-medium mt-1">{errors.birthday}</p>}
                     </div>
 
                     <div className="space-y-1">
@@ -120,8 +162,9 @@ export const Signup: React.FC = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="输入您的电子邮件"
-                            className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium"
+                            className={`w-full bg-gray-50 border rounded-lg p-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                         />
+                        {errors.email && <p className="text-xs text-red-500 font-medium mt-1">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-1">
@@ -131,8 +174,9 @@ export const Signup: React.FC = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="andrew_123"
-                            className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium"
+                            className={`w-full bg-gray-50 border rounded-lg p-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                         />
+                        {errors.username && <p className="text-xs text-red-500 font-medium mt-1">{errors.username}</p>}
                     </div>
 
                     <div className="space-y-1 relative">
@@ -143,7 +187,7 @@ export const Signup: React.FC = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="●●●●●●●●"
-                                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium pr-12"
+                                className={`w-full bg-gray-50 border rounded-lg p-3 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium pr-12 ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                             />
                             <button
                                 type="button"
@@ -153,6 +197,7 @@ export const Signup: React.FC = () => {
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                         </div>
+                        {errors.password && <p className="text-xs text-red-500 font-medium mt-1">{errors.password}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -166,11 +211,10 @@ export const Signup: React.FC = () => {
                                     key={option.value}
                                     type="button"
                                     onClick={() => setRole(option.value as 'student' | 'teacher')}
-                                    className={`border rounded-lg py-3 px-4 text-sm font-semibold transition-colors ${
-                                        role === option.value
+                                    className={`border rounded-lg py-3 px-4 text-sm font-semibold transition-colors ${role === option.value
                                             ? 'border-primary bg-indigo-50 text-primary'
                                             : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     {option.label}
                                 </button>
@@ -179,19 +223,30 @@ export const Signup: React.FC = () => {
                         <p className="text-xs text-gray-500">管理员账号受限，默认保留为平台管理员。</p>
                     </div>
 
-                    <div className="flex items-start gap-3 pt-2">
-                        <input type="checkbox" id="terms" className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
-                        <label htmlFor="terms" className="text-sm text-gray-500 leading-tight">
-                            我接受 Quizlet 的<span className="text-primary font-bold">服务条款</span>和<span className="text-primary font-bold">隐私政策</span>
-                        </label>
+                    <div className="space-y-2">
+                        <div className="flex items-start gap-3 pt-2">
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                checked={termsAccepted}
+                                onChange={(e) => setTermsAccepted(e.target.checked)}
+                                className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                            />
+                            <label htmlFor="terms" className="text-sm text-gray-500 leading-tight cursor-pointer select-none">
+                                我接受 Quizlet 的<span className="text-primary font-bold">服务条款</span>和<span className="text-primary font-bold">隐私政策</span>
+                            </label>
+                        </div>
+                        {errors.terms && <p className="text-xs text-red-500 font-medium ml-8">{errors.terms}</p>}
                     </div>
 
                     <button
                         type="submit"
-                        disabled={!email || !username || !password || !birthday.year || loading}
-                        className="w-full bg-primary hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-lg shadow-sm transition-all active:scale-[0.98] text-lg mt-4 flex items-center justify-center"
+                        disabled={loading}
+                        className="w-full bg-primary hover:bg-primary-dark disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-4 rounded-lg shadow-sm transition-all active:scale-[0.98] text-lg mt-4 flex items-center justify-center"
                     >
-                        {loading ? '注册中...' : '注册'}
+                        {loading ? (
+                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : '注册'}
                     </button>
                 </form>
             </div>
