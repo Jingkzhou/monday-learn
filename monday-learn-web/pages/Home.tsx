@@ -331,13 +331,13 @@ export const Home: React.FC = () => {
             <section className="mb-12">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div
-                        onClick={() => navigate('/folders')}
+                        onClick={() => navigate('/word-cards')}
                         className="bg-white hover:bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
                     >
                         <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                            <Folder className="w-6 h-6 text-blue-500" />
+                            <Layers className="w-6 h-6 text-blue-500" />
                         </div>
-                        <span className="font-bold text-gray-700 group-hover:text-gray-900">我的文件夹</span>
+                        <span className="font-bold text-gray-700 group-hover:text-gray-900">单词卡</span>
                     </div>
 
                     <div className="bg-white hover:bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"

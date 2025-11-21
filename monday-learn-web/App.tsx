@@ -15,6 +15,7 @@ import { Welcome } from './pages/Welcome';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Library } from './pages/Library';
+import { WordCards } from './pages/WordCards';
 import { FlashcardMode } from './pages/FlashcardMode';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
@@ -131,6 +132,13 @@ const App: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <Library />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/word-cards" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <WordCards />
             </MainLayout>
           </ProtectedRoute>
         } />

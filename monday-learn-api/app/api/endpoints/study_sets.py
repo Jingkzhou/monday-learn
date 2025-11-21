@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 from app.models.learning_progress import LearningProgress, LearningStatus
-from sqlalchemy import func, case
+from sqlalchemy import func, case, cast, Integer
 
 def serialize_study_set(study_set: StudySet, current_user=None, db: Session = None) -> StudySetResponse:
     is_owner = bool(current_user and study_set.author_id == current_user.id)
@@ -28,21 +28,28 @@ def serialize_study_set(study_set: StudySet, current_user=None, db: Session = No
     if current_user and db:
         # Calculate progress
         # MySQL doesn't support FILTER, use CASE instead
-        progress_stats = (
-            db.query(
-                func.sum(case((LearningProgress.status == LearningStatus.MASTERED, 1), else_=0)).label("mastered"),
-                func.max(LearningProgress.last_reviewed).label("last_reviewed")
+        # Cast sum to Integer to avoid Decimal type issues
+        try:
+            progress_stats = (
+                db.query(
+                    cast(func.sum(case([(LearningProgress.status == LearningStatus.MASTERED, 1)], else_=0)), Integer).label("mastered"),
+                    func.max(LearningProgress.last_reviewed).label("last_reviewed")
+                )
+                .filter(
+                    LearningProgress.study_set_id == study_set.id,
+                    LearningProgress.user_id == current_user.id
+                )
+                .first()
             )
-            .filter(
-                LearningProgress.study_set_id == study_set.id,
-                LearningProgress.user_id == current_user.id
-            )
-            .first()
-        )
-        
-        if progress_stats:
-            mastered_count = progress_stats.mastered or 0
-            last_reviewed = progress_stats.last_reviewed
+            
+            if progress_stats:
+                # Ensure strictly int
+                mastered_count = int(progress_stats.mastered) if progress_stats.mastered is not None else 0
+                last_reviewed = progress_stats.last_reviewed
+        except Exception as e:
+            print(f"Error calculating progress: {e}")
+            mastered_count = 0
+            last_reviewed = None
 
     return StudySetResponse(
         id=study_set.id,
@@ -149,10 +156,93 @@ def get_study_set(
 
     study_set.view_count = (study_set.view_count or 0) + 1
     db.add(study_set)
+    
+    # Update LearningProgress last_reviewed
+    if current_user:
+        try:
+            progress = (
+                db.query(LearningProgress)
+                .filter(
+                    LearningProgress.study_set_id == study_set.id,
+                    LearningProgress.user_id == current_user.id
+                )
+                .order_by(LearningProgress.last_reviewed.desc()) # Get the most recently reviewed term's progress
+                .first()
+            )
+            
+            if not progress:
+                # If no progress record exists for this user and study set,
+                # create one for the first term (if terms exist) to track activity.
+                if study_set.terms:
+                    first_term = sorted(study_set.terms, key=lambda t: t.order or 0)[0]
+                    progress = LearningProgress(
+                        user_id=current_user.id,
+                        study_set_id=study_set.id,
+                        term_id=first_term.id,
+                        status=LearningStatus.NOT_STARTED,
+                        last_reviewed=datetime.now()
+                    )
+                    db.add(progress)
+            else:
+                # Update the existing progress record's last_reviewed timestamp
+                progress.last_reviewed = datetime.now()
+                db.add(progress)
+        except Exception as e:
+            print(f"Error updating learning progress: {e}")
+            # Don't fail the request if progress update fails
+
     db.commit()
     db.refresh(study_set)
 
     return serialize_study_set(study_set, current_user, db)
+
+
+@router.get("/library", response_model=list[StudySetResponse])
+def get_library_study_sets(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    # Fetch sets where user is author OR has learning progress
+    # We need to join with LearningProgress to get the last_reviewed time
+    # And sort by that time.
+    
+    # Subquery to get the max last_reviewed for each study set for the current user
+    latest_progress = (
+        db.query(
+            LearningProgress.study_set_id,
+            func.max(LearningProgress.last_reviewed).label("last_active")
+        )
+        .filter(LearningProgress.user_id == current_user.id)
+        .group_by(LearningProgress.study_set_id)
+        .subquery()
+    )
+    
+    # Main query
+    # We want sets that are either authored by user OR have progress
+    # And we want to sort by the latest activity (or created_at/updated_at if no activity)
+    
+    # Join StudySet with the subquery
+    study_sets = (
+        db.query(StudySet, latest_progress.c.last_active)
+        .options(selectinload(StudySet.terms), selectinload(StudySet.author))
+        .outerjoin(latest_progress, StudySet.id == latest_progress.c.study_set_id)
+        .filter(
+            (StudySet.author_id == current_user.id) | 
+            (latest_progress.c.study_set_id.isnot(None))
+        )
+        .all() # Fetch all matching sets
+    )
+    
+    # Sort in Python:
+    # Priority: last_active > updated_at > created_at
+    def get_sort_key(item):
+        study_set, last_active = item
+        ts = last_active or study_set.updated_at or study_set.created_at
+        return ts or datetime.min.replace(tzinfo=None) # Fallback
+
+    sorted_items = sorted(study_sets, key=get_sort_key, reverse=True)
+    
+    return [serialize_study_set(item[0], current_user, db) for item in sorted_items]
 
 
 @router.get("", response_model=list[StudySetResponse])
