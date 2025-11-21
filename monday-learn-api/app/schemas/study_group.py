@@ -15,7 +15,13 @@ class StudyGroupUpdate(StudyGroupBase):
 class StudyGroupResponse(StudyGroupBase):
     id: int
     teacher_id: int
+    teacher_name: str
+    join_code: str
     created_at: datetime
+    member_count: int = 0
 
     class Config:
         from_attributes = True
+
+class JoinClassRequest(BaseModel):
+    join_code: str

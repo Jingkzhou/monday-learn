@@ -43,8 +43,8 @@ export const Sidebar: React.FC = () => {
               key={item.label}
               onClick={() => navigate(item.path)}
               className={`flex items-center w-full px-4 py-3 text-sm font-medium rounded-md transition-colors ${isActive
-                  ? 'bg-indigo-50 text-primary'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-indigo-50 text-primary'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
             >
               <item.icon className={`w-5 h-5 mr-3 ${isActive ? 'text-primary' : 'text-gray-400'}`} />
@@ -56,25 +56,13 @@ export const Sidebar: React.FC = () => {
 
       <div className="mt-auto p-4 border-t border-gray-100">
         <div
-          className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 cursor-pointer hover:text-primary transition-colors"
+          className="flex items-center justify-between px-4 py-2 mb-1 cursor-pointer group hover:bg-gray-50 rounded-md transition-all"
           onClick={() => navigate('/classes')}
         >
-          你的班级
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-primary transition-colors">你的班级</span>
+          <span className="text-[10px] font-medium text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity group-hover:text-primary">管理</span>
         </div>
-        {role === 'teacher' ? (
-          <button
-            onClick={() => navigate('/create-class')}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md"
-          >
-            <PlusSquare className="w-4 h-4 mr-3" />
-            创建班级
-          </button>
-        ) : (
-          <button className="flex items-center w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md">
-            <PlusSquare className="w-4 h-4 mr-3" />
-            加入班级
-          </button>
-        )}
+
       </div>
     </aside>
   );
