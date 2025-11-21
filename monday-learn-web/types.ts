@@ -64,3 +64,23 @@ export interface UserResponse {
   role: UserRole;
   created_at: string;
 }
+
+export interface AIConfig {
+  id: number;
+  name: string;
+  provider: string;
+  api_key: string;
+  base_url?: string;
+  model_name: string;
+  total_tokens: number;
+  is_active: boolean;
+}
+
+export interface AIUsageLog {
+  id: number;
+  config_id: number;
+  user_id: number;
+  tokens_used: number;
+  request_type: string;
+  created_at: string;
+}

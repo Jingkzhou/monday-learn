@@ -21,21 +21,10 @@ export const Welcome: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 max-w-2xl mx-8 hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="更快速地搜索查找"
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#4255ff]/20 focus:border-[#4255ff] transition-all"
-            />
-          </div>
-        </div>
+
 
         <div className="flex items-center gap-4">
-          <button className="hidden md:flex items-center gap-1 text-gray-600 font-semibold hover:text-gray-900">
-            <Plus className="w-4 h-4" /> 创建
-          </button>
+
           <button
             onClick={() => navigate('/login')}
             className="px-4 py-2 text-gray-600 font-bold hover:bg-gray-50 rounded-md transition-colors"
