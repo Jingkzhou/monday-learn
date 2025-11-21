@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Term } from '../types';
-import { ArrowLeft, Settings, Trash2, Image as ImageIcon, GripVertical, Loader2, CheckCircle2, AlertCircle, Upload, X, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Settings, Trash2, Image as ImageIcon, GripVertical, Loader2, CheckCircle2, AlertCircle, Upload, X, ChevronDown, Sparkles } from 'lucide-react';
 import { api } from '../utils/api';
 
 const createEmptyTerm = (index: number): Term => ({
@@ -37,6 +37,7 @@ export const EditSet: React.FC = () => {
 
   // Settings Dropdown State
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [, setIsAiModalOpen] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -326,6 +327,17 @@ export const EditSet: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
+
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-800">Create a new study set</h1>
+          <button
+            onClick={() => setIsAiModalOpen(true)}
+            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm"
+          >
+            <Sparkles size={16} />
+            AI Auto-Generate
+          </button>
         </div>
 
         {/* Cards List */}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import { Term } from '../types';
-import { X, Settings, Volume2, CheckCircle2, AlertCircle, ArrowRight, RotateCcw } from 'lucide-react';
+import { X, Settings, Volume2, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, Star } from 'lucide-react';
 
 interface LearningTerm extends Term {
     learning_status: 'not_started' | 'familiar' | 'mastered';
@@ -246,6 +246,25 @@ export const LearnMode: React.FC = () => {
         setCounts(newCounts);
     };
 
+    const handleToggleStar = async () => {
+        if (!currentTerm) return;
+        const nextStarred = !currentTerm.starred;
+
+        const updateState = (starredValue: boolean) => {
+            setQueue((prev) => prev.map((t, idx) => idx === currentIndex ? { ...t, starred: starredValue } : t));
+            setSession((prev) => prev ? { ...prev, terms: prev.terms.map((t) => t.id === currentTerm.id ? { ...t, starred: starredValue } : t) } : prev);
+        };
+
+        updateState(nextStarred);
+
+        try {
+            await api.patch(`/study-sets/terms/${currentTerm.id}/star`);
+        } catch (err) {
+            console.error("Failed to toggle star", err);
+            updateState(!nextStarred); // revert
+        }
+    };
+
     // Auto-advance
     useEffect(() => {
         if (showFeedback) {
@@ -447,6 +466,18 @@ export const LearnMode: React.FC = () => {
                 <div className="w-full max-w-3xl bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-12 mb-8 relative min-h-[200px] flex flex-col justify-center">
                     <div className="absolute top-6 left-6 text-gray-500 text-sm font-medium flex items-center gap-2">
                         术语 <Volume2 className="w-4 h-4 cursor-pointer hover:text-primary" />
+                    </div>
+                    <div className="absolute top-6 right-6">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleStar();
+                            }}
+                            className={`p-2 rounded-full transition-colors ${currentTerm?.starred ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400 hover:bg-yellow-50'}`}
+                            title={currentTerm?.starred ? "取消星标" : "标记星号"}
+                        >
+                            <Star className={`w-5 h-5 ${currentTerm?.starred ? 'fill-current' : ''}`} />
+                        </button>
                     </div>
                     <h2 className="text-4xl text-center font-serif text-gray-800">
                         {questionType === 'flashcard' && isFlipped ? currentTerm.definition : currentTerm.term}

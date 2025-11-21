@@ -511,8 +511,7 @@ export const SetView: React.FC = () => {
             <span>只看星标 ({terms.filter(t => t.starred).length})</span>
           </button>
           <div className="w-px h-4 bg-gray-300 mx-2"></div>
-          <span className="text-gray-500 font-semibold cursor-pointer hover:text-gray-900 border-b-2 border-primary pb-1">默认顺序</span>
-          <span className="text-gray-400 font-semibold cursor-pointer hover:text-gray-900">字母顺序</span>
+          
         </div>
       </div>
 

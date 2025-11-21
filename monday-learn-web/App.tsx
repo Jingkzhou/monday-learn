@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { SetView } from './pages/SetView';
 import { LearnMode } from './pages/LearnMode';
@@ -24,6 +24,7 @@ import { MobileNav } from './components/MobileNav';
 import { Admin } from './pages/Admin';
 import { CreateClass } from './pages/CreateClass';
 import { Classes } from './pages/Classes';
+import ChatBot from './components/ChatBot';
 
 // Layout wrapper for pages that have the standard sidebar/topbar
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -47,130 +48,134 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
 };
 
 const App: React.FC = () => {
+  const location = useLocation();
+  const hideChatFor = ['/welcome', '/login', '/signup'];
+  const shouldShowChat = !hideChatFor.includes(location.pathname);
+
   return (
-    <Router>
+    <>
       <Routes>
         {/* Public Auth Routes */}
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected App Routes */}
-        <Route path="/" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Home />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          {/* Protected App Routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Home />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/set/:id" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <SetView />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/set/:id" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <SetView />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/set/:id/flashcards" element={
-          <ProtectedRoute>
-            <FlashcardMode />
-          </ProtectedRoute>
-        } />
+          <Route path="/set/:id/flashcards" element={
+            <ProtectedRoute>
+              <FlashcardMode />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/set/:id/learn" element={
-          <ProtectedRoute>
-            <LearnMode />
-          </ProtectedRoute>
-        } />
-        <Route path="/set/:id/test" element={
-          <ProtectedRoute>
-            <TestMode />
-          </ProtectedRoute>
-        } />
-        <Route path="/set/:id/match" element={
-          <ProtectedRoute>
-            <MatchMode />
-          </ProtectedRoute>
-        } />
-        <Route path="/set/:id/blast" element={
-          <ProtectedRoute>
-            <BlastMode />
-          </ProtectedRoute>
-        } />
-        <Route path="/set/:id/ai-exam" element={
-          <ProtectedRoute>
-            <AIExamMode />
-          </ProtectedRoute>
-        } />
+          <Route path="/set/:id/learn" element={
+            <ProtectedRoute>
+              <LearnMode />
+            </ProtectedRoute>
+          } />
+          <Route path="/set/:id/test" element={
+            <ProtectedRoute>
+              <TestMode />
+            </ProtectedRoute>
+          } />
+          <Route path="/set/:id/match" element={
+            <ProtectedRoute>
+              <MatchMode />
+            </ProtectedRoute>
+          } />
+          <Route path="/set/:id/blast" element={
+            <ProtectedRoute>
+              <BlastMode />
+            </ProtectedRoute>
+          } />
+          <Route path="/set/:id/ai-exam" element={
+            <ProtectedRoute>
+              <AIExamMode />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/set/:id/edit" element={
-          <ProtectedRoute>
-            <EditSet />
-          </ProtectedRoute>
-        } />
+          <Route path="/set/:id/edit" element={
+            <ProtectedRoute>
+              <EditSet />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/folders" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Folders />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/folders" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Folders />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Profile />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Profile />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Admin />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Admin />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/profile/edit" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <EditProfile />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/profile/edit" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <EditProfile />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/create-class" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <CreateClass />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/create-class" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <CreateClass />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        <Route path="/classes" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Classes />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          <Route path="/classes" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Classes />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
-        {/* Fallback routes */}
-        <Route path="/create" element={
-          <ProtectedRoute>
-            <EditSet />
-          </ProtectedRoute>
-        } />
-        <Route path="/library" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Library />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
+          {/* Fallback routes */}
+          <Route path="/create" element={
+            <ProtectedRoute>
+              <EditSet />
+            </ProtectedRoute>
+          } />
+          <Route path="/library" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Library />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
         <Route path="/word-cards" element={
           <ProtectedRoute>
             <MainLayout>
@@ -179,8 +184,14 @@ const App: React.FC = () => {
           </ProtectedRoute>
         } />
       </Routes>
-    </Router>
+    </>
   );
 };
 
-export default App;
+const AppWithRouter: React.FC = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default AppWithRouter;
