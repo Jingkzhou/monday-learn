@@ -57,5 +57,6 @@ export interface UserResponse {
   email: string;
   username: string;
   is_active: boolean;
+  avatar_url?: string;
   created_at: string;
 }

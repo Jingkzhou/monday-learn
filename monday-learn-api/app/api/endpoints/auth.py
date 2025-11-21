@@ -93,3 +93,30 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+from app.schemas.user import UserUpdate
+
+@router.put("/me", response_model=UserResponse)
+async def update_me(
+    payload: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Check if username is taken (if changed)
+    if payload.username and payload.username != current_user.username:
+        existing_user = db.query(User).filter(User.username == payload.username).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
+        current_user.username = payload.username
+    
+    if payload.avatar_url is not None:
+        current_user.avatar_url = payload.avatar_url
+        
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user

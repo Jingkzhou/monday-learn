@@ -77,8 +77,12 @@ export const Profile: React.FC = () => {
                     {/* Profile Info */}
                     <div className="px-8 pb-8 relative">
                         <div className="flex flex-col md:flex-row items-start md:items-end -mt-12 mb-6 gap-6">
-                            <div className="w-24 h-24 rounded-full bg-purple-600 text-white text-4xl font-bold flex items-center justify-center border-4 border-white shadow-md relative">
-                                {user.username?.[0]?.toUpperCase() || 'U'}
+                            <div className="w-24 h-24 rounded-full bg-purple-600 text-white text-4xl font-bold flex items-center justify-center border-4 border-white shadow-md relative overflow-hidden">
+                                {user.avatar_url ? (
+                                    <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
+                                ) : (
+                                    user.username?.[0]?.toUpperCase() || 'U'
+                                )}
                                 <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full" title="在线"></div>
                             </div>
                             <div className="flex-1 mb-2">
@@ -90,7 +94,10 @@ export const Profile: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex gap-3 w-full md:w-auto">
-                                <button className="flex-1 md:flex-none px-6 py-2 bg-white border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+                                <button
+                                    onClick={() => navigate('/profile/edit')}
+                                    className="flex-1 md:flex-none px-6 py-2 bg-white border border-gray-300 rounded-lg font-bold text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                                >
                                     编辑资料
                                 </button>
                             </div>

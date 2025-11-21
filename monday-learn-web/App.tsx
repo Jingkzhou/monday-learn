@@ -11,6 +11,7 @@ import { BlastMode } from './pages/BlastMode';
 import { AIExamMode } from './pages/AIExamMode';
 import { Folders } from './pages/Folders';
 import { Profile } from './pages/Profile';
+import { EditProfile } from './pages/EditProfile';
 import { Welcome } from './pages/Welcome';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
@@ -118,6 +119,14 @@ const App: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <Profile />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/profile/edit" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EditProfile />
             </MainLayout>
           </ProtectedRoute>
         } />
