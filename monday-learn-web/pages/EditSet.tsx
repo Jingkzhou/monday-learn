@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Term } from '../types';
 import { ArrowLeft, Settings, Trash2, Image as ImageIcon, GripVertical, Loader2, CheckCircle2, AlertCircle, Upload, X, ChevronDown, Sparkles } from 'lucide-react';
 import { api } from '../utils/api';
@@ -17,10 +17,19 @@ type DelimiterType = 'tab' | 'comma' | 'newline' | 'semicolon' | 'custom';
 export const EditSet: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
   const isEditing = useMemo(() => Boolean(id), [id]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [terms, setTerms] = useState<Term[]>([createEmptyTerm(0)]);
+
+  // Get initial state from navigation (for merge feature)
+  const initialState = location.state as {
+    initialTitle?: string;
+    initialDescription?: string;
+    initialTerms?: Term[]
+  } | null;
+
+  const [title, setTitle] = useState(initialState?.initialTitle || '');
+  const [description, setDescription] = useState(initialState?.initialDescription || '');
+  const [terms, setTerms] = useState<Term[]>(initialState?.initialTerms || [createEmptyTerm(0)]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -197,7 +206,7 @@ export const EditSet: React.FC = () => {
         : await api.post<any>('/study-sets', payload);
 
       setSuccessMessage('保存成功');
-      navigate(`/set/${data.id}`);
+      navigate('/');
     } catch (err: any) {
       setError(err.message || '保存失败，请稍后重试');
     } finally {

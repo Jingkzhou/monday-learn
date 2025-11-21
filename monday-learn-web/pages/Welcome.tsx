@@ -59,15 +59,6 @@ export const Welcome: React.FC = () => {
         <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
           通过MondayQuizlet的互动式单词卡、模拟测试和学习活动，掌握所学知识。
         </p>
-        <button
-          onClick={() => navigate('/signup')}
-          className="px-8 py-4 bg-[#4255ff] hover:bg-[#3644cc] text-white font-bold rounded-md text-lg shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5"
-        >
-          免费注册
-        </button>
-        <div className="mt-4">
-          <button className="text-[#4255ff] font-bold hover:underline">我是教师</button>
-        </div>
       </section>
 
       {/* Feature Cards Grid */}

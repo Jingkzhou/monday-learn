@@ -25,7 +25,8 @@ import {
   AlertCircle,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
+  Merge
 } from 'lucide-react';
 import { api } from '../utils/api';
 
@@ -244,7 +245,7 @@ export const SetView: React.FC = () => {
     }
 
     try {
-      await api.post(`/study-sets/${studySet.id}/reset-progress`);
+      await api.post(`/study-sets/${studySet.id}/reset-progress`, {});
       // Refresh the page or data to reflect changes
       // For now, just reload the page to be safe and simple, or re-fetch data
       window.location.reload();
@@ -355,6 +356,17 @@ export const SetView: React.FC = () => {
                   >
                     <RotateCcw className="w-4 h-4 text-red-500" />
                     重置学习进度
+                  </button>
+                  <div className="h-px bg-gray-100 my-1"></div>
+                  <button
+                    onClick={() => {
+                      navigate(`/set/${id}/merge`);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                  >
+                    <Merge className="w-4 h-4 text-gray-500" />
+                    合并学习集
                   </button>
                 </div>
               </>
@@ -515,11 +527,10 @@ export const SetView: React.FC = () => {
           <button
             onClick={() => navigate(`/set/${id}/learn?starredOnly=true`)}
             disabled={starredCount === 0}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border ${
-              starredCount === 0
-                ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
-                : 'bg-indigo-50 text-primary border-indigo-100 hover:bg-indigo-100'
-            }`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border ${starredCount === 0
+              ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
+              : 'bg-indigo-50 text-primary border-indigo-100 hover:bg-indigo-100'
+              }`}
             title="仅练习星标术语，不影响整体进度"
           >
             <Sparkles className="w-4 h-4" />

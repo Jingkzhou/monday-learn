@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Home, Folder, PlusSquare, Library, Settings } from 'lucide-react';
+import { Home, Folder, PlusSquare, Library, Settings, Calendar } from 'lucide-react';
 import { NavItem, UserRole, UserResponse } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../utils/api';
@@ -9,6 +9,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: '你的文库', icon: Library, path: '/library' },
   { label: '文件夹', icon: Folder, path: '/folders' },
   { label: '管理', icon: Settings, path: '/admin', roles: ['admin'] },
+  { label: '日历', icon: Calendar, path: '/calendar' },
 ];
 
 export const Sidebar: React.FC = () => {
