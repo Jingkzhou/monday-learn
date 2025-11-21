@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
+import { Logo } from '../components/Logo';
 
 export const Welcome: React.FC = () => {
   const navigate = useNavigate();
@@ -11,8 +12,8 @@ export const Welcome: React.FC = () => {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-4 md:px-8 py-3 border-b border-gray-100 sticky top-0 bg-white z-50">
         <div className="flex items-center gap-8">
-          <div className="text-2xl font-bold text-[#4255ff] cursor-pointer" onClick={() => navigate('/')}>
-            Quizlet
+          <div className="cursor-pointer" onClick={() => navigate('/')}>
+            <Logo />
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
             <button className="hover:text-gray-900">学习工具 <span className="text-xs">▼</span></button>
@@ -56,7 +57,7 @@ export const Welcome: React.FC = () => {
           您想如何学习？
         </h1>
         <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          通过Quizlet的互动式单词卡、模拟测试和学习活动，掌握所学知识。
+          通过MondayQuizlet的互动式单词卡、模拟测试和学习活动，掌握所学知识。
         </p>
         <button
           onClick={() => navigate('/signup')}
@@ -246,7 +247,7 @@ export const Welcome: React.FC = () => {
               增强学生的能力
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              帮助每个学生自信地学习任何知识。有了免费的单词卡学习集、学习模式和课堂游戏（如Quizlet Live），您可以立即创建更有吸引力的课堂。
+              帮助每个学生自信地学习任何知识。有了免费的单词卡学习集、学习模式和课堂游戏（如MondayQuizlet Live），您可以立即创建更有吸引力的课堂。
             </p>
             <button
               onClick={() => navigate('/signup')}
@@ -255,7 +256,7 @@ export const Welcome: React.FC = () => {
               注册成为教师
             </button>
             <div className="mt-4">
-              <button className="text-[#4255ff] font-bold hover:underline">了解教师如何使用Quizlet</button>
+              <button className="text-[#4255ff] font-bold hover:underline">了解教师如何使用MondayQuizlet</button>
             </div>
           </div>
           <div className="flex-1 h-96 w-full rounded-2xl overflow-hidden shadow-xl relative">
@@ -266,7 +267,7 @@ export const Welcome: React.FC = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-8">
               <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-bold text-gray-900">
-                Quizlet
+                MondayQuizlet
               </div>
             </div>
           </div>
@@ -279,7 +280,7 @@ export const Welcome: React.FC = () => {
           <div>
             <h4 className="font-bold text-gray-900 mb-4">关于我们</h4>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li className="hover:text-[#4255ff] cursor-pointer">关于Quizlet</li>
+              <li className="hover:text-[#4255ff] cursor-pointer">关于MondayQuizlet</li>
               <li className="hover:text-[#4255ff] cursor-pointer">工作机会</li>
               <li className="hover:text-[#4255ff] cursor-pointer">广告宣传</li>
               <li className="hover:text-[#4255ff] cursor-pointer">获取应用</li>
@@ -291,7 +292,7 @@ export const Welcome: React.FC = () => {
               <li className="hover:text-[#4255ff] cursor-pointer">单词卡</li>
               <li className="hover:text-[#4255ff] cursor-pointer">学习</li>
               <li className="hover:text-[#4255ff] cursor-pointer">解决方案</li>
-              <li className="hover:text-[#4255ff] cursor-pointer">Quizlet Plus</li>
+              <li className="hover:text-[#4255ff] cursor-pointer">MondayQuizlet Plus</li>
             </ul>
           </div>
           <div>
@@ -300,7 +301,7 @@ export const Welcome: React.FC = () => {
               <li className="hover:text-[#4255ff] cursor-pointer">Live</li>
               <li className="hover:text-[#4255ff] cursor-pointer">帮助中心</li>
               <li className="hover:text-[#4255ff] cursor-pointer">博客</li>
-              <li className="hover:text-[#4255ff] cursor-pointer">Quizlet Plus教师版</li>
+              <li className="hover:text-[#4255ff] cursor-pointer">MondayQuizlet Plus教师版</li>
             </ul>
           </div>
           <div>
@@ -334,7 +335,7 @@ export const Welcome: React.FC = () => {
         </div>
         <div className="max-w-7xl mx-auto pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <div className="flex gap-4">
-            <span>© 2025 Quizlet, Inc.</span>
+            <span>© 2025 MondayQuizlet, Inc.</span>
             <span className="hover:text-[#4255ff] cursor-pointer">隐私政策</span>
             <span className="hover:text-[#4255ff] cursor-pointer">服务条款</span>
           </div>

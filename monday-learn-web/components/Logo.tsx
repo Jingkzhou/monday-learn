@@ -9,39 +9,16 @@ interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({ className = "w-10 h-10", showText = true }) => {
   return (
     <div className="flex items-center gap-2 select-none">
-      <svg 
-        viewBox="0 0 100 100" 
-        fill="none" 
-        xmlns="http://www.w3.org/2000/svg" 
+      <img
+        src="/logo.svg"
+        alt="Monday Logo"
         className={className}
-        aria-label="Monday Logo"
-      >
-        {/* The M Shape - Rounded and Friendly */}
-        <path 
-          d="M15 85V35C15 23.9543 23.9543 15 35 15C42.5 15 48 20 50 25C52 20 57.5 15 65 15C76.0457 15 85 23.9543 85 35V85" 
-          stroke="#4255ff" 
-          strokeWidth="14" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
-        
-        {/* The Sun Character rising in the middle */}
-        <circle cx="50" cy="45" r="16" fill="#FACC15" />
-        
-        {/* Sun Rays (Subtle) */}
-        <path d="M50 22V18" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-        <path d="M68 35L71 33" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-        <path d="M32 35L29 33" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
+      />
 
-        {/* Kawaii Face on the Sun */}
-        <circle cx="44" cy="43" r="2" fill="#854D0E" /> {/* Left Eye */}
-        <circle cx="56" cy="43" r="2" fill="#854D0E" /> {/* Right Eye */}
-        <path d="M46 48C46 48 48 50 50 50C52 50 54 48 54 48" stroke="#854D0E" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-      
       {showText && (
-        <span className="text-2xl font-black tracking-tight text-gray-800 hidden sm:block">
-          Monday
+        <span className="text-2xl font-extrabold tracking-tight hidden sm:block">
+          <span className="text-gray-800">Monday</span>
+          <span className="text-[#4255ff]">Quizlet</span>
         </span>
       )}
     </div>
