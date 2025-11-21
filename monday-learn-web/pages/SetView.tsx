@@ -313,62 +313,70 @@ export const SetView: React.FC = () => {
       </div>
 
       {/* Study Modes Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         <button
           onClick={() => navigate(`/set/${id}/flashcards`)}
-          className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 transition-all group"
         >
-          <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-100">
+          <div className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Copy className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-gray-700">单词卡</span>
+          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">单词卡</span>
         </button>
+
         <button
           onClick={() => navigate(`/set/${id}/learn`)}
-          className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 transition-all group"
         >
-          <div className="w-8 h-8 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-100">
+          <div className="w-10 h-10 rounded-lg bg-indigo-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Sparkles className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-gray-700">学习</span>
+          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">学习</span>
         </button>
+
         <button
           onClick={() => navigate(`/set/${id}/test`)}
-          className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group"
         >
-          <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100">
+          <div className="w-10 h-10 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <ScrollText className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-gray-700">测试</span>
+          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">测试</span>
         </button>
+
         <button
           onClick={() => navigate(`/set/${id}/match`)}
-          className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-purple-300 transition-all group"
         >
-          <div className="w-8 h-8 rounded-md bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-100">
+          <div className="w-10 h-10 rounded-lg bg-purple-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Gamepad2 className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-gray-700">配对</span>
+          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">配对</span>
         </button>
+
         <button
           onClick={() => navigate(`/set/${id}/blast`)}
-          className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group"
+          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-pink-300 transition-all group"
         >
-          <div className="w-8 h-8 rounded-md bg-pink-50 text-pink-600 flex items-center justify-center group-hover:bg-pink-100">
+          <div className="w-10 h-10 rounded-lg bg-pink-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Rocket className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-gray-700">Blast</span>
+          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">Blast</span>
         </button>
+
         <button
           onClick={() => navigate(`/set/${id}/ai-exam`)}
-          className="flex flex-col gap-2 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left group ring-1 ring-indigo-100 bg-indigo-50/30"
+          className="flex items-center justify-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 transition-all group relative overflow-hidden"
         >
-          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center group-hover:shadow-lg transition-all">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform z-10">
             <FileText className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-gray-700 flex items-center gap-1">
-            AI 试卷 <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1 rounded font-bold">NEW</span>
-          </span>
+          <div className="flex flex-col z-10">
+            <span className="font-bold text-gray-800 text-lg group-hover:text-gray-900 flex items-center gap-2">
+              AI 试卷
+              <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">New</span>
+            </span>
+          </div>
         </button>
       </div>
 

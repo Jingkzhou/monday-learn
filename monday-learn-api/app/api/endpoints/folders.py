@@ -11,7 +11,10 @@ from app.schemas.folder import FolderCreate, FolderResponse, FolderUpdate, Folde
 router = APIRouter()
 
 def get_folder_or_404(db: Session, folder_id: int, user_id: int) -> Folder:
-    folder = db.query(Folder).options(selectinload(Folder.study_sets), selectinload(Folder.author)).filter(Folder.id == folder_id).first()
+    folder = db.query(Folder).options(
+        selectinload(Folder.study_sets).selectinload(StudySet.terms),
+        selectinload(Folder.author)
+    ).filter(Folder.id == folder_id).first()
     if not folder:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Folder not found")
     if folder.author_id != user_id:

@@ -151,7 +151,7 @@ export const Folders: React.FC = () => {
                         <div>
                             <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
                                 <FolderIcon className="w-4 h-4" />
-                                {currentFolder.set_count} 个学习集
+                                {currentFolder.set_count} 个学习集 • {currentFolder.study_sets.reduce((acc, set) => acc + (set.term_count || 0), 0)} 个词语
                             </div>
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentFolder.title}</h1>
                             <p className="text-gray-600">{currentFolder.description}</p>
@@ -327,7 +327,7 @@ export const Folders: React.FC = () => {
 
                             <div className="relative z-10 flex items-center gap-2 text-xs font-bold text-gray-400 group-hover:text-gray-600">
                                 <div className="bg-gray-100 px-2 py-1 rounded group-hover:bg-white group-hover:shadow-sm transition-all">
-                                    {folder.set_count} 个学习集
+                                    {folder.set_count} 个学习集 • {folder.study_sets.reduce((acc, set) => acc + (set.term_count || 0), 0)} 个词语
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <User className="w-3 h-3" /> {folder.author_username}

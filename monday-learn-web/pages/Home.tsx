@@ -156,7 +156,7 @@ export const Home: React.FC = () => {
                         <Layers className="w-6 h-6 text-indigo-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-gray-900 leading-tight mb-1 truncate group-hover:text-indigo-600 transition-colors">{set.title}</h3>
+                        <h3 className="text-base font-bold text-gray-900 leading-tight mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors">{set.title}</h3>
                         <div className="flex items-center gap-2">
                             <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-500 text-xs font-medium border border-gray-200">
                                 {termCount} 个词语
@@ -318,9 +318,9 @@ export const Home: React.FC = () => {
                     ) : (
                         <div className="relative z-10 flex-1 text-center py-8">
                             <h1 className="text-3xl font-bold text-gray-900 mb-4">欢迎来到
-          <span className="text-gray-800">Monday</span>
-          <span className="text-[#4255ff]">Quizlet</span></h1>
-                            
+                                <span className="text-gray-800">Monday</span>
+                                <span className="text-[#4255ff]">Quizlet</span></h1>
+
                             <p className="text-gray-500 mb-8">创建你的第一个学习集，开始高效记忆！</p>
                             <button
                                 onClick={() => navigate('/create')}
