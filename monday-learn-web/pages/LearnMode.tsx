@@ -33,6 +33,7 @@ export const LearnMode: React.FC = () => {
         written: true,
         flashcard: false
     });
+    const persistedKey = useMemo(() => (id ? `learnModeSettings_${id}` : 'learnModeSettings'), [id]);
 
     // Flashcard State
     const [isFlipped, setIsFlipped] = useState(false);
@@ -72,6 +73,28 @@ export const LearnMode: React.FC = () => {
     useEffect(() => {
         fetchSession();
     }, [id]);
+
+    // 读取上次设置
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(persistedKey);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                setSettings((prev) => ({ ...prev, ...parsed }));
+            }
+        } catch (err) {
+            console.error('Failed to load saved settings', err);
+        }
+    }, [persistedKey]);
+
+    // 实时保存设置
+    const updateSetting = (key: 'mc' | 'written' | 'flashcard', value: boolean) => {
+        setSettings((prev) => {
+            const next = { ...prev, [key]: value };
+            localStorage.setItem(persistedKey, JSON.stringify(next));
+            return next;
+        });
+    };
 
     useEffect(() => {
         if (queue.length > 0 && !roundComplete && inputRef.current) {
@@ -344,7 +367,7 @@ export const LearnMode: React.FC = () => {
                                             <span className="font-medium">多项选择</span>
                                         </div>
                                         <button
-                                            onClick={() => setSettings(s => ({ ...s, mc: !s.mc }))}
+                                            onClick={() => updateSetting('mc', !settings.mc)}
                                             className={`w-12 h-6 rounded-full transition-colors relative ${settings.mc ? 'bg-primary' : 'bg-slate-600'}`}
                                         >
                                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.mc ? 'left-7' : 'left-1'}`} />
@@ -358,7 +381,7 @@ export const LearnMode: React.FC = () => {
                                             <span className="font-medium">书面问题</span>
                                         </div>
                                         <button
-                                            onClick={() => setSettings(s => ({ ...s, written: !s.written }))}
+                                            onClick={() => updateSetting('written', !settings.written)}
                                             className={`w-12 h-6 rounded-full transition-colors relative ${settings.written ? 'bg-primary' : 'bg-slate-600'}`}
                                         >
                                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.written ? 'left-7' : 'left-1'}`} />
@@ -372,7 +395,7 @@ export const LearnMode: React.FC = () => {
                                             <span className="font-medium">单词卡</span>
                                         </div>
                                         <button
-                                            onClick={() => setSettings(s => ({ ...s, flashcard: !s.flashcard }))}
+                                            onClick={() => updateSetting('flashcard', !settings.flashcard)}
                                             className={`w-12 h-6 rounded-full transition-colors relative ${settings.flashcard ? 'bg-primary' : 'bg-slate-600'}`}
                                         >
                                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${settings.flashcard ? 'left-7' : 'left-1'}`} />
@@ -380,7 +403,17 @@ export const LearnMode: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-slate-700 text-center">
-                                    <button className="text-primary text-sm font-bold hover:text-primary-light">查看所有选项</button>
+                                    <button
+                                        onClick={() => {
+                                            updateSetting('mc', false);
+                                            updateSetting('written', false);
+                                            updateSetting('flashcard', false);
+                                            setSettings({ mc: false, written: false, flashcard: false });
+                                        }}
+                                        className="text-primary text-sm font-bold hover:text-primary-light"
+                                    >
+                                        查看所有选项
+                                    </button>
                                     <button
                                         onClick={async () => {
                                             if (confirm('确定要重置学习进度吗？这将清除所有术语的学习状态。')) {

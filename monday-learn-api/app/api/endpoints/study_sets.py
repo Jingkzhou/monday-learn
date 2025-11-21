@@ -31,9 +31,10 @@ def serialize_study_set(study_set: StudySet, current_user=None, db: Session = No
         # MySQL doesn't support FILTER, use CASE instead
         # Cast sum to Integer to avoid Decimal type issues
         try:
+            # SQLAlchemy 2.0 case syntax expects positional whens, not list
             progress_stats = (
                 db.query(
-                    cast(func.sum(case([(LearningProgress.status == LearningStatus.MASTERED, 1)], else_=0)), Integer).label("mastered"),
+                    cast(func.sum(case((LearningProgress.status == LearningStatus.MASTERED, 1), else_=0)), Integer).label("mastered"),
                     func.max(LearningProgress.last_reviewed).label("last_reviewed")
                 )
                 .filter(

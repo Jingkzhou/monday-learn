@@ -280,16 +280,10 @@ export const Home: React.FC = () => {
                                 </p>
                                 <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
                                     <button
-                                        onClick={() => navigate(`/set/${heroSet.id}/test`)}
+                                        onClick={() => navigate(`/set/${heroSet.id}`)}
                                         className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-primary-dark hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                                     >
                                         继续挑战
-                                    </button>
-                                    <button
-                                        onClick={() => navigate('/create')}
-                                        className="w-full sm:w-auto px-8 py-3 bg-white border-2 border-gray-100 text-gray-700 rounded-xl font-bold hover:border-gray-200 hover:bg-gray-50 transition-all"
-                                    >
-                                        创建学习集
                                     </button>
                                 </div>
                             </div>
