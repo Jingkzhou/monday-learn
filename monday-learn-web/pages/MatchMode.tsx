@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MOCK_SET } from '../constants';
-import { Term } from '../types';
-import { X, Trophy, RotateCcw, Settings, Volume2, VolumeX, Timer, Hourglass, Clock } from 'lucide-react';
+import { Term, StudySet } from '../types';
+import { api } from '../utils/api';
+import { X, Trophy, RotateCcw, Settings, Volume2, VolumeX, Timer, Hourglass, Clock, AlertCircle } from 'lucide-react';
 
 interface MatchCard {
   id: string;
@@ -14,10 +14,15 @@ interface MatchCard {
 }
 
 type TimerMode = 'stopwatch' | 'countdown';
+const BATCH_SIZE = 6; // 每轮取多少个术语
 
 export const MatchMode: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [allTerms, setAllTerms] = useState<Term[]>([]);
+  const [remainingTerms, setRemainingTerms] = useState<Term[]>([]);
   const [cards, setCards] = useState<MatchCard[]>([]);
   const [gameStatus, setGameStatus] = useState<'intro' | 'playing' | 'finished' | 'timeout'>('intro');
   const [startTime, setStartTime] = useState<number>(0);
@@ -34,6 +39,35 @@ export const MatchMode: React.FC = () => {
   const timerRef = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
+
+  // 拉取学习集
+  useEffect(() => {
+    const fetchSet = async () => {
+      if (!id) return;
+      setLoading(true);
+      setError('');
+      try {
+        const data = await api.get<StudySet>(`/study-sets/${id}`);
+        const normalizedTerms: Term[] = (data.terms || []).map((t, idx) => ({
+          id: t.id ?? idx,
+          term: t.term,
+          definition: t.definition,
+          imageUrl: (t as any).image_url ?? t.imageUrl,
+          order: t.order,
+          starred: t.starred,
+        }));
+        if (normalizedTerms.length === 0) {
+          setError('该学习集暂无术语，无法开始配对游戏。');
+        }
+        setAllTerms(normalizedTerms);
+      } catch (err: any) {
+        setError(err.message || '加载学习集失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSet();
+  }, [id]);
 
   // Initialize Audio Context
   useEffect(() => {
@@ -157,38 +191,56 @@ export const MatchMode: React.FC = () => {
     }
   };
 
-  const initializeGame = () => {
-    playSound('start');
-    const termsToUse = [...MOCK_SET.terms]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 6);
-
+  const buildCardsFromTerms = (termsSlice: Term[]) => {
     const newCards: MatchCard[] = [];
-    termsToUse.forEach(term => {
+    termsSlice.forEach(term => {
       newCards.push({
         id: `${term.id}-term`,
-        termId: term.id,
+        termId: String(term.id),
         content: term.term,
         type: 'term',
         state: 'default'
       });
       newCards.push({
         id: `${term.id}-def`,
-        termId: term.id,
+        termId: String(term.id),
         content: term.definition,
         type: 'definition',
         state: 'default'
       });
     });
+    return newCards.sort(() => Math.random() - 0.5);
+  };
 
-    setCards(newCards.sort(() => Math.random() - 0.5));
+  const dealNextBatch = (queue: Term[]) => {
+    if (queue.length === 0) {
+      setCards([]);
+      setRemainingTerms([]);
+      setGameStatus('finished');
+      playSound('finish');
+      return;
+    }
+    const batch = queue.slice(0, Math.min(BATCH_SIZE, queue.length));
+    const rest = queue.slice(batch.length);
+    setRemainingTerms(rest);
+    setCards(buildCardsFromTerms(batch));
+    setSelectedCardIds([]);
+    setIsProcessing(false);
+  };
+
+  const initializeGame = () => {
+    if (allTerms.length === 0) return;
+    playSound('start');
+    const shuffled = [...allTerms].sort(() => Math.random() - 0.5);
+    setRemainingTerms(shuffled.slice(Math.min(BATCH_SIZE, shuffled.length)));
+    setCards(buildCardsFromTerms(shuffled.slice(0, Math.min(BATCH_SIZE, shuffled.length))));
     setGameStatus('playing');
     setStartTime(Date.now());
-    
+
     if (timerMode === 'stopwatch') {
-        setCurrentTime(0);
+      setCurrentTime(0);
     } else {
-        setCurrentTime(countdownDuration * 1000);
+      setCurrentTime(countdownDuration * 1000);
     }
 
     setSelectedCardIds([]);
@@ -227,11 +279,11 @@ export const MatchMode: React.FC = () => {
     if (gameStatus === 'playing' && cards.length > 0) {
       const allMatched = cards.every(c => c.state === 'matched');
       if (allMatched) {
-        setGameStatus('finished');
-        playSound('finish');
+        // 牌面清空，尝试发下一批或结束
+        dealNextBatch(remainingTerms);
       }
     }
-  }, [cards, gameStatus]);
+  }, [cards, gameStatus, remainingTerms]);
 
   const handleCardClick = (clickedCard: MatchCard) => {
     if (
@@ -385,6 +437,15 @@ export const MatchMode: React.FC = () => {
         {gameStatus === 'intro' && (
             <div className="text-center animate-in fade-in zoom-in duration-300">
                 <h1 className="text-4xl font-black text-gray-800 mb-6">准备好了吗？</h1>
+                {error && (
+                  <div className="flex items-center justify-center gap-2 text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-sm font-medium max-w-xl mx-auto mb-3">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                  </div>
+                )}
+                {loading && (
+                  <div className="text-gray-500 mb-4">正在加载学习集...</div>
+                )}
                 <div className="mb-8 inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-sm font-medium text-gray-600">
                     {timerMode === 'stopwatch' ? <Timer className="w-4 h-4" /> : <Hourglass className="w-4 h-4" />}
                     模式: {timerMode === 'stopwatch' ? '正计时挑战' : `限时 ${countdownDuration} 秒`}
@@ -392,10 +453,14 @@ export const MatchMode: React.FC = () => {
                 <br />
                 <button 
                     onClick={initializeGame}
+                    disabled={loading || !!error || allTerms.length === 0}
                     className="bg-primary text-white text-xl font-bold py-4 px-12 rounded-xl hover:bg-primary-dark shadow-lg hover:shadow-xl transition-all active:scale-95"
                 >
                     开始游戏
                 </button>
+                {allTerms.length === 0 && !loading && !error && (
+                  <p className="mt-4 text-gray-500 font-medium">暂无可用术语</p>
+                )}
                 <p className="mt-4 text-gray-500 font-medium">匹配所有术语和定义</p>
             </div>
         )}
