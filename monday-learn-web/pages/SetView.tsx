@@ -38,6 +38,7 @@ export const SetView: React.FC = () => {
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [editInProgress, setEditInProgress] = useState(false);
+  const [filterStarred, setFilterStarred] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const autoPlayTimeout = useRef<number | null>(null);
   const pauseTimeout = useRef<number | null>(null);
@@ -304,12 +305,6 @@ export const SetView: React.FC = () => {
             </button>
           </div>
         </div>
-        {actionError && (
-          <div className="mt-3 text-sm text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" />
-            {actionError}
-          </div>
-        )}
       </div>
 
       {/* Study Modes Grid */}
@@ -449,7 +444,18 @@ export const SetView: React.FC = () => {
           <img src="https://picsum.photos/seed/user/30/30" className="w-8 h-8 rounded-full" alt="Current User" />
           <span className="font-bold text-gray-900">本学习集中的术语 ({terms.length})</span>
         </div>
-        <div className="flex gap-4 text-sm md:text-base">
+        <div className="flex gap-4 text-sm md:text-base items-center">
+          <button
+            onClick={() => setFilterStarred(!filterStarred)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors text-sm font-medium ${filterStarred
+              ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+              : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+          >
+            <Star className={`w-4 h-4 ${filterStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+            <span>只看星标 ({terms.filter(t => t.starred).length})</span>
+          </button>
+          <div className="w-px h-4 bg-gray-300 mx-2"></div>
           <span className="text-gray-500 font-semibold cursor-pointer hover:text-gray-900 border-b-2 border-primary pb-1">默认顺序</span>
           <span className="text-gray-400 font-semibold cursor-pointer hover:text-gray-900">字母顺序</span>
         </div>
@@ -463,7 +469,7 @@ export const SetView: React.FC = () => {
 
       {/* Term List */}
       <div className="space-y-3">
-        {terms.map((term) => (
+        {(filterStarred ? terms.filter(t => t.starred) : terms).map((term) => (
           <div key={term.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row items-start md:items-center justify-between group hover:border-gray-300 transition-colors gap-4 md:gap-0">
             <div className="flex-1 w-full md:w-auto md:pr-4 md:border-r border-gray-100 border-b md:border-b-0 pb-2 md:pb-0">
               <div className="text-lg text-gray-800">{term.term}</div>
@@ -488,12 +494,20 @@ export const SetView: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
 
-      <div className="flex justify-center mt-8">
-        <button className="bg-primary text-white font-bold py-3 px-8 rounded-lg hover:bg-primary-dark shadow-lg shadow-indigo-200 transition-all">
-          添加或移除术语
-        </button>
+        {filterStarred && terms.filter(t => t.starred).length === 0 && (
+          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+            <Star className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900">没有找到星标术语</h3>
+            <p className="text-gray-500 mt-1">点击术语旁边的星星图标来收藏重点内容</p>
+            <button
+              onClick={() => setFilterStarred(false)}
+              className="mt-4 text-primary font-bold hover:underline"
+            >
+              显示所有术语
+            </button>
+          </div>
+        )}
       </div>
 
     </div>
