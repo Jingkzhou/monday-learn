@@ -1,17 +1,14 @@
-<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- The M Shape - Rounded and Friendly -->
-  <path d="M15 85V35C15 23.9543 23.9543 15 35 15C42.5 15 48 20 50 25C52 20 57.5 15 65 15C76.0457 15 85 23.9543 85 35V85" stroke="#4255ff" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M15 85V35C15 23.9543 23.9543 15 35 15C42.5 15 48 20 50 25C52 20 57.5 15 65 15C76.0457 15 85 23.9543 85 35V85" stroke="#4255ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
   
-  <!-- The Sun Character rising in the middle -->
-  <circle cx="50" cy="45" r="16" fill="#FACC15" />
+  <circle cx="50" cy="45" r="16" fill="#FACC15"/>
   
-  <!-- Sun Rays (Subtle) -->
-  <path d="M50 22V18" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-  <path d="M68 35L71 33" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-  <path d="M32 35L29 33" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-
-  <!-- Kawaii Face on the Sun -->
-  <circle cx="44" cy="43" r="2" fill="#854D0E" /> <!-- Left Eye -->
-  <circle cx="56" cy="43" r="2" fill="#854D0E" /> <!-- Right Eye -->
-  <path d="M46 48C46 48 48 50 50 50C52 50 54 48 54 48" stroke="#854D0E" strokeWidth="2" strokeLinecap="round" />
+  <path d="M50 22V18" stroke="#FACC15" stroke-width="4" stroke-linecap="round"/>
+  <path d="M68 35L71 33" stroke="#FACC15" stroke-width="4" stroke-linecap="round"/>
+  <path d="M32 35L29 33" stroke="#FACC15" stroke-width="4" stroke-linecap="round"/>
+  
+  <circle cx="44" cy="43" r="2" fill="#854D0E"/>
+  <circle cx="56" cy="43" r="2" fill="#854D0E"/>
+  
+  <path d="M46 48C46 48 48 50 50 50C52 50 54 48 54 48" stroke="#854D0E" stroke-width="2" stroke-linecap="round"/>
 </svg>

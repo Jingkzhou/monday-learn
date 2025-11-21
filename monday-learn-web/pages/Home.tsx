@@ -4,6 +4,7 @@ import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, Trendin
 import { GoogleGenAI } from "@google/genai";
 import { StudySet } from '../types';
 import { api } from '../utils/api';
+import { Logo } from '../components/Logo';
 
 export const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -322,7 +323,10 @@ export const Home: React.FC = () => {
                         </>
                     ) : (
                         <div className="relative z-10 flex-1 text-center py-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-4">欢迎来到 Monday Learn</h1>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4">欢迎来到
+          <span className="text-gray-800">Monday</span>
+          <span className="text-[#4255ff]">Quizlet</span></h1>
+                            
                             <p className="text-gray-500 mb-8">创建你的第一个学习集，开始高效记忆！</p>
                             <button
                                 onClick={() => navigate('/create')}
