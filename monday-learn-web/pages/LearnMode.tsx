@@ -149,65 +149,76 @@ export const LearnMode: React.FC = () => {
             currentCounts: counts
         });
 
-        if (isCorrect) {
-            updatedTerm.consecutive_correct += 1;
+        // State Machine Logic
+        // 1. Not Started (Gray) + Correct -> Familiar (Orange)
+        // 2. Familiar (Orange) + Correct -> Mastered (Green)
+        // 3. Any + Incorrect -> Not Started (Gray)
 
-            // Update Counts
-            if (updatedTerm.consecutive_correct >= 2) {
-                // Mastered
-                if (currentTerm.learning_status === 'familiar') {
-                    newCounts.familiar = Math.max(0, newCounts.familiar - 1);
-                    newCounts.mastered += 1;
-                } else if (currentTerm.learning_status === 'not_started') {
-                    newCounts.new = Math.max(0, newCounts.new - 1);
-                    newCounts.mastered += 1;
-                }
+        const currentStatus = currentTerm.learning_status;
+
+        if (isCorrect) {
+            if (currentStatus === 'not_started') {
+                // Transition: Not Started -> Familiar
+                updatedTerm.learning_status = 'familiar';
+                updatedTerm.consecutive_correct = 1;
+
+                newCounts.new = Math.max(0, newCounts.new - 1);
+                newCounts.familiar += 1;
+
+                // Move to end of queue
+                const newQueue = [...queue];
+                newQueue.splice(currentIndex, 1);
+                newQueue.push(updatedTerm);
+                setQueue(newQueue);
+                if (currentIndex >= newQueue.length) setCurrentIndex(0);
+
+            } else if (currentStatus === 'familiar') {
+                // Transition: Familiar -> Mastered
+                updatedTerm.learning_status = 'mastered';
+                updatedTerm.consecutive_correct = 2;
+
+                newCounts.familiar = Math.max(0, newCounts.familiar - 1);
+                newCounts.mastered += 1;
 
                 // Remove from queue
                 const newQueue = [...queue];
                 newQueue.splice(currentIndex, 1);
                 setQueue(newQueue);
+
                 if (newQueue.length === 0) {
                     setRoundComplete(true);
                 } else if (currentIndex >= newQueue.length) {
                     setCurrentIndex(0);
                 }
             } else {
-                // Familiar
-                if (currentTerm.learning_status === 'not_started') {
-                    newCounts.new = Math.max(0, newCounts.new - 1);
-                    newCounts.familiar += 1;
-                    updatedTerm.learning_status = 'familiar';
-                }
-
-                // Move to end
+                // Already Mastered (shouldn't happen in queue usually)
                 const newQueue = [...queue];
                 newQueue.splice(currentIndex, 1);
-                newQueue.push(updatedTerm);
                 setQueue(newQueue);
-                if (currentIndex >= newQueue.length) {
-                    setCurrentIndex(0);
-                }
+                if (newQueue.length === 0) setRoundComplete(true);
+                else if (currentIndex >= newQueue.length) setCurrentIndex(0);
             }
         } else {
-            // Incorrect
+            // Incorrect: Reset consecutive correct, but keep status if already familiar
             updatedTerm.consecutive_correct = 0;
 
-            if (currentTerm.learning_status === 'familiar') {
-                newCounts.familiar = Math.max(0, newCounts.familiar - 1);
-                newCounts.new += 1;
+            if (currentStatus === 'familiar') {
+                // Stay Familiar
+                updatedTerm.learning_status = 'familiar';
+                // Counts do NOT change (still familiar)
+            } else {
+                // Stay Not Started
                 updatedTerm.learning_status = 'not_started';
             }
-            // If it was 'not_started', it stays 'not_started'
 
+            // Move to end of queue
             const newQueue = [...queue];
             newQueue.splice(currentIndex, 1);
             newQueue.push(updatedTerm);
             setQueue(newQueue);
-            if (currentIndex >= newQueue.length) {
-                setCurrentIndex(0);
-            }
+            if (currentIndex >= newQueue.length) setCurrentIndex(0);
         }
+
         console.log("New Counts:", newCounts);
         setCounts(newCounts);
     };

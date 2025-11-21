@@ -122,20 +122,35 @@ def update_progress(
         db.add(progress)
     
     # Update logic
+    # Current Status
+    current_status = progress.status
+    
     if payload.is_correct:
-        progress.consecutive_correct = (progress.consecutive_correct or 0) + 1
-        progress.total_correct = (progress.total_correct or 0) + 1
-        
-        # Mastery Rule: 2 consecutive correct
-        if progress.consecutive_correct >= 2:
-            progress.status = LearningStatus.MASTERED
-        else:
+        # Correct Answer Logic
+        if current_status == LearningStatus.NOT_STARTED:
+            # Transition: Not Started -> Familiar
             progress.status = LearningStatus.FAMILIAR
+            progress.consecutive_correct = 1
+        elif current_status == LearningStatus.FAMILIAR:
+            # Transition: Familiar -> Mastered
+            progress.status = LearningStatus.MASTERED
+            progress.consecutive_correct = 2 # Or increment, but logically it's mastered now
+        else:
+            # Already Mastered (shouldn't happen usually, but keep as is)
+            progress.consecutive_correct += 1
+            
+        progress.total_correct = (progress.total_correct or 0) + 1
             
     else:
+        # Incorrect Answer Logic
+        # If already Familiar, stay Familiar (don't demote to Gray)
+        if current_status == LearningStatus.FAMILIAR:
+            progress.status = LearningStatus.FAMILIAR
+        else:
+            progress.status = LearningStatus.NOT_STARTED
+            
         progress.consecutive_correct = 0
         progress.total_incorrect = (progress.total_incorrect or 0) + 1
-        progress.status = LearningStatus.NOT_STARTED
     
     progress.last_reviewed = datetime.now()
     
