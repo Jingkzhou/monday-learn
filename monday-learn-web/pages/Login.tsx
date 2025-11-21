@@ -23,9 +23,14 @@ export const Login: React.FC = () => {
             formData.append('username', email); // OAuth2PasswordRequestForm expects 'username'
             formData.append('password', password);
 
-            const data = await api.post<{ access_token: string }>('/auth/login', formData);
+            const data = await api.post<{ access_token: string; role?: string }>('/auth/login', formData);
 
             localStorage.setItem('token', data.access_token);
+            if (data.role) {
+                localStorage.setItem('userRole', data.role);
+            } else {
+                localStorage.removeItem('userRole');
+            }
 
             // Success
             navigate('/');

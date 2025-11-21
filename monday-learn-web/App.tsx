@@ -21,6 +21,7 @@ import { FlashcardMode } from './pages/FlashcardMode';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { MobileNav } from './components/MobileNav';
+import { Admin } from './pages/Admin';
 
 // Layout wrapper for pages that have the standard sidebar/topbar
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -119,6 +120,14 @@ const App: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <Profile />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Admin />
             </MainLayout>
           </ProtectedRoute>
         } />

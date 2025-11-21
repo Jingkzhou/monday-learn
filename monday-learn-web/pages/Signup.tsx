@@ -12,6 +12,7 @@ export const Signup: React.FC = () => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState<'student' | 'teacher'>('student');
     const [showPassword, setShowPassword] = useState(false);
 
     const [error, setError] = useState('');
@@ -27,6 +28,7 @@ export const Signup: React.FC = () => {
                 email,
                 username,
                 password,
+                role,
             });
 
             // Success
@@ -153,6 +155,30 @@ export const Signup: React.FC = () => {
                         </div>
                     </div>
 
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-500 uppercase">身份</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            {[
+                                { value: 'student', label: '学生' },
+                                { value: 'teacher', label: '老师' },
+                            ].map(option => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={() => setRole(option.value as 'student' | 'teacher')}
+                                    className={`border rounded-lg py-3 px-4 text-sm font-semibold transition-colors ${
+                                        role === option.value
+                                            ? 'border-primary bg-indigo-50 text-primary'
+                                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                    }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-500">管理员账号受限，默认保留为平台管理员。</p>
+                    </div>
+
                     <div className="flex items-start gap-3 pt-2">
                         <input type="checkbox" id="terms" className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
                         <label htmlFor="terms" className="text-sm text-gray-500 leading-tight">
@@ -172,4 +198,3 @@ export const Signup: React.FC = () => {
         </div>
     );
 };
-

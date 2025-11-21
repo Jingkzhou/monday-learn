@@ -13,6 +13,7 @@ export const Profile: React.FC = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
         navigate('/welcome', { replace: true });
         window.location.href = '/#/welcome';
     };

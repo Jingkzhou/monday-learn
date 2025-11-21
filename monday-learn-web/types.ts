@@ -1,3 +1,5 @@
+export type UserRole = 'student' | 'teacher' | 'admin';
+
 export interface Term {
   id: string | number;
   term: string;
@@ -33,6 +35,7 @@ export interface NavItem {
   label: string;
   icon: any;
   path: string;
+  roles?: UserRole[];
 }
 
 export interface Folder {
@@ -58,5 +61,6 @@ export interface UserResponse {
   username: string;
   is_active: boolean;
   avatar_url?: string;
+  role: UserRole;
   created_at: string;
 }

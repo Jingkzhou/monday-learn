@@ -24,6 +24,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
     if (response.status === 401) {
         localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
         window.location.href = '/#/welcome';
         throw new Error('Unauthorized');
     }

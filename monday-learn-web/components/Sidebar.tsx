@@ -1,22 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Home, Folder, PlusSquare, Library, Settings } from 'lucide-react';
-import { NavItem } from '../types';
+import { NavItem, UserRole, UserResponse } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { api } from '../utils/api';
 
 const NAV_ITEMS: NavItem[] = [
   { label: '首页', icon: Home, path: '/' },
   { label: '你的文库', icon: Library, path: '/library' },
   { label: '文件夹', icon: Folder, path: '/folders' },
+  { label: '管理', icon: Settings, path: '/admin', roles: ['admin'] },
 ];
 
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [role, setRole] = useState<UserRole | null>(() => (localStorage.getItem('userRole') as UserRole | null) || null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await api.get<UserResponse>('/auth/me');
+        if (data?.role) {
+          setRole(data.role);
+          localStorage.setItem('userRole', data.role);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user for nav', err);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const visibleNavItems = NAV_ITEMS.filter((item) => !item.roles || (role && item.roles.includes(role)));
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 hidden md:flex flex-col z-20">
       <div className="p-4 space-y-1">
-        {NAV_ITEMS.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <button

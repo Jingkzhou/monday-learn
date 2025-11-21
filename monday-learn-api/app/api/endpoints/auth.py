@@ -58,11 +58,13 @@ async def login_access_token(
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username, "role": user.role},
+        expires_delta=access_token_expires
     )
     return {
         "access_token": access_token,
         "token_type": "bearer",
+        "role": user.role,
     }
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -74,13 +76,30 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email or username already registered"
         )
+
+    requested_role = user.role or "student"
+
+    # Reserve admin role strictly for the admin account
+    if requested_role == "admin":
+        if user.username != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only the reserved admin account can have admin role"
+            )
+        existing_admin = db.query(User).filter(User.role == "admin").first()
+        if existing_admin:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Admin user already exists"
+            )
     
     # Create new user
     hashed_password = get_password_hash(user.password)
     new_user = User(
         email=user.email,
         username=user.username,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        role=requested_role,
     )
     
     db.add(new_user)

@@ -15,6 +15,9 @@ export const TopBar: React.FC = () => {
       try {
         const data = await api.get<UserResponse>('/auth/me');
         setUser(data);
+        if (data?.role) {
+          localStorage.setItem('userRole', data.role);
+        }
       } catch (err) {
         console.error('Failed to fetch user', err);
       }
