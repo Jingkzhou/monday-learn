@@ -119,15 +119,7 @@ export const WordCards: React.FC = () => {
         <div className="min-h-screen bg-gray-50 pb-20 md:pl-64 pt-20">
             <div className="max-w-5xl mx-auto px-4 md:px-8">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="p-2 hover:bg-white rounded-full transition-colors"
-                    >
-                        <ChevronLeft className="w-6 h-6 text-gray-600" />
-                    </button>
-                    <h1 className="text-2xl font-bold text-gray-900">我的单词卡</h1>
-                </div>
+
 
                 {loading ? (
                     <div className="flex justify-center py-12">
@@ -151,7 +143,7 @@ export const WordCards: React.FC = () => {
                                         >
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                                                    <span className="font-medium text-gray-900">{set.termCount}个词语</span>
+                                                    <span className="font-medium text-gray-900">{set.term_count || 0}个词语</span>
                                                     <span>•</span>
                                                     <div className="flex items-center gap-1">
                                                         {set.authorUsername ? (
