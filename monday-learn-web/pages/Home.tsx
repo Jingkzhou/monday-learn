@@ -268,7 +268,7 @@ export const Home: React.FC = () => {
                                         stroke="url(#gradient)"
                                         strokeWidth="8"
                                         strokeDasharray="251.2"
-                                        strokeDashoffset="50.24" // 80% progress
+                                        strokeDashoffset={251.2 * (1 - ((heroSet.mastered_count || 0) / (heroSet.termCount || 1)))}
                                         strokeLinecap="round"
                                     />
                                     <defs>
@@ -279,7 +279,9 @@ export const Home: React.FC = () => {
                                     </defs>
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                    <span className="text-2xl font-bold text-gray-900">80%</span>
+                                    <span className="text-2xl font-bold text-gray-900">
+                                        {Math.round(((heroSet.mastered_count || 0) / (heroSet.termCount || 1)) * 100)}%
+                                    </span>
                                 </div>
                             </div>
 
@@ -287,13 +289,15 @@ export const Home: React.FC = () => {
                             <div className="flex-1 text-center md:text-left">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-xs text-gray-500 mb-3">
                                     <Calendar className="w-3 h-3" />
-                                    上次学习: 2小时前
+                                    上次学习: {heroSet.last_reviewed ? new Date(heroSet.last_reviewed).toLocaleString() : '从未学习'}
                                 </div>
                                 <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{heroSet.title}</h3>
                                 <p className="text-gray-500 text-sm flex items-center justify-center md:justify-start gap-2">
                                     <span>{heroSet.termCount || 0} 个词语</span>
                                     <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                                    <span className="text-indigo-600 font-medium">剩余 5 个待掌握</span>
+                                    <span className="text-indigo-600 font-medium">
+                                        剩余 {Math.max(0, (heroSet.termCount || 0) - (heroSet.mastered_count || 0))} 个待掌握
+                                    </span>
                                 </p>
                             </div>
 
@@ -425,8 +429,8 @@ export const Home: React.FC = () => {
                                     }}
                                     disabled={reportStatus === 'generating'}
                                     className={`px-5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ${selectedTimeframe === tf
-                                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                                            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
                                         }`}
                                 >
                                     {tf}概况

@@ -44,6 +44,8 @@ class StudySetResponse(StudySetBase):
     is_owner: bool = False
     term_count: int
     view_count: int = 0
+    mastered_count: Optional[int] = 0
+    last_reviewed: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime]
     terms: List[TermResponse] = Field(default_factory=list)

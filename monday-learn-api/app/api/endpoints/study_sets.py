@@ -15,9 +15,35 @@ from app.schemas.study_set import (
 router = APIRouter()
 
 
-def serialize_study_set(study_set: StudySet, current_user=None) -> StudySetResponse:
+from app.models.learning_progress import LearningProgress, LearningStatus
+from sqlalchemy import func, case
+
+def serialize_study_set(study_set: StudySet, current_user=None, db: Session = None) -> StudySetResponse:
     is_owner = bool(current_user and study_set.author_id == current_user.id)
     term_items = sorted(study_set.terms, key=lambda t: t.order or 0)
+    
+    mastered_count = 0
+    last_reviewed = None
+    
+    if current_user and db:
+        # Calculate progress
+        # MySQL doesn't support FILTER, use CASE instead
+        progress_stats = (
+            db.query(
+                func.sum(case((LearningProgress.status == LearningStatus.MASTERED, 1), else_=0)).label("mastered"),
+                func.max(LearningProgress.last_reviewed).label("last_reviewed")
+            )
+            .filter(
+                LearningProgress.study_set_id == study_set.id,
+                LearningProgress.user_id == current_user.id
+            )
+            .first()
+        )
+        
+        if progress_stats:
+            mastered_count = progress_stats.mastered or 0
+            last_reviewed = progress_stats.last_reviewed
+
     return StudySetResponse(
         id=study_set.id,
         title=study_set.title,
@@ -28,6 +54,8 @@ def serialize_study_set(study_set: StudySet, current_user=None) -> StudySetRespo
         is_public=study_set.is_public,
         view_count=study_set.view_count or 0,
         term_count=len(term_items),
+        mastered_count=mastered_count,
+        last_reviewed=last_reviewed,
         created_at=study_set.created_at,
         updated_at=study_set.updated_at,
         terms=[
@@ -60,7 +88,7 @@ def get_public_top_study_sets(
         .limit(limit)
         .all()
     )
-    return [serialize_study_set(study_set, current_user) for study_set in study_sets]
+    return [serialize_study_set(study_set, current_user, db) for study_set in study_sets]
 
 
 @router.post("", response_model=StudySetResponse, status_code=status.HTTP_201_CREATED)
@@ -97,7 +125,7 @@ def create_study_set(
         .first()
     )
 
-    return serialize_study_set(study_set, current_user)
+    return serialize_study_set(study_set, current_user, db)
 
 
 @router.get("/{study_set_id}", response_model=StudySetResponse)
@@ -124,7 +152,7 @@ def get_study_set(
     db.commit()
     db.refresh(study_set)
 
-    return serialize_study_set(study_set, current_user)
+    return serialize_study_set(study_set, current_user, db)
 
 
 @router.get("", response_model=list[StudySetResponse])
@@ -143,7 +171,7 @@ def list_study_sets(
         .limit(limit)
         .all()
     )
-    return [serialize_study_set(study_set, current_user) for study_set in study_sets]
+    return [serialize_study_set(study_set, current_user, db) for study_set in study_sets]
 
 
 @router.put("/{study_set_id}", response_model=StudySetResponse)
@@ -189,7 +217,7 @@ def update_study_set(
         .first()
     )
 
-    return serialize_study_set(study_set, current_user)
+    return serialize_study_set(study_set, current_user, db)
 
 
 @router.post("/{study_set_id}/clone", response_model=StudySetResponse, status_code=status.HTTP_201_CREATED)
@@ -239,7 +267,7 @@ def clone_study_set(
         .first()
     )
 
-    return serialize_study_set(new_set, current_user)
+    return serialize_study_set(new_set, current_user, db)
 
 
 @router.patch("/terms/{term_id}/star", response_model=TermResponse)

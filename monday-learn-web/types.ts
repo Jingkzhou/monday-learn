@@ -21,6 +21,8 @@ export interface StudySet {
   term_count?: number;
   viewCount?: number;
   view_count?: number;
+  mastered_count?: number;
+  last_reviewed?: string;
   isPublic?: boolean;
   terms: Term[];
   createdAt?: string;
