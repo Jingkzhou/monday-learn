@@ -196,8 +196,19 @@ export const LearnMode: React.FC = () => {
         setShowFeedback(true);
 
         try {
-            if (!starredOnly) {
-                await api.post(`/learning/${id}/update/${currentTerm.id}`, { is_correct: isRight });
+            const question_type = questionType === 'mc' ? 'multiple_choice' : questionType;
+            const payload = {
+                is_correct: isRight,
+                question_type,
+                user_answer: answer,
+                expected_answer: currentTerm.definition,
+                source: starredOnly ? 'learn_mode_starred' : 'learn_mode',
+            };
+
+            if (starredOnly) {
+                await api.post(`/learning/${id}/log`, { ...payload, term_id: currentTerm.id, mode: 'learn' });
+            } else {
+                await api.post(`/learning/${id}/update/${currentTerm.id}`, payload);
             }
         } catch (err) {
             console.error("Failed to update progress", err);
@@ -209,8 +220,18 @@ export const LearnMode: React.FC = () => {
         setShowFeedback(true); // Trigger auto-advance logic
 
         try {
-            if (!starredOnly) {
-                await api.post(`/learning/${id}/update/${currentTerm.id}`, { is_correct: correct });
+            const payload = {
+                is_correct: correct,
+                question_type: "flashcard",
+                user_answer: correct ? "known" : "needs_review",
+                expected_answer: currentTerm.definition,
+                source: starredOnly ? 'learn_mode_starred' : 'learn_mode',
+            };
+
+            if (starredOnly) {
+                await api.post(`/learning/${id}/log`, { ...payload, term_id: currentTerm.id, mode: 'learn' });
+            } else {
+                await api.post(`/learning/${id}/update/${currentTerm.id}`, payload);
             }
         } catch (err) {
             console.error("Failed to update progress", err);

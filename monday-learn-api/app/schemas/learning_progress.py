@@ -15,6 +15,12 @@ class LearningProgressBase(BaseModel):
 
 class LearningProgressUpdate(BaseModel):
     is_correct: bool
+    question_type: Optional[str] = None
+    user_answer: Optional[str] = None
+    expected_answer: Optional[str] = None
+    time_spent_ms: Optional[int] = None
+    session_id: Optional[str] = None
+    source: Optional[str] = None
 
 class LearningProgressResponse(LearningProgressBase):
     id: int
