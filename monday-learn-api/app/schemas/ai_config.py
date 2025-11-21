@@ -14,6 +14,7 @@ class AIConfigCreate(AIConfigBase):
     pass
 
 class AIConfigTest(BaseModel):
+    config_id: Optional[int] = None
     api_key: str = Field(..., min_length=1)
     base_url: Optional[str] = None
     model_name: str = Field(..., min_length=1)

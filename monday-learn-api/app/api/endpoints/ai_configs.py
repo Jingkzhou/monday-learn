@@ -166,10 +166,22 @@ async def test_connection(
                 # Let's assume this is primarily for the actual usage (generation), but testing also consumes tokens.
                 # Let's try to find the config by API Key to attribute the cost.
                 
-                config = db.query(AIConfig).filter(AIConfig.api_key == payload.api_key).first()
+                config = None
+                if payload.config_id:
+                    config = db.query(AIConfig).filter(AIConfig.id == payload.config_id).first()
+
+                if config is None:
+                    query = db.query(AIConfig).filter(AIConfig.api_key == payload.api_key)
+                    # Narrow by model/base_url to avoid mixing configs that share an API key
+                    if payload.model_name:
+                        query = query.filter(AIConfig.model_name == payload.model_name)
+                    if payload.base_url:
+                        query = query.filter(AIConfig.base_url == payload.base_url)
+                    config = query.first()
+
                 if config:
-                    config.total_tokens += total_tokens
-                    
+                    config.total_tokens = (config.total_tokens or 0) + total_tokens
+
                     from app.models.ai_usage_log import AIUsageLog
                     log = AIUsageLog(
                         config_id=config.id,

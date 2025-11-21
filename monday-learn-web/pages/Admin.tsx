@@ -57,10 +57,14 @@ export const Admin: React.FC = () => {
             alert('请先填写 API Key 和模型名称');
             return;
         }
+        const payload = {
+            ...formData,
+            config_id: editingConfig?.id, // ensure backend attributes tokens to the exact config
+        };
         setTestingConnection(true);
         setTestResult(null);
         try {
-            const res = await api.post<any>('/admin/ai-configs/test', formData);
+            const res = await api.post<any>('/admin/ai-configs/test', payload);
             if (res.status === 'success') {
                 setTestResult({ status: 'success', latency: res.latency });
                 // Refresh configs to update token count if we tested an existing one (though we don't know ID here easily without more logic, 

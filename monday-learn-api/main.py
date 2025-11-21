@@ -7,6 +7,7 @@ from app.api import routes
 from app.core.logger import setup_logging
 from app.db.session import get_db, engine
 from app.db.base import Base
+from app.db.migrations import run_migrations
 # Import models to ensure they are registered
 from app.models.user import User
 from app.models.login_log import LoginLog
@@ -21,6 +22,8 @@ from app.models.ai_usage_log import AIUsageLog
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+# Run lightweight migrations to backfill schema changes on existing databases
+run_migrations(engine)
 
 # Setup logging
 setup_logging()
