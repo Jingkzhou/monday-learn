@@ -5,6 +5,7 @@ import { MOCK_SET } from '../constants';
 import { Term } from '../types';
 import { X, Settings, CheckCircle, XCircle, FileText, ListChecks, ToggleLeft, RotateCcw, AlertCircle, Filter, ChevronDown, Check, Pencil, Keyboard, Eraser, Sparkles, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
+import { api } from '../utils/api';
 
 type QuestionType = 'written' | 'multiple-choice' | 'true-false';
 
@@ -307,7 +308,38 @@ export const TestMode: React.FC = () => {
       setRecognizingIds(prev => [...prev, qId]);
   };
 
-  const handleSubmit = () => {
+  const logTestAttempts = async (finalScore: number) => {
+      if (!id) return;
+
+      await Promise.all(questions.map(async (q) => {
+          const userAnsRaw = answers[q.id] ?? '';
+          const userAns = userAnsRaw.trim();
+          const correctAns = q.correctAnswer.trim();
+          const isCorrect = userAns.toLowerCase() === correctAns.toLowerCase();
+
+          const question_type = q.type === 'multiple-choice'
+              ? 'multiple_choice'
+              : q.type === 'true-false'
+                  ? 'true_false'
+                  : 'written';
+
+          try {
+              await api.post(`/learning/${id}/log`, {
+                  term_id: Number(q.term.id),
+                  mode: 'test',
+                  question_type,
+                  is_correct: isCorrect,
+                  user_answer: userAns,
+                  expected_answer: correctAns,
+                  source: 'test_mode',
+              });
+          } catch (err) {
+              console.error("Failed to record test log", err);
+          }
+      }));
+  }
+
+  const handleSubmit = async () => {
       let correctCount = 0;
       questions.forEach(q => {
           const userAns = answers[q.id]?.trim().toLowerCase();
@@ -319,6 +351,8 @@ export const TestMode: React.FC = () => {
       setScore(finalScore);
       setIsSubmitted(true);
       window.scrollTo(0,0);
+
+      await logTestAttempts(finalScore);
   }
 
   const toggleType = (type: QuestionType) => {

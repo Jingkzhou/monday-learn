@@ -18,3 +18,4 @@ class User(Base):
     materials = relationship("Material", back_populates="owner")
     folders = relationship("Folder", back_populates="author")
     learning_progress = relationship("LearningProgress", back_populates="user")
+    learning_logs = relationship("LearningProgressLog", back_populates="user")

@@ -15,6 +15,7 @@ from app.models.study_set import StudySet, Term
 from app.models.material import Material
 from app.models.folder import Folder
 from app.models.learning_progress import LearningProgress
+from app.models.learning_progress_log import LearningProgressLog
 from app.models.study_group import StudyGroup
 from app.models.class_member import class_members
 from app.models.ai_config import AIConfig

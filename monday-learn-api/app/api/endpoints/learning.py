@@ -7,10 +7,49 @@ from app.core import deps
 from app.models.user import User
 from app.models.study_set import StudySet, Term
 from app.models.learning_progress import LearningProgress, LearningStatus
+from app.models.learning_progress_log import LearningProgressLog
 from app.schemas.learning_progress import LearningProgressUpdate, LearningProgressResponse, LearningSession
+from app.schemas.learning_progress_log import LearningProgressLogCreate, LearningProgressLogResponse
 from app.schemas.study_set import TermResponse
 
 router = APIRouter()
+
+def record_learning_log(
+    db: Session,
+    *,
+    user_id: int,
+    study_set_id: int,
+    term_id: int,
+    mode: str,
+    is_correct: bool,
+    question_type: str | None = None,
+    user_answer: str | None = None,
+    expected_answer: str | None = None,
+    time_spent_ms: int | None = None,
+    session_id: str | None = None,
+    source: str | None = None,
+    commit: bool = True,
+):
+    log = LearningProgressLog(
+        user_id=user_id,
+        study_set_id=study_set_id,
+        term_id=term_id,
+        mode=mode,
+        is_correct=is_correct,
+        question_type=question_type,
+        user_answer=user_answer,
+        expected_answer=expected_answer,
+        time_spent_ms=time_spent_ms,
+        session_id=session_id,
+        source=source,
+    )
+    db.add(log)
+    if commit:
+        db.commit()
+        db.refresh(log)
+    else:
+        db.flush()
+    return log
 
 @router.get("/{study_set_id}/session", response_model=LearningSession)
 def get_learning_session(
@@ -153,10 +192,58 @@ def update_progress(
         progress.total_incorrect = (progress.total_incorrect or 0) + 1
     
     progress.last_reviewed = datetime.now()
-    
+    record_learning_log(
+        db,
+        user_id=current_user.id,
+        study_set_id=study_set_id,
+        term_id=term_id,
+        mode="learn",
+        is_correct=payload.is_correct,
+        question_type=payload.question_type,
+        user_answer=payload.user_answer,
+        expected_answer=payload.expected_answer,
+        time_spent_ms=payload.time_spent_ms,
+        session_id=payload.session_id,
+        source=payload.source or "learn_mode",
+        commit=False,
+    )
+
     db.commit()
     db.refresh(progress)
     return progress
+
+
+@router.post("/{study_set_id}/log", response_model=LearningProgressLogResponse)
+def create_progress_log(
+    study_set_id: int,
+    payload: LearningProgressLogCreate,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    # Validate that term belongs to this study set to avoid orphaned logs
+    term = (
+        db.query(Term)
+        .filter(Term.id == payload.term_id, Term.study_set_id == study_set_id)
+        .first()
+    )
+    if not term:
+        raise HTTPException(status_code=404, detail="Term not found in study set")
+
+    log = record_learning_log(
+        db,
+        user_id=current_user.id,
+        study_set_id=study_set_id,
+        term_id=payload.term_id,
+        mode=payload.mode,
+        is_correct=payload.is_correct,
+        question_type=payload.question_type,
+        user_answer=payload.user_answer,
+        expected_answer=payload.expected_answer,
+        time_spent_ms=payload.time_spent_ms,
+        session_id=payload.session_id,
+        source=payload.source or "test_mode",
+    )
+    return log
 
 @router.post("/{study_set_id}/reset", status_code=200)
 def reset_progress(
