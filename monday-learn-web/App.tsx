@@ -22,6 +22,8 @@ import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { MobileNav } from './components/MobileNav';
 import { Admin } from './pages/Admin';
+import { CreateClass } from './pages/CreateClass';
+import { Classes } from './pages/Classes';
 
 // Layout wrapper for pages that have the standard sidebar/topbar
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -136,6 +138,22 @@ const App: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <EditProfile />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/create-class" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CreateClass />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/classes" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Classes />
             </MainLayout>
           </ProtectedRoute>
         } />
