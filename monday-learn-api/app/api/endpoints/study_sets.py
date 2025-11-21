@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
+from datetime import datetime
 from app.core.deps import get_current_user
 from app.db.session import get_db
 from app.models.study_set import StudySet, Term
@@ -135,7 +136,7 @@ def create_study_set(
     return serialize_study_set(study_set, current_user, db)
 
 
-@router.get("/{study_set_id}", response_model=StudySetResponse)
+@router.get("/{study_set_id:int}", response_model=StudySetResponse)
 def get_study_set(
     study_set_id: int,
     db: Session = Depends(get_db),
@@ -256,7 +257,8 @@ def list_study_sets(
         db.query(StudySet)
         .options(selectinload(StudySet.terms), selectinload(StudySet.author))
         .filter(StudySet.author_id == current_user.id)
-        .order_by(StudySet.created_at.desc())
+        # Show most recently updated first so the home page recent list reflects latest activity
+        .order_by(StudySet.updated_at.desc(), StudySet.created_at.desc())
         .offset(skip)
         .limit(limit)
         .all()
@@ -264,7 +266,7 @@ def list_study_sets(
     return [serialize_study_set(study_set, current_user, db) for study_set in study_sets]
 
 
-@router.put("/{study_set_id}", response_model=StudySetResponse)
+@router.put("/{study_set_id:int}", response_model=StudySetResponse)
 def update_study_set(
     study_set_id: int,
     payload: StudySetUpdate,
@@ -310,7 +312,7 @@ def update_study_set(
     return serialize_study_set(study_set, current_user, db)
 
 
-@router.post("/{study_set_id}/clone", response_model=StudySetResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{study_set_id:int}/clone", response_model=StudySetResponse, status_code=status.HTTP_201_CREATED)
 def clone_study_set(
     study_set_id: int,
     payload: StudySetCloneRequest | None = None,
@@ -360,7 +362,7 @@ def clone_study_set(
     return serialize_study_set(new_set, current_user, db)
 
 
-@router.patch("/terms/{term_id}/star", response_model=TermResponse)
+@router.patch("/terms/{term_id:int}/star", response_model=TermResponse)
 def toggle_term_star(
     term_id: int,
     db: Session = Depends(get_db),
