@@ -1,18 +1,33 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Plus, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
+import { api } from '../utils/api';
+import { UserResponse } from '../types';
 
 export const TopBar: React.FC = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<UserResponse | null>(null);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const data = await api.get<UserResponse>('/auth/me');
+        setUser(data);
+      } catch (err) {
+        console.error('Failed to fetch user', err);
+      }
+    };
+    fetchMe();
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white md:border-b border-gray-200 z-30 flex items-center px-4 justify-between">
       <div className="flex items-center gap-4">
         {/* Logo Area */}
         <div className="cursor-pointer hover:opacity-90 transition-opacity" onClick={() => navigate('/')}>
-            <Logo />
+          <Logo />
         </div>
       </div>
 
@@ -30,22 +45,26 @@ export const TopBar: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-3">
-        <button 
-            onClick={() => navigate('/create')}
-            className="hidden sm:flex items-center justify-center w-8 h-8 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors"
+        <button
+          onClick={() => navigate('/create')}
+          className="hidden sm:flex items-center justify-center w-8 h-8 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors"
         >
           <Plus className="w-5 h-5" />
         </button>
-        
+
         <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-            <Bell className="w-5 h-5" />
+          <Bell className="w-5 h-5" />
         </button>
 
-        <div 
-            onClick={() => navigate('/profile')}
-            className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-purple-500 transition-all"
+        <div
+          onClick={() => navigate('/profile')}
+          className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-purple-500 transition-all overflow-hidden"
         >
-          L
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
+          ) : (
+            user?.username?.[0]?.toUpperCase() || 'U'
+          )}
         </div>
       </div>
     </header>

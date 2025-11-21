@@ -191,22 +191,6 @@ export const Home: React.FC = () => {
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                     {title}
                 </h2>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => scrollBy(ref, 'left')}
-                        className="p-1.5 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors shadow-sm"
-                        aria-label="上一页"
-                    >
-                        <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                        onClick={() => scrollBy(ref, 'right')}
-                        className="p-1.5 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors shadow-sm"
-                        aria-label="下一页"
-                    >
-                        <ChevronRight className="w-4 h-4" />
-                    </button>
-                </div>
             </div>
 
             {error && (
@@ -216,22 +200,44 @@ export const Home: React.FC = () => {
                 </div>
             )}
 
-            <div
-                ref={ref}
-                className="flex gap-4 overflow-x-auto pb-2 no-scrollbar"
-            >
-                {loading ? (
-                    <div className="flex items-center gap-2 text-gray-500 p-4">
-                        <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
-                        <span className="text-sm">正在加载...</span>
-                    </div>
-                ) : sets.length > 0 ? (
-                    sets.map(renderCard)
-                ) : (
-                    <div className="bg-white text-gray-500 rounded-xl border border-dashed border-gray-200 p-6 min-w-[260px] flex flex-col items-center justify-center gap-2">
-                        <span className="text-sm">暂无数据</span>
-                    </div>
+            <div className="relative group">
+                {/* Navigation Buttons - Overlay */}
+                {!loading && sets.length > 0 && (
+                    <>
+                        <button
+                            onClick={() => scrollBy(ref, 'left')}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 p-2 rounded-full bg-white border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-all shadow-lg opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
+                            aria-label="上一页"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={() => scrollBy(ref, 'right')}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 p-2 rounded-full bg-white border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-all shadow-lg opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
+                            aria-label="下一页"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    </>
                 )}
+
+                <div
+                    ref={ref}
+                    className="flex gap-4 overflow-x-auto pb-4 pt-1 px-1 no-scrollbar scroll-smooth"
+                >
+                    {loading ? (
+                        <div className="flex items-center gap-2 text-gray-500 p-4">
+                            <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
+                            <span className="text-sm">正在加载...</span>
+                        </div>
+                    ) : sets.length > 0 ? (
+                        sets.map(renderCard)
+                    ) : (
+                        <div className="bg-white text-gray-500 rounded-xl border border-dashed border-gray-200 p-6 min-w-[260px] flex flex-col items-center justify-center gap-2">
+                            <span className="text-sm">暂无数据</span>
+                        </div>
+                    )}
+                </div>
             </div>
         </section>
     );
@@ -246,7 +252,6 @@ export const Home: React.FC = () => {
                         <Zap className="w-5 h-5 text-yellow-500 fill-current" />
                         继续学习
                     </h2>
-                    <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">查看全部</button>
                 </div>
 
                 <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden">
