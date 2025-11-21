@@ -10,7 +10,7 @@ export const MobileNav: React.FC = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-50 px-6 py-2 flex justify-between items-center pb-safe">
-      <button 
+      <button
         onClick={() => navigate('/')}
         className={`flex flex-col items-center gap-1 min-w-[4rem] ${isActive('/') ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`}
       >
@@ -18,7 +18,7 @@ export const MobileNav: React.FC = () => {
         <span className="text-[10px] font-medium">主页</span>
       </button>
 
-      <button 
+      <button
         onClick={() => navigate('/create')}
         className="flex flex-col items-center gap-1 min-w-[4rem] text-gray-400 hover:text-gray-600"
       >
@@ -26,7 +26,7 @@ export const MobileNav: React.FC = () => {
         <span className="text-[10px] font-medium">创建</span>
       </button>
 
-      <button 
+      <button
         onClick={() => navigate('/folders')}
         className={`flex flex-col items-center gap-1 min-w-[4rem] ${isActive('/folders') ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`}
       >

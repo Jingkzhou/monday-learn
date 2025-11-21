@@ -253,18 +253,47 @@ export const Home: React.FC = () => {
                         继续学习
                     </h2>
                 </div>
-
-                <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden">
+                {/* Hero Section */}
+                <section className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden mb-10">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
 
                     {loadingSets ? (
-                        <div className="flex items-center gap-3 text-gray-500 w-full justify-center py-8">
+                        <div className="flex items-center gap-3 text-gray-500 w-full justify-center py-8 z-10">
                             <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
                             正在同步学习进度...
                         </div>
                     ) : heroSet ? (
                         <>
-                            {/* Circular Progress */}
-                            <div className="relative w-32 h-32 flex-shrink-0">
+                            <div className="relative z-10 flex-1 text-center md:text-left">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold mb-4">
+                                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                    今日学习目标
+                                </div>
+                                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                                    准备好开始今天的<br />
+                                    <span className="text-primary">单词挑战</span>了吗？
+                                </h1>
+                                <p className="text-gray-500 mb-8 max-w-md mx-auto md:mx-0">
+                                    你上次学习到了 <span className="font-bold text-gray-700">{heroSet.title}</span>。
+                                    坚持每天 15 分钟，轻松掌握新词汇！
+                                </p>
+                                <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
+                                    <button
+                                        onClick={() => navigate(`/set/${heroSet.id}/test`)}
+                                        className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-primary-dark hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+                                    >
+                                        继续挑战
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/create')}
+                                        className="w-full sm:w-auto px-8 py-3 bg-white border-2 border-gray-100 text-gray-700 rounded-xl font-bold hover:border-gray-200 hover:bg-gray-50 transition-all"
+                                    >
+                                        创建学习集
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="relative w-48 h-48 md:w-64 md:h-64 flex-shrink-0">
                                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                                     <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" strokeWidth="8" />
                                     <circle
@@ -284,49 +313,26 @@ export const Home: React.FC = () => {
                                     </defs>
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                    <span className="text-2xl font-bold text-gray-900">
+                                    <span className="text-3xl font-bold text-gray-900">
                                         {Math.round(((heroSet.mastered_count || 0) / (heroSet.termCount || 1)) * 100)}%
                                     </span>
+                                    <span className="text-xs text-gray-400 font-medium mt-1">已掌握</span>
                                 </div>
                             </div>
-
-                            {/* Content */}
-                            <div className="flex-1 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-xs text-gray-500 mb-3">
-                                    <Calendar className="w-3 h-3" />
-                                    上次学习: {heroSet.last_reviewed ? new Date(heroSet.last_reviewed).toLocaleString() : '从未学习'}
-                                </div>
-                                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{heroSet.title}</h3>
-                                <p className="text-gray-500 text-sm flex items-center justify-center md:justify-start gap-2">
-                                    <span>{heroSet.termCount || 0} 个词语</span>
-                                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                                    <span className="text-indigo-600 font-medium">
-                                        剩余 {Math.max(0, (heroSet.termCount || 0) - (heroSet.mastered_count || 0))} 个待掌握
-                                    </span>
-                                </p>
-                            </div>
-
-                            {/* Action Button */}
-                            <button
-                                onClick={() => navigate(`/set/${heroSet.id}/test`)}
-                                className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap"
-                            >
-                                <Zap className="w-4 h-4 fill-current" />
-                                继续挑战
-                            </button>
                         </>
                     ) : (
-                        <div className="flex flex-col items-center justify-center w-full gap-4 py-4">
-                            <p className="text-gray-500">暂无正在学习的内容</p>
+                        <div className="relative z-10 flex-1 text-center py-8">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4">欢迎来到 Monday Learn</h1>
+                            <p className="text-gray-500 mb-8">创建你的第一个学习集，开始高效记忆！</p>
                             <button
                                 onClick={() => navigate('/create')}
-                                className="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+                                className="px-8 py-3 bg-primary text-white rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all"
                             >
                                 创建学习集
                             </button>
                         </div>
                     )}
-                </div>
+                </section>
             </section>
 
             {/* Recent Content Carousel */}
@@ -402,118 +408,120 @@ export const Home: React.FC = () => {
             </section>
 
             {/* AI Report Modal */}
-            {showReportModal && (
-                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center sm:p-4">
-                    <div className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onClick={handleCloseModal}></div>
+            {
+                showReportModal && (
+                    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center sm:p-4">
+                        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onClick={handleCloseModal}></div>
 
-                    <div className="relative bg-white w-full md:max-w-2xl h-[90vh] md:h-[85vh] md:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
-                        {/* Header */}
-                        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white z-10">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                                    <Sparkles className="w-5 h-5 text-indigo-600" />
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-900 leading-none mb-1">AI 学习诊断</h2>
-                                    <span className="text-[10px] text-gray-400 font-mono uppercase tracking-widest">System Ready</span>
-                                </div>
-                            </div>
-                            <button onClick={handleCloseModal} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
-                                <X className="w-6 h-6" />
-                            </button>
-                        </div>
-
-                        {/* Timeframe Selection */}
-                        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex gap-2 overflow-x-auto no-scrollbar">
-                            {timeframes.map(tf => (
-                                <button
-                                    key={tf}
-                                    onClick={() => {
-                                        setSelectedTimeframe(tf);
-                                        setReportStatus('idle');
-                                    }}
-                                    disabled={reportStatus === 'generating'}
-                                    className={`px-5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ${selectedTimeframe === tf
-                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
-                                        }`}
-                                >
-                                    {tf}概况
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Content Area */}
-                        <div className="flex-1 overflow-y-auto p-6 relative custom-scrollbar">
-                            {reportStatus === 'idle' && (
-                                <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
-                                    <div className="relative">
-                                        <div className="absolute inset-0 bg-indigo-100 blur-3xl rounded-full"></div>
-                                        <div className="w-32 h-32 bg-white border border-gray-100 rounded-full flex items-center justify-center relative z-10 shadow-xl">
-                                            <Calendar className="w-12 h-12 text-indigo-600" />
-                                        </div>
-                                    </div>
-                                    <div className="max-w-sm">
-                                        <h3 className="text-2xl font-bold text-gray-900 mb-3">准备生成{selectedTimeframe}报告</h3>
-                                        <p className="text-gray-500 mb-8 leading-relaxed">
-                                            AI 核心将扫描您的答题矩阵、错误模式和时间流数据，为您计算最佳学习路径。
-                                        </p>
-                                        <button
-                                            onClick={generateReport}
-                                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center gap-2 mx-auto"
-                                        >
-                                            <Sparkles className="w-5 h-5" />
-                                            启动分析程序
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {reportStatus === 'generating' && (
-                                <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
-                                    <div className="relative">
-                                        <div className="absolute inset-0 bg-indigo-100 blur-3xl rounded-full animate-pulse"></div>
-                                        <Loader2 className="w-16 h-16 text-indigo-600 animate-spin relative z-10" />
+                        <div className="relative bg-white w-full md:max-w-2xl h-[90vh] md:h-[85vh] md:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
+                            {/* Header */}
+                            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                        <Sparkles className="w-5 h-5 text-indigo-600" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900 mb-2">正在处理数据流...</h3>
-                                        <p className="text-gray-500 text-sm font-mono">Scanning neural pathways...</p>
+                                        <h2 className="text-lg font-bold text-gray-900 leading-none mb-1">AI 学习诊断</h2>
+                                        <span className="text-[10px] text-gray-400 font-mono uppercase tracking-widest">System Ready</span>
                                     </div>
                                 </div>
-                            )}
+                                <button onClick={handleCloseModal} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
 
-                            {reportStatus === 'complete' && (
-                                <div className="prose prose-indigo max-w-none animate-in fade-in duration-500">
-                                    {/* Render simple formatted text since we don't have a markdown parser installed */}
-                                    {reportContent.split('\n').map((line, idx) => {
-                                        // Simple bold handling for headings or **text**
-                                        if (line.trim().startsWith('##') || line.trim().startsWith('###') || /^\d+\./.test(line)) {
-                                            return (
-                                                <h3 key={idx} className="text-indigo-900 font-bold text-xl mt-6 mb-3 border-b border-indigo-100 pb-2">
-                                                    {line.replace(/#/g, '')}
-                                                </h3>
-                                            );
-                                        }
-                                        if (line.trim() === '') return <br key={idx} />;
-                                        return <p key={idx} className="text-gray-600 mb-3 leading-relaxed text-base">{line.replace(/\*\*/g, '')}</p>;
-                                    })}
+                            {/* Timeframe Selection */}
+                            <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex gap-2 overflow-x-auto no-scrollbar">
+                                {timeframes.map(tf => (
+                                    <button
+                                        key={tf}
+                                        onClick={() => {
+                                            setSelectedTimeframe(tf);
+                                            setReportStatus('idle');
+                                        }}
+                                        disabled={reportStatus === 'generating'}
+                                        className={`px-5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ${selectedTimeframe === tf
+                                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        {tf}概况
+                                    </button>
+                                ))}
+                            </div>
 
-                                    <div className="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center">
-                                        <span className="text-[10px] text-gray-400 font-mono uppercase tracking-widest">Generated by Gemini AI Core</span>
-                                        <button
-                                            onClick={generateReport}
-                                            className="text-indigo-600 text-sm font-bold hover:text-indigo-800 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors"
-                                        >
-                                            <TrendingUp className="w-4 h-4" /> 重新校准
-                                        </button>
+                            {/* Content Area */}
+                            <div className="flex-1 overflow-y-auto p-6 relative custom-scrollbar">
+                                {reportStatus === 'idle' && (
+                                    <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-indigo-100 blur-3xl rounded-full"></div>
+                                            <div className="w-32 h-32 bg-white border border-gray-100 rounded-full flex items-center justify-center relative z-10 shadow-xl">
+                                                <Calendar className="w-12 h-12 text-indigo-600" />
+                                            </div>
+                                        </div>
+                                        <div className="max-w-sm">
+                                            <h3 className="text-2xl font-bold text-gray-900 mb-3">准备生成{selectedTimeframe}报告</h3>
+                                            <p className="text-gray-500 mb-8 leading-relaxed">
+                                                AI 核心将扫描您的答题矩阵、错误模式和时间流数据，为您计算最佳学习路径。
+                                            </p>
+                                            <button
+                                                onClick={generateReport}
+                                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center gap-2 mx-auto"
+                                            >
+                                                <Sparkles className="w-5 h-5" />
+                                                启动分析程序
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+
+                                {reportStatus === 'generating' && (
+                                    <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-indigo-100 blur-3xl rounded-full animate-pulse"></div>
+                                            <Loader2 className="w-16 h-16 text-indigo-600 animate-spin relative z-10" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-gray-900 mb-2">正在处理数据流...</h3>
+                                            <p className="text-gray-500 text-sm font-mono">Scanning neural pathways...</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {reportStatus === 'complete' && (
+                                    <div className="prose prose-indigo max-w-none animate-in fade-in duration-500">
+                                        {/* Render simple formatted text since we don't have a markdown parser installed */}
+                                        {reportContent.split('\n').map((line, idx) => {
+                                            // Simple bold handling for headings or **text**
+                                            if (line.trim().startsWith('##') || line.trim().startsWith('###') || /^\d+\./.test(line)) {
+                                                return (
+                                                    <h3 key={idx} className="text-indigo-900 font-bold text-xl mt-6 mb-3 border-b border-indigo-100 pb-2">
+                                                        {line.replace(/#/g, '')}
+                                                    </h3>
+                                                );
+                                            }
+                                            if (line.trim() === '') return <br key={idx} />;
+                                            return <p key={idx} className="text-gray-600 mb-3 leading-relaxed text-base">{line.replace(/\*\*/g, '')}</p>;
+                                        })}
+
+                                        <div className="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center">
+                                            <span className="text-[10px] text-gray-400 font-mono uppercase tracking-widest">Generated by Gemini AI Core</span>
+                                            <button
+                                                onClick={generateReport}
+                                                className="text-indigo-600 text-sm font-bold hover:text-indigo-800 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors"
+                                            >
+                                                <TrendingUp className="w-4 h-4" /> 重新校准
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-        </main>
+        </main >
     );
 };

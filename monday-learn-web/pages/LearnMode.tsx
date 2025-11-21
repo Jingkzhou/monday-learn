@@ -411,7 +411,7 @@ export const LearnMode: React.FC = () => {
             <div className="flex-1 flex flex-col items-center justify-center p-6 bg-bg-gray" onClick={() => setShowSettings(false)}>
 
                 {/* Question Card */}
-                <div className="w-full max-w-3xl bg-white rounded-xl shadow-sm border border-gray-200 p-12 mb-8 relative min-h-[200px] flex flex-col justify-center">
+                <div className="w-full max-w-3xl bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-12 mb-8 relative min-h-[200px] flex flex-col justify-center">
                     <div className="absolute top-6 left-6 text-gray-500 text-sm font-medium flex items-center gap-2">
                         术语 <Volume2 className="w-4 h-4 cursor-pointer hover:text-primary" />
                     </div>

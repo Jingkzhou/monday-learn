@@ -386,8 +386,8 @@ export const SetView: React.FC = () => {
             />
 
             {/* Flashcard Controls */}
-            <div className="flex items-center justify-between mt-6 max-w-3xl mx-auto px-4">
-              <div className="flex gap-4">
+            <div className="flex flex-col-reverse md:flex-row items-center justify-between mt-6 max-w-3xl mx-auto px-4 gap-4 md:gap-0">
+              <div className="flex gap-4 w-full md:w-auto justify-center md:justify-start">
                 <button
                   onClick={toggleAutoPlay}
                   className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
@@ -418,7 +418,7 @@ export const SetView: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full md:w-auto justify-center md:justify-end hidden md:flex">
                 <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="快捷键">
                   <Keyboard className="w-6 h-6" />
                 </button>
@@ -436,12 +436,12 @@ export const SetView: React.FC = () => {
       </div>
 
       {/* Terms List Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-2">
           <img src="https://picsum.photos/seed/user/30/30" className="w-8 h-8 rounded-full" alt="Current User" />
           <span className="font-bold text-gray-900">本学习集中的术语 ({terms.length})</span>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 text-sm md:text-base">
           <span className="text-gray-500 font-semibold cursor-pointer hover:text-gray-900 border-b-2 border-primary pb-1">默认顺序</span>
           <span className="text-gray-400 font-semibold cursor-pointer hover:text-gray-900">字母顺序</span>
         </div>
@@ -449,20 +449,20 @@ export const SetView: React.FC = () => {
 
       {/* Terms Status Banner */}
       <div className="bg-indigo-50 rounded-lg p-4 mb-6 flex items-center gap-3">
-        <div className="text-primary font-bold">术语总数 {terms.length}</div>
-        <div className="text-gray-500 text-sm">加油！坚持练习能带来最大的收获。</div>
+        <div className="text-primary font-bold whitespace-nowrap">术语总数 {terms.length}</div>
+        <div className="text-gray-500 text-sm line-clamp-1">加油！坚持练习能带来最大的收获。</div>
       </div>
 
       {/* Term List */}
       <div className="space-y-3">
         {terms.map((term) => (
-          <div key={term.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center justify-between group hover:border-gray-300 transition-colors">
-            <div className="flex-1 pr-4 border-r border-gray-100">
+          <div key={term.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row items-start md:items-center justify-between group hover:border-gray-300 transition-colors gap-4 md:gap-0">
+            <div className="flex-1 w-full md:w-auto md:pr-4 md:border-r border-gray-100 border-b md:border-b-0 pb-2 md:pb-0">
               <div className="text-lg text-gray-800">{term.term}</div>
             </div>
-            <div className="flex-1 pl-4 flex items-center justify-between">
+            <div className="flex-1 w-full md:w-auto md:pl-4 flex items-center justify-between">
               <div className="text-lg text-gray-800">{term.definition}</div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleToggleStar(term.id)}
                   className={`p-2 rounded-full transition-colors opacity-0 group-hover:opacity-100 ${term.starred ? 'text-yellow-400 opacity-100' : 'text-gray-400 hover:text-primary hover:bg-gray-50'}`}
