@@ -90,6 +90,7 @@ export const SetView: React.FC = () => {
 
   const authorName = studySet?.authorUsername || '你';
   const hasTerms = terms.length > 0;
+  const starredCount = terms.filter(t => t.starred).length;
 
   const nextCard = () => {
     if (!hasTerms) return;
@@ -508,10 +509,22 @@ export const SetView: React.FC = () => {
               }`}
           >
             <Star className={`w-4 h-4 ${filterStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
-            <span>只看星标 ({terms.filter(t => t.starred).length})</span>
+            <span>只看星标 ({starredCount})</span>
           </button>
           <div className="w-px h-4 bg-gray-300 mx-2"></div>
-          
+          <button
+            onClick={() => navigate(`/set/${id}/learn?starredOnly=true`)}
+            disabled={starredCount === 0}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border ${
+              starredCount === 0
+                ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
+                : 'bg-indigo-50 text-primary border-indigo-100 hover:bg-indigo-100'
+            }`}
+            title="仅练习星标术语，不影响整体进度"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>只学习星标内容</span>
+          </button>
         </div>
       </div>
 

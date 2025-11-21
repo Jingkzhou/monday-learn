@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../utils/api';
 import { Term } from '../types';
 import { X, Settings, Volume2, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, Star } from 'lucide-react';
@@ -19,6 +19,9 @@ interface LearningSession {
 export const LearnMode: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const starredOnly = searchParams.get('starredOnly') === 'true';
 
     const [session, setSession] = useState<LearningSession | null>(null);
     const [queue, setQueue] = useState<LearningTerm[]>([]);
@@ -47,19 +50,73 @@ export const LearnMode: React.FC = () => {
 
     // Local counts state for real-time updates
     const [counts, setCounts] = useState({ new: 0, familiar: 0, mastered: 0 });
+    const [allTerms, setAllTerms] = useState<LearningTerm[]>([]);
+
+    const computeCounts = (termsList: LearningTerm[]) => {
+        return termsList.reduce(
+            (acc, term) => {
+                if (term.learning_status === 'mastered') acc.mastered += 1;
+                else if (term.learning_status === 'familiar') acc.familiar += 1;
+                else acc.new += 1;
+                return acc;
+            },
+            { new: 0, familiar: 0, mastered: 0 }
+        );
+    };
 
     const fetchSession = async () => {
         if (!id) return;
         setLoading(true);
         try {
             const data = await api.get<LearningSession>(`/learning/${id}/session`);
-            setSession(data);
-            setQueue(data.terms);
-            setCounts({
-                new: data.new_count,
-                familiar: data.familiar_count,
-                mastered: data.mastered_count
+
+            let termsData: LearningTerm[] = data.terms || [];
+            let allTermsPool: LearningTerm[] = termsData;
+
+            if (starredOnly) {
+                const setData = await api.get<any>(`/study-sets/${id}`);
+                const setTerms: LearningTerm[] = (setData.terms || []).map((term: any, index: number) => ({
+                    id: term.id,
+                    term: term.term,
+                    definition: term.definition,
+                    imageUrl: term.image_url,
+                    status: term.status || 'not_started',
+                    order: term.order ?? index,
+                    starred: term.starred,
+                    learning_status: 'not_started',
+                    consecutive_correct: 0,
+                }));
+                allTermsPool = setTerms;
+                termsData = setTerms.filter(t => t.starred);
+            }
+
+            setAllTerms(allTermsPool);
+
+            const filteredTermsRaw = starredOnly ? termsData : termsData;
+            const filteredTerms = starredOnly
+                ? filteredTermsRaw.map(term => ({
+                    ...term,
+                    learning_status: 'not_started',
+                    consecutive_correct: 0,
+                }))
+                : filteredTermsRaw;
+            const updatedCounts = starredOnly
+                ? computeCounts(filteredTerms)
+                : {
+                    new: data.new_count,
+                    familiar: data.familiar_count,
+                    mastered: data.mastered_count
+                };
+
+            setSession({
+                ...data,
+                terms: filteredTerms,
+                new_count: updatedCounts.new,
+                familiar_count: updatedCounts.familiar,
+                mastered_count: updatedCounts.mastered
             });
+            setQueue(filteredTerms);
+            setCounts(updatedCounts);
             setCurrentIndex(0);
             setRoundComplete(false);
             setIsFlipped(false);
@@ -122,12 +179,13 @@ export const LearnMode: React.FC = () => {
 
     // Generate options for Multiple Choice
     const options = useMemo(() => {
-        if (!currentTerm || !session) return [];
+        if (!currentTerm) return [];
+        const termPool = starredOnly ? allTerms : session?.terms || [];
         const correct = currentTerm.definition;
-        const otherTerms = session.terms.filter(t => t.id !== currentTerm.id);
+        const otherTerms = termPool.filter(t => t.id !== currentTerm.id);
         const wrong = otherTerms.sort(() => 0.5 - Math.random()).slice(0, 3).map(t => t.definition);
         return [...wrong, correct].sort(() => 0.5 - Math.random());
-    }, [currentTerm, session]);
+    }, [currentTerm, session, starredOnly, allTerms]);
 
     const handleAnswer = async (answer: string) => {
         if (showFeedback) return;
@@ -138,7 +196,9 @@ export const LearnMode: React.FC = () => {
         setShowFeedback(true);
 
         try {
-            await api.post(`/learning/${id}/update/${currentTerm.id}`, { is_correct: isRight });
+            if (!starredOnly) {
+                await api.post(`/learning/${id}/update/${currentTerm.id}`, { is_correct: isRight });
+            }
         } catch (err) {
             console.error("Failed to update progress", err);
         }
@@ -149,10 +209,35 @@ export const LearnMode: React.FC = () => {
         setShowFeedback(true); // Trigger auto-advance logic
 
         try {
-            await api.post(`/learning/${id}/update/${currentTerm.id}`, { is_correct: correct });
+            if (!starredOnly) {
+                await api.post(`/learning/${id}/update/${currentTerm.id}`, { is_correct: correct });
+            }
         } catch (err) {
             console.error("Failed to update progress", err);
         }
+    };
+
+    const resetStarredProgress = () => {
+        setQueue((prevQueue) => {
+            const resetQueue = prevQueue.map(term => ({
+                ...term,
+                learning_status: 'not_started',
+                consecutive_correct: 0,
+            }));
+            const resetCounts = computeCounts(resetQueue);
+            setCounts(resetCounts);
+            setSession((prev) => prev ? {
+                ...prev,
+                terms: resetQueue,
+                new_count: resetCounts.new,
+                familiar_count: resetCounts.familiar,
+                mastered_count: resetCounts.mastered,
+            } : prev);
+            setCurrentIndex(0);
+            setRoundComplete(false);
+            setIsFlipped(false);
+            return resetQueue;
+        });
     };
 
     const handleContinue = () => {
@@ -279,6 +364,24 @@ export const LearnMode: React.FC = () => {
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
+    if (starredOnly && session && session.terms.length === 0) {
+        return (
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mb-6">
+                    <Star className="w-10 h-10 text-yellow-500" />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">没有星标内容可以学习</h2>
+                <p className="text-gray-600 mb-8">请返回学习集为想要重点复习的术语添加星标。</p>
+                <button
+                    onClick={() => navigate(`/set/${id}`)}
+                    className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+                >
+                    返回学习集
+                </button>
+            </div>
+        );
+    }
+
     if (roundComplete) {
         return (
             <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
@@ -364,6 +467,12 @@ export const LearnMode: React.FC = () => {
                 </div>
 
                 <div className="flex-1 flex justify-end gap-4">
+                    {starredOnly && (
+                        <div className="px-3 py-1.5 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold flex items-center gap-2">
+                            <Star className="w-4 h-4 fill-current" />
+                            星标练习模式（不记录进度）
+                        </div>
+                    )}
                     <div className="relative">
                         <button
                             className={`p-2 rounded-full ${showSettings ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
@@ -435,12 +544,17 @@ export const LearnMode: React.FC = () => {
                                     </button>
                                     <button
                                         onClick={async () => {
-                                            if (confirm('确定要重置学习进度吗？这将清除所有术语的学习状态。')) {
-                                                try {
-                                                    await api.post(`/learning/${id}/reset`, {});
-                                                    window.location.reload();
-                                                } catch (err) {
-                                                    console.error("Failed to reset progress", err);
+                                            if (confirm(starredOnly ? '确定重置星标练习进度吗？这不会影响整个学习集的进度。' : '确定要重置学习进度吗？这将清除所有术语的学习状态。')) {
+                                                if (starredOnly) {
+                                                    resetStarredProgress();
+                                                    setShowSettings(false);
+                                                } else {
+                                                    try {
+                                                        await api.post(`/learning/${id}/reset`, {});
+                                                        window.location.reload();
+                                                    } catch (err) {
+                                                        console.error("Failed to reset progress", err);
+                                                    }
                                                 }
                                             }
                                         }}
