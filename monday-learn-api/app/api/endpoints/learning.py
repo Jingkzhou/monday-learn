@@ -1,15 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List, Any
-from datetime import datetime
+from typing import List, Any, Dict
+from datetime import datetime, timedelta
+from loguru import logger
 
 from app.core import deps
 from app.models.user import User
 from app.models.study_set import StudySet, Term
 from app.models.learning_progress import LearningProgress, LearningStatus
 from app.models.learning_progress_log import LearningProgressLog
+from app.models.ai_config import AIConfig
+from app.models.ai_usage_log import AIUsageLog
 from app.schemas.learning_progress import LearningProgressUpdate, LearningProgressResponse, LearningSession
 from app.schemas.learning_progress_log import LearningProgressLogCreate, LearningProgressLogResponse
+from app.schemas.learning_report import LearningReportRequest, LearningReportResponse
+import httpx
 from app.schemas.study_set import TermResponse
 
 router = APIRouter()
@@ -50,6 +55,83 @@ def record_learning_log(
     else:
         db.flush()
     return log
+
+
+def call_active_ai(db: Session, current_user: User, prompt: str, max_tokens: int = 600) -> str:
+    config = db.query(AIConfig).filter(AIConfig.is_active.is_(True)).first()
+    if not config:
+        raise HTTPException(status_code=503, detail="No active AI model configured")
+
+    base_url = config.base_url or "https://api.openai.com/v1"
+    url = f"{base_url.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {config.api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": config.model_name,
+        "messages": [
+            {
+                "role": "system",
+                "content": "你是一名学习数据分析师，使用简洁的中文输出，并提供可执行的学习建议。",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "max_tokens": max_tokens,
+    }
+
+    logger.info(
+        "AI report request",
+        provider=config.provider,
+        model=config.model_name,
+        url=url,
+        prompt_preview=prompt[:500],
+    )
+
+    try:
+        with httpx.Client(timeout=15.0) as client:
+            response = client.post(url, json=payload, headers=headers)
+    except Exception as e:
+        logger.error(f"AI provider request failed: {e}")
+        raise HTTPException(status_code=502, detail=f"AI provider request failed: {e}")
+
+    if response.status_code != 200:
+        logger.error(
+            "AI provider error",
+            status=response.status_code,
+            body=response.text[:1000],
+        )
+        raise HTTPException(status_code=502, detail=f"AI provider error: {response.text}")
+
+    data = response.json()
+    content = (
+        data.get("choices", [{}])[0]
+        .get("message", {})
+        .get("content", "")
+    )
+    logger.info(
+        "AI provider response",
+        status=response.status_code,
+        content_preview=content[:500],
+    )
+
+    # Track token usage if returned
+    usage = data.get("usage", {})
+    total_tokens = usage.get("total_tokens", 0)
+    if total_tokens:
+        config.total_tokens = (config.total_tokens or 0) + total_tokens
+        log = AIUsageLog(
+            config_id=config.id,
+            user_id=current_user.id,
+            tokens_used=total_tokens,
+            request_type="learning_report",
+        )
+        db.add(log)
+        db.add(config)
+        db.commit()
+
+    return content or "未能生成报告内容。"
+
 
 @router.get("/{study_set_id}/session", response_model=LearningSession)
 def get_learning_session(
@@ -260,6 +342,92 @@ def reset_progress(
         LearningProgress.user_id == current_user.id,
         LearningProgress.study_set_id == study_set_id
     ).delete()
-    
+
     db.commit()
     return {"message": "Progress reset successfully"}
+
+
+def _timeframe_window(timeframe: str) -> datetime | None:
+    mapping = {
+        "本周": 7,
+        "本月": 30,
+        "半年": 180,
+        "本年": 365,
+    }
+    days = mapping.get(timeframe, 30)
+    return datetime.now() - timedelta(days=days)
+
+
+@router.post("/report", response_model=LearningReportResponse)
+def generate_learning_report(
+    payload: LearningReportRequest,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    start_at = _timeframe_window(payload.timeframe)
+
+    query = db.query(LearningProgressLog).filter(LearningProgressLog.user_id == current_user.id)
+    if start_at:
+        query = query.filter(LearningProgressLog.created_at >= start_at)
+
+    logs = query.order_by(LearningProgressLog.created_at.desc()).limit(500).all()
+    if not logs:
+        return LearningReportResponse(content=f"{payload.timeframe}暂无学习记录可供分析，请先完成几次练习或测试。", raw_stats={})
+
+    total = len(logs)
+    correct = sum(1 for l in logs if l.is_correct)
+    accuracy = round((correct / total) * 100, 1) if total else 0.0
+
+    # per-term aggregates
+    term_stats: Dict[int, Dict[str, Any]] = {}
+    for log in logs:
+        stats = term_stats.setdefault(log.term_id, {"total": 0, "incorrect": 0, "question_types": {}})
+        stats["total"] += 1
+        if not log.is_correct:
+            stats["incorrect"] += 1
+        if log.question_type:
+            stats["question_types"][log.question_type] = stats["question_types"].get(log.question_type, 0) + 1
+
+    # enrich term info
+    term_ids = list(term_stats.keys())
+    terms = db.query(Term).filter(Term.id.in_(term_ids)).all() if term_ids else []
+    term_names = {t.id: t.term for t in terms}
+
+    top_mistakes = sorted(
+        [
+            {
+                "term": term_names.get(tid, f"术语#{tid}"),
+                "incorrect": data["incorrect"],
+                "total": data["total"],
+            }
+            for tid, data in term_stats.items()
+            if data["incorrect"] > 0
+        ],
+        key=lambda x: x["incorrect"],
+        reverse=True,
+    )[:5]
+
+    prompt_lines = [
+        f"时间范围: {payload.timeframe}",
+        f"总答题数: {total}",
+        f"正确数: {correct}",
+        f"总体正确率: {accuracy}%",
+    ]
+    if top_mistakes:
+        prompt_lines.append("错题高频术语: " + "; ".join([f"{m['term']}({m['incorrect']}/{m['total']})" for m in top_mistakes]))
+
+    prompt_lines.append("请基于以上数据，用简洁中文输出：整体表现、主要薄弱点、3条具体可执行的训练建议，以及1句鼓励的话。")
+    prompt = "\n".join(prompt_lines)
+
+    ai_content = call_active_ai(db, current_user, prompt)
+
+    return LearningReportResponse(
+        content=ai_content,
+        raw_stats={
+            "timeframe": payload.timeframe,
+            "total": total,
+            "correct": correct,
+            "accuracy": accuracy,
+            "top_mistakes": top_mistakes,
+        },
+    )

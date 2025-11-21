@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, TrendingUp, AlertCircle, BrainCircuit, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, Zap, Activity, Folder, Trophy, BarChart2, Users, Layers } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { StudySet } from '../types';
 import { api } from '../utils/api';
 import { Logo } from '../components/Logo';
@@ -20,6 +19,7 @@ export const Home: React.FC = () => {
     const [recommendedError, setRecommendedError] = useState('');
     const recentRef = useRef<HTMLDivElement | null>(null);
     const recommendedRef = useRef<HTMLDivElement | null>(null);
+    const heroSet = useMemo(() => studySets[0], [studySets]);
 
     const timeframes = ['本周', '本月', '半年', '本年'];
 
@@ -67,62 +67,12 @@ export const Home: React.FC = () => {
         fetchRecommended();
     }, []);
 
-    const heroSet = useMemo(() => studySets[0], [studySets]);
-
-    const setTitleForReport = heroSet?.title || '示例学习集';
-
-    // Mock history data generator to simulate user activity for the AI
-    const getMockHistory = (timeframe: string) => {
-        return {
-            timeframe,
-            totalStudyTime: timeframe === '本周' ? '4.5小时' : '120小时',
-            setsCompleted: timeframe === '本周' ? 3 : 15,
-            averageScore: '78%',
-            weakPoints: ['多音字辨析', '生僻字书写', '形近字混淆'],
-            recentTests: [
-                { name: setTitleForReport, score: '85%', date: '2024-11-15' },
-                { name: 'Fast Phonics Peak 2', score: '60%', date: '2024-11-12' },
-                { name: '古诗词填空', score: '92%', date: '2024-11-10' }
-            ]
-        };
-    };
-
     const generateReport = async () => {
         setReportStatus('generating');
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-            const history = getMockHistory(selectedTimeframe);
-
-            const prompt = `
-        作为一名专业的个性化学习顾问，请根据以下用户的学习数据生成一份"${selectedTimeframe}学习总结报告"。
-        
-        用户数据:
-        - 时间范围: ${history.timeframe}
-        - 总学习时长: ${history.totalStudyTime}
-        - 完成学习集: ${history.setsCompleted} 个
-        - 平均正确率: ${history.averageScore}
-        - 识别出的薄弱点: ${history.weakPoints.join(', ')}
-        - 近期测试记录: ${JSON.stringify(history.recentTests)}
-
-        请生成一份结构清晰的报告（使用简单的Markdown格式，不要使用代码块），包含以下部分：
-        1. 📊 **整体表现概览**：用鼓励的语气总结用户的努力程度和进步。
-        2. 🛑 **错题深度分析**：具体分析为什么用户在"${history.weakPoints.join('、')}"方面存在困难，分析可能的认知误区。
-        3. 🚀 **定制化提升计划**：针对薄弱点，给出具体的、可执行的复习建议（例如：建议使用什么模式，每天复习多少个词等）。
-        4. 💡 **AI 寄语**：一句简短的激励话语。
-
-        语气要亲切、专业且具有建设性。
-      `;
-
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: prompt,
-            });
-
-            if (response.text) {
-                setReportContent(response.text);
-                setReportStatus('complete');
-            }
+            const res = await api.post<{ content: string }>('/learning/report', { timeframe: selectedTimeframe });
+            setReportContent(res?.content || '未获取到报告内容，请稍后重试。');
+            setReportStatus('complete');
         } catch (error) {
             console.error("Error generating report:", error);
             setReportContent("抱歉，生成报告时出现错误，请稍后重试。");
