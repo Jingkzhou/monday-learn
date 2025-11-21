@@ -34,6 +34,11 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
         throw new Error(data.detail || 'Something went wrong');
     }
 
+    // Some endpoints (e.g., DELETE 204) return no body
+    if (response.status === 204) {
+        return null as T;
+    }
+
     return response.json();
 }
 

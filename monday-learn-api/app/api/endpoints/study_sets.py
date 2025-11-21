@@ -17,6 +17,7 @@ router = APIRouter()
 
 
 from app.models.learning_progress import LearningProgress, LearningStatus
+from app.models.learning_progress_log import LearningProgressLog
 from sqlalchemy import func, case, cast, Integer
 
 def serialize_study_set(study_set: StudySet, current_user=None, db: Session = None) -> StudySetResponse:
@@ -428,3 +429,24 @@ def reset_study_set_progress(
     db.commit()
     
     return {"message": "Progress reset successfully"}
+
+
+@router.delete("/{study_set_id:int}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_study_set(
+    study_set_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    study_set = db.query(StudySet).filter(StudySet.id == study_set_id).first()
+    if not study_set:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study set not found")
+
+    if study_set.author_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the owner can delete this study set")
+
+    # Clean up dependent records first to avoid FK issues
+    db.query(LearningProgress).filter(LearningProgress.study_set_id == study_set_id).delete()
+    db.query(LearningProgressLog).filter(LearningProgressLog.study_set_id == study_set_id).delete()
+
+    db.delete(study_set)
+    db.commit()

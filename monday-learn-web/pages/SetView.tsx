@@ -22,6 +22,7 @@ import {
   Rocket,
   FolderPlus,
   Loader2,
+  Trash2,
   AlertCircle,
   Play,
   Pause,
@@ -40,6 +41,7 @@ export const SetView: React.FC = () => {
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [editInProgress, setEditInProgress] = useState(false);
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [filterStarred, setFilterStarred] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
@@ -254,6 +256,24 @@ export const SetView: React.FC = () => {
     }
   };
 
+  const handleDeleteSet = async () => {
+    if (!studySet) return;
+    if (!window.confirm('删除后无法恢复，确定要删除此学习集吗？')) {
+      return;
+    }
+
+    setDeleteInProgress(true);
+    setActionError('');
+    try {
+      await api.delete(`/study-sets/${studySet.id}`);
+      navigate('/'); // Back to home after deletion
+    } catch (err: any) {
+      setActionError(err.message || '删除失败，请稍后再试');
+    } finally {
+      setDeleteInProgress(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
@@ -327,6 +347,7 @@ export const SetView: React.FC = () => {
                     <FolderPlus className="w-4 h-4 text-gray-500" />
                     添加到文件夹
                   </button>
+                                    <div className="h-px bg-gray-100 my-1"></div>
                   <button
                     className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
                     onClick={() => setShowMoreMenu(false)}
@@ -349,6 +370,40 @@ export const SetView: React.FC = () => {
                   <div className="h-px bg-gray-100 my-1"></div>
                   <button
                     onClick={() => {
+                      navigate(`/set/${id}/merge`);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                  >
+                    
+                    <Merge className="w-4 h-4 text-gray-500" />
+                    合并学习集
+                  </button>
+                                    <div className="h-px bg-gray-100 my-1"></div>
+
+                  {studySet.isOwner && (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleDeleteSet();
+                          setShowMoreMenu(false);
+                        }}
+                        disabled={deleteInProgress}
+                        className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors disabled:opacity-50"
+                      >
+                        {deleteInProgress ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-red-500" />
+                        ) : (
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        )}
+                        删除学习集
+                      </button>
+                      <div className="h-px bg-gray-100 my-1"></div>
+                    </>
+                  )}
+
+                  <button
+                    onClick={() => {
                       handleResetProgress();
                       setShowMoreMenu(false);
                     }}
@@ -356,17 +411,6 @@ export const SetView: React.FC = () => {
                   >
                     <RotateCcw className="w-4 h-4 text-red-500" />
                     重置学习进度
-                  </button>
-                  <div className="h-px bg-gray-100 my-1"></div>
-                  <button
-                    onClick={() => {
-                      navigate(`/set/${id}/merge`);
-                      setShowMoreMenu(false);
-                    }}
-                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                  >
-                    <Merge className="w-4 h-4 text-gray-500" />
-                    合并学习集
                   </button>
                 </div>
               </>
