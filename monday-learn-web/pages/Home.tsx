@@ -10,7 +10,7 @@ export const Home: React.FC = () => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportStatus, setReportStatus] = useState<'idle' | 'generating' | 'complete'>('idle');
     const [reportContent, setReportContent] = useState<string>('');
-    const [reportData, setReportData] = useState<{ report_id?: number; suggestion_create_set?: boolean } | null>(null);
+    const [reportData, setReportData] = useState<{ report_id?: number; suggestion_create_set?: boolean; mistakes?: any[] } | null>(null);
     const [creatingSet, setCreatingSet] = useState(false);
     const [selectedTimeframe, setSelectedTimeframe] = useState<string>('本周');
     const [studySets, setStudySets] = useState<StudySet[]>([]);
@@ -73,9 +73,19 @@ export const Home: React.FC = () => {
         setReportStatus('generating');
         setReportData(null);
         try {
-            const res = await api.post<{ content: string; report_id?: number; suggestion_create_set?: boolean }>('/learning/report', { timeframe: selectedTimeframe });
+            const res = await api.post<{
+                content: string;
+                report_id?: number;
+                suggestion_create_set?: boolean;
+                raw_stats?: { top_mistakes?: any[] }
+            }>('/learning/report', { timeframe: selectedTimeframe });
+
             setReportContent(res?.content || '未获取到报告内容，请稍后重试。');
-            setReportData({ report_id: res?.report_id, suggestion_create_set: res?.suggestion_create_set });
+            setReportData({
+                report_id: res?.report_id,
+                suggestion_create_set: res?.suggestion_create_set,
+                mistakes: res?.raw_stats?.top_mistakes || []
+            });
             setReportStatus('complete');
         } catch (error) {
             console.error("Error generating report:", error);
@@ -84,19 +94,24 @@ export const Home: React.FC = () => {
         }
     };
 
-    const handleCreateErrorSet = async () => {
-        if (!reportData?.report_id) return;
-        setCreatingSet(true);
-        try {
-            const res = await api.post<{ study_set_id: number }>(`/learning/create-set-from-mistakes/${reportData.report_id}`, {});
-            // Navigate to the new set
-            navigate(`/set/${res.study_set_id}`);
-        } catch (error) {
-            console.error("Error creating error set:", error);
-            alert("创建错题集失败，请稍后重试。");
-        } finally {
-            setCreatingSet(false);
-        }
+    const handleCreateErrorSet = () => {
+        if (!reportData?.mistakes || reportData.mistakes.length === 0) return;
+
+        const initialTerms = reportData.mistakes.map((m: any, index: number) => ({
+            id: `mistake-${index}`,
+            term: m.term,
+            definition: m.definition || '',
+            status: 'not_started',
+            order: index
+        }));
+
+        navigate('/create', {
+            state: {
+                initialTitle: `错题集 - ${new Date().toLocaleDateString()}`,
+                initialDescription: '基于AI学习诊断生成的错题集',
+                initialTerms: initialTerms
+            }
+        });
     };
 
     const handleCloseModal = () => {

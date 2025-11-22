@@ -394,13 +394,14 @@ def generate_learning_report(
     # enrich term info
     term_ids = list(term_stats.keys())
     terms = db.query(Term).filter(Term.id.in_(term_ids)).all() if term_ids else []
-    term_names = {t.id: t.term for t in terms}
+    term_map = {t.id: t for t in terms}
 
     top_mistakes = sorted(
         [
             {
                 "term_id": tid,
-                "term": term_names.get(tid, f"术语#{tid}"),
+                "term": term_map[tid].term if tid in term_map else f"术语#{tid}",
+                "definition": term_map[tid].definition if tid in term_map else "",
                 "incorrect": data["incorrect"],
                 "total": data["total"],
             }
@@ -456,59 +457,4 @@ def generate_learning_report(
     )
 
 
-@router.post("/create-set-from-mistakes/{report_id}", response_model=Dict[str, int])
-def create_set_from_mistakes(
-    report_id: int,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
-):
-    # 1. Fetch the report
-    report = db.query(LearningReport).filter(LearningReport.id == report_id, LearningReport.user_id == current_user.id).first()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
 
-    if report.suggested_study_set_id:
-        # Already created
-        return {"study_set_id": report.suggested_study_set_id}
-
-    # 2. Extract mistakes
-    raw_stats = report.raw_stats
-    if not raw_stats or "top_mistakes" not in raw_stats:
-        raise HTTPException(status_code=400, detail="No mistake data in report")
-
-    top_mistakes = raw_stats["top_mistakes"]
-    if not top_mistakes:
-        raise HTTPException(status_code=400, detail="No mistakes to create set from")
-
-    term_ids = [m["term_id"] for m in top_mistakes]
-    
-    # 3. Fetch original terms to copy
-    original_terms = db.query(Term).filter(Term.id.in_(term_ids)).all()
-    if not original_terms:
-        raise HTTPException(status_code=404, detail="Original terms not found")
-
-    # 4. Create new Study Set
-    new_set = StudySet(
-        title=f"错题集 - {datetime.now().strftime('%Y-%m-%d')}",
-        description=f"Based on AI Learning Diagnosis from {report.created_at.strftime('%Y-%m-%d')}",
-        user_id=current_user.id,
-        is_public=False,
-    )
-    db.add(new_set)
-    db.flush() # Get ID
-
-    # 5. Copy terms
-    for term in original_terms:
-        new_term = Term(
-            study_set_id=new_set.id,
-            term=term.term,
-            definition=term.definition,
-        )
-        db.add(new_term)
-
-    # 6. Update report
-    report.suggested_study_set_id = new_set.id
-    
-    db.commit()
-    
-    return {"study_set_id": new_set.id}

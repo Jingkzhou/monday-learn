@@ -97,24 +97,21 @@ def run_verification():
             # Debug: print raw stats
             print(data.get('raw_stats'))
         else:
-            # 5. Create Set from Mistakes
-            report_id = data['report_id']
-            resp = httpx.post(f"{BASE_URL}/learning/create-set-from-mistakes/{report_id}", headers=headers)
-            if resp.status_code != 200:
-                print(f"❌ Create error set failed: {resp.text}")
+            # 5. Verify Mistakes Data (Frontend needs term + definition)
+            raw_stats = data.get('raw_stats', {})
+            top_mistakes = raw_stats.get('top_mistakes', [])
+            if not top_mistakes:
+                print("❌ No top_mistakes found in raw_stats")
             else:
-                new_set_id = resp.json()["study_set_id"]
-                print(f"✅ Created Error Set: {new_set_id}")
-                
-                # Verify new set has terms
-                r = httpx.get(f"{BASE_URL}/study-sets/{new_set_id}", headers=headers)
-                new_set = r.json()
-                print(f"   New Set Title: {new_set['title']}")
-                # Check terms count (should be 3)
-                if len(new_set.get('terms', [])) == 3:
-                     print("✅ New set has correct number of terms (3)")
+                first_mistake = top_mistakes[0]
+                if 'definition' not in first_mistake:
+                    print("❌ Mistake missing 'definition' field")
+                    print(first_mistake)
                 else:
-                     print(f"⚠️ New set has {len(new_set.get('terms', []))} terms, expected 3")
+                    print("✅ Mistake has 'definition' field")
+                    print(f"   Term: {first_mistake.get('term')} - Def: {first_mistake.get('definition')}")
+            
+            print("✅ Verification Complete (Frontend navigation logic not tested here)")
 
 if __name__ == "__main__":
     run_verification()
