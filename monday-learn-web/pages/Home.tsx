@@ -21,7 +21,13 @@ export const Home: React.FC = () => {
     const [recommendedError, setRecommendedError] = useState('');
     const recentRef = useRef<HTMLDivElement | null>(null);
     const recommendedRef = useRef<HTMLDivElement | null>(null);
-    const heroSet = useMemo(() => studySets[0], [studySets]);
+
+    const heroSet = useMemo(() => {
+        // Find the first set that is not fully mastered
+        const notMastered = studySets.find(set => (set.mastered_count || 0) < (set.termCount || 0));
+        // Fallback to the most recent set if all are mastered or none exist
+        return notMastered || studySets[0];
+    }, [studySets]);
 
     const timeframes = ['本周', '本月', '半年', '本年'];
 
@@ -141,11 +147,26 @@ export const Home: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                         <h3 className="text-base font-bold text-gray-900 leading-tight mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors">{set.title}</h3>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mb-2">
                             <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-500 text-xs font-medium border border-gray-200">
                                 {termCount} 个词语
                             </span>
                         </div>
+
+                        {/* Mastery Progress */}
+                        {(set.mastered_count || 0) > 0 && (
+                            <div className="flex items-center gap-2">
+                                <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-green-500 rounded-full"
+                                        style={{ width: `${Math.min(100, Math.round(((set.mastered_count || 0) / (termCount || 1)) * 100))}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-[10px] font-bold text-green-600">
+                                    {Math.round(((set.mastered_count || 0) / (termCount || 1)) * 100)}%
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
