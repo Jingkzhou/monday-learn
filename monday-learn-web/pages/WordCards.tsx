@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Layers, Lock, User, Calendar } from 'lucide-react';
 import { StudySet } from '../types';
 import { api } from '../utils/api';
+import { normalizeStudySet } from '../utils/studySet';
 import { format, isToday, isThisWeek, isThisMonth, isSameYear, parseISO } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 
@@ -17,7 +18,8 @@ export const WordCards: React.FC = () => {
             setLoading(true);
             try {
                 const data = await api.get<StudySet[]>('/study-sets/library');
-                setSets(data);
+                const normalized = (data || []).map(normalizeStudySet);
+                setSets(normalized);
             } catch (err: any) {
                 setError(err.message || '加载单词卡失败');
             } finally {

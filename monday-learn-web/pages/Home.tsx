@@ -4,6 +4,7 @@ import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, Trendin
 import { StudySet } from '../types';
 import { api } from '../utils/api';
 import { Logo } from '../components/Logo';
+import { normalizeStudySet } from '../utils/studySet';
 
 export const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -31,13 +32,7 @@ export const Home: React.FC = () => {
 
     const timeframes = ['本周', '本月', '半年', '本年'];
 
-    const normalizeSet = (item: any): StudySet => ({
-        ...item,
-        termCount: item.termCount ?? item.term_count ?? item.terms?.length ?? 0,
-        viewCount: item.viewCount ?? item.view_count ?? 0,
-        isPublic: item.isPublic ?? item.is_public ?? true,
-        isOwner: item.isOwner ?? item.is_owner ?? false,
-    });
+    const normalizeSet = normalizeStudySet;
 
     useEffect(() => {
         const fetchSets = async () => {
