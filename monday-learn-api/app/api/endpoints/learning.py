@@ -12,6 +12,7 @@ from app.models.learning_progress_log import LearningProgressLog
 from app.models.ai_config import AIConfig
 from app.models.ai_usage_log import AIUsageLog
 from app.models.learning_report import LearningReport
+from app.models.daily_learning_summary import DailyLearningSummary
 from app.schemas.learning_progress import LearningProgressUpdate, LearningProgressResponse, LearningSession
 from app.schemas.learning_progress_log import LearningProgressLogCreate, LearningProgressLogResponse
 from app.schemas.learning_report import LearningReportRequest, LearningReportResponse
@@ -50,6 +51,51 @@ def record_learning_log(
         source=source,
     )
     db.add(log)
+    
+    # Update Daily Summary
+    today = datetime.now().date()
+    summary = (
+        db.query(DailyLearningSummary)
+        .filter(
+            DailyLearningSummary.user_id == user_id,
+            DailyLearningSummary.date == today
+        )
+        .first()
+    )
+    if not summary:
+        summary = DailyLearningSummary(
+            user_id=user_id,
+            date=today,
+            total_time_ms=0,
+            total_words_reviewed=0,
+            activity_level=0
+        )
+        db.add(summary)
+    
+    # Update stats
+    if time_spent_ms:
+        summary.total_time_ms += time_spent_ms
+    
+    summary.total_words_reviewed += 1
+    
+    # Simple logic for activity level (0-4)
+    # Level 1: > 0 mins (Started)
+    # Level 2: > 10 mins OR > 20 words
+    # Level 3: > 30 mins OR > 50 words
+    # Level 4: > 60 mins OR > 100 words
+    
+    total_mins = summary.total_time_ms / 60000
+    words = summary.total_words_reviewed
+    
+    if total_mins > 60 or words > 100:
+        summary.activity_level = 4
+    elif total_mins > 30 or words > 50:
+        summary.activity_level = 3
+    elif total_mins > 10 or words > 20:
+        summary.activity_level = 2
+    else:
+        summary.activity_level = 1
+
     if commit:
         db.commit()
         db.refresh(log)
@@ -91,7 +137,7 @@ def call_active_ai(db: Session, current_user: User, prompt: str, max_tokens: int
     )
 
     try:
-        with httpx.Client(timeout=15.0) as client:
+        with httpx.Client(timeout=60.0) as client:
             response = client.post(url, json=payload, headers=headers)
     except Exception as e:
         logger.error(f"AI provider request failed: {e}")
@@ -412,16 +458,53 @@ def generate_learning_report(
         reverse=True,
     )[:10]  # Increased to top 10 for better analysis
 
+    # global question type stats
+    q_type_stats = {}
+    for log in logs:
+        if log.question_type:
+            qt = log.question_type
+            if qt not in q_type_stats:
+                q_type_stats[qt] = {"total": 0, "correct": 0}
+            q_type_stats[qt]["total"] += 1
+            if log.is_correct:
+                q_type_stats[qt]["correct"] += 1
+
     prompt_lines = [
-        f"时间范围: {payload.timeframe}",
+        f"分析时间范围: {payload.timeframe}",
         f"总答题数: {total}",
         f"正确数: {correct}",
         f"总体正确率: {accuracy}%",
     ]
-    if top_mistakes:
-        prompt_lines.append("错题高频术语: " + "; ".join([f"{m['term']}({m['incorrect']}/{m['total']})" for m in top_mistakes[:5]]))
 
-    prompt_lines.append("请基于以上数据，用简洁中文输出：整体表现、主要薄弱点、3条具体可执行的训练建议，以及1句鼓励的话。")
+    if q_type_stats:
+        q_lines = []
+        for qt, stats in q_type_stats.items():
+            acc = round((stats["correct"] / stats["total"]) * 100, 1)
+            q_lines.append(f"{qt}: {acc}% ({stats['correct']}/{stats['total']})")
+        prompt_lines.append("题型表现: " + "; ".join(q_lines))
+
+    if top_mistakes:
+        prompt_lines.append("高频错题 (术语/错误次数/总次数): " + "; ".join([f"{m['term']}({m['incorrect']}/{m['total']})" for m in top_mistakes[:10]]))
+
+    prompt_lines.append("""
+请扮演一位专业的学习教练，基于以上数据生成一份详细的学习诊断报告。
+请使用 Markdown 格式，包含以下部分（请严格使用中文）：
+
+### 📊 整体表现
+简要评价用户的当前水平和答题状态。
+
+### ⚠️ 学习进度问题
+分析用户是否存在特定的学习障碍（如：特定题型薄弱、记忆混淆、新词掌握慢等）。
+
+### 🎯 主要薄弱点
+列出具体的薄弱术语或概念，并分析可能的原因。
+
+### 💡 训练建议
+提供3条具体、可执行的改进建议（例如：建议使用哪种模式复习，重点关注哪些内容）。
+
+### 🌟 鼓励
+一句简短温暖的鼓励。
+""")
     prompt = "\n".join(prompt_lines)
 
     ai_content = call_active_ai(db, current_user, prompt)
