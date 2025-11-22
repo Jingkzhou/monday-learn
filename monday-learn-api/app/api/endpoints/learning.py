@@ -111,6 +111,7 @@ def call_active_ai(
     *,
     max_tokens: int = 600,
     request_type: str = "generic",
+    feature: str | None = None,
     extra_payload: dict | None = None,
     require_json_object: bool = False,
 ) -> str:
@@ -190,7 +191,7 @@ def call_active_ai(
             user_id=current_user.id,
             tokens_used=total_tokens,
             request_type=request_type,
-            feature=request_type,
+            feature=feature or request_type,
             user_email=getattr(current_user, "email", None),
         )
         db.add(log)
@@ -540,6 +541,7 @@ def generate_learning_report(
             {"role": "user", "content": prompt},
         ],
         request_type="learning_report",
+        feature="learning_report",
     )
 
     # Determine if we should suggest creating a study set

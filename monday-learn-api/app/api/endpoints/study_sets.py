@@ -488,6 +488,7 @@ def generate_ai_exam(
         ],
         max_tokens=900,
         request_type="ai_exam",
+        feature="ai_exam",
     )
 
     # If AI returns anything, hand it to the frontend; fallback is still available
