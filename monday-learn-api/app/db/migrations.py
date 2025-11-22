@@ -89,8 +89,37 @@ def ensure_learning_progress_mastered_at(engine) -> None:
         conn.commit()
     logger.success("mastered_at column ensured and backfilled")
 
+
+def ensure_ai_usage_logs_extra_fields(engine) -> None:
+    """
+    Add feature and user_email columns to ai_usage_logs if missing.
+    Keeps logging schema in sync without manual migrations.
+    """
+    inspector = inspect(engine)
+    if "ai_usage_logs" not in inspector.get_table_names():
+        logger.warning("ai_usage_logs table missing; skipping feature/email migration")
+        return
+
+    column_names = [col["name"] for col in inspector.get_columns("ai_usage_logs")]
+    alters = []
+    if "feature" not in column_names:
+        alters.append("ADD COLUMN feature VARCHAR(100)")
+    if "user_email" not in column_names:
+        alters.append("ADD COLUMN user_email VARCHAR(255)")
+
+    if not alters:
+        return
+
+    alter_sql = "ALTER TABLE ai_usage_logs " + ", ".join(alters)
+    logger.info("Applying ai_usage_logs migration: {}", alter_sql)
+    with engine.connect() as conn:
+        conn.execute(text(alter_sql))
+        conn.commit()
+    logger.success("ai_usage_logs columns ensured")
+
 def run_migrations(engine) -> None:
     ensure_ai_config_total_tokens(engine)
     ensure_learning_reports_utf8mb4(engine)
     # daily_learning_summaries is created by Base.metadata.create_all in main.py
     ensure_learning_progress_mastered_at(engine)
+    ensure_ai_usage_logs_extra_fields(engine)

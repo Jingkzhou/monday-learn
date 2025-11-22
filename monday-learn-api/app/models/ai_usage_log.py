@@ -11,6 +11,8 @@ class AIUsageLog(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     tokens_used = Column(Integer, default=0)
     request_type = Column(String(50), nullable=False)  # e.g., "test", "generation"
+    feature = Column(String(100), nullable=True)  # e.g., "ai_exam", "learning_report"
+    user_email = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     config = relationship("AIConfig", backref="usage_logs")

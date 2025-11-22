@@ -531,6 +531,8 @@ export const Admin: React.FC = () => {
                                     <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-white/5">
                                         <tr>
                                             <th className="px-4 py-3">时间</th>
+                                            <th className="px-4 py-3">功能</th>
+                                            <th className="px-4 py-3">用户</th>
                                             <th className="px-4 py-3">类型</th>
                                             <th className="px-4 py-3 text-right">消耗 Tokens</th>
                                         </tr>
@@ -540,6 +542,12 @@ export const Admin: React.FC = () => {
                                             <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
                                                 <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
                                                     {new Date(log.created_at).toLocaleString()}
+                                                </td>
+                                                <td className="px-4 py-3 text-gray-700 dark:text-gray-200">
+                                                    {log.feature || '—'}
+                                                </td>
+                                                <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                                    {log.user_email || `User #${log.user_id}`}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${log.request_type === 'test'

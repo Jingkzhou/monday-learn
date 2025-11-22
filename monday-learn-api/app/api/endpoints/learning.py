@@ -111,6 +111,8 @@ def call_active_ai(
     *,
     max_tokens: int = 600,
     request_type: str = "generic",
+    extra_payload: dict | None = None,
+    require_json_object: bool = False,
 ) -> str:
     config = db.query(AIConfig).filter(AIConfig.is_active.is_(True)).first()
     if not config:
@@ -128,13 +130,25 @@ def call_active_ai(
         "messages": messages,
         "max_tokens": max_tokens,
     }
+    if extra_payload:
+        payload.update(extra_payload)
+
+    # For Ark/OpenAI-compatible JSON mode
+    if require_json_object:
+        payload["response_format"] = {"type": "json_object"}
+
+    prompt_preview = " | ".join(
+        [f"{m.get('role')}:{str(m.get('content'))[:500]}" for m in messages]
+    )
 
     logger.info(
-        "AI report request",
+        "AI request",
         provider=config.provider,
         model=config.model_name,
         url=url,
-        prompt_preview=prompt[:500],
+        request_type=request_type,
+        prompt_preview=prompt_preview,
+        prompt_messages=messages,
     )
 
     try:
@@ -162,7 +176,8 @@ def call_active_ai(
     logger.info(
         "AI provider response",
         status=response.status_code,
-        content_preview=content[:500],
+        request_type=request_type,
+        content=content,
     )
 
     # Track token usage if returned
@@ -175,6 +190,8 @@ def call_active_ai(
             user_id=current_user.id,
             tokens_used=total_tokens,
             request_type=request_type,
+            feature=request_type,
+            user_email=getattr(current_user, "email", None),
         )
         db.add(log)
         db.add(config)

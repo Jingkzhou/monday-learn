@@ -82,5 +82,7 @@ export interface AIUsageLog {
   user_id: number;
   tokens_used: number;
   request_type: string;
+  feature?: string | null;
+  user_email?: string | null;
   created_at: string;
 }

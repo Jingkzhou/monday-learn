@@ -32,6 +32,7 @@ export const AIExamMode: React.FC = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState<'idle' | 'generating' | 'complete' | 'error'>('idle');
   const [examData, setExamData] = useState<ExamData | null>(null);
+  const [examMarkdown, setExamMarkdown] = useState<string>('');
   const [showAnswers, setShowAnswers] = useState(false);
   const [studySet, setStudySet] = useState<StudySet | null>(null);
   const [terms, setTerms] = useState<Term[]>([]);
@@ -86,8 +87,14 @@ export const AIExamMode: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const data = await api.post<ExamData>(`/study-sets/${id}/ai-exam`, {});
-      setExamData(data);
+      const data: any = await api.post(`/study-sets/${id}/ai-exam`, {});
+      if (data?.markdown) {
+        setExamMarkdown(data.markdown);
+        setExamData(null);
+      } else {
+        setExamData(data as ExamData);
+        setExamMarkdown('');
+      }
       setStatus('complete');
     } catch (error: any) {
       console.error("Error generating exam:", error);
@@ -318,6 +325,12 @@ export const AIExamMode: React.FC = () => {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {status === 'complete' && !examData && examMarkdown && (
+          <div className="bg-white dark:bg-[#15143c] shadow-lg p-[15mm] md:p-[20mm] min-h-[297mm] whitespace-pre-wrap text-gray-800 dark:text-gray-100">
+            {examMarkdown}
           </div>
         )}
       </div>

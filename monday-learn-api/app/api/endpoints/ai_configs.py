@@ -184,13 +184,15 @@ async def test_connection(
 
                     from app.models.ai_usage_log import AIUsageLog
                     log = AIUsageLog(
-                        config_id=config.id,
-                        user_id=current_user.id,
-                        tokens_used=total_tokens,
-                        request_type="test"
-                    )
-                    db.add(log)
-                    db.commit()
+                    config_id=config.id,
+                    user_id=current_user.id,
+                    tokens_used=total_tokens,
+                    request_type="test",
+                    feature="test",
+                    user_email=current_user.email,
+                )
+                db.add(log)
+                db.commit()
 
                 return {"status": "success", "message": "Connection successful", "latency": f"{response.elapsed.total_seconds() * 1000:.2f}ms", "tokens": total_tokens}
             else:

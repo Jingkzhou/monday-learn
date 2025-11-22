@@ -4,6 +4,8 @@ from datetime import datetime
 class AIUsageLogBase(BaseModel):
     tokens_used: int
     request_type: str
+    feature: str | None = None
+    user_email: str | None = None
 
 class AIUsageLogCreate(AIUsageLogBase):
     config_id: int

@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 from datetime import datetime
 import json
+import re
+from typing import List, Union
 from app.core.deps import get_current_user
+from app.core.logger import logger
 from app.db.session import get_db
 from app.models.study_set import StudySet, Term
 from app.schemas.study_set import (
@@ -22,6 +25,68 @@ router = APIRouter()
 from app.models.learning_progress import LearningProgress, LearningStatus
 from app.models.learning_progress_log import LearningProgressLog
 from sqlalchemy import func, case, cast, Integer
+
+def build_fallback_exam(study_set: StudySet, terms: List[Term]) -> ExamPaper:
+    # Deterministic fallback to avoid blocking users when AI JSON解析失败
+    top_terms = terms[:10]  # cap to avoid overly long fallbacks
+    distractors = [t.definition for t in top_terms if t.definition]
+
+    mc_questions = []
+    for idx, term in enumerate(top_terms[:5]):
+        options = [term.definition or term.term]
+        for d in distractors:
+            if d and d != term.definition and len(options) < 4:
+                options.append(d)
+        while len(options) < 4:
+            options.append("——")
+        mc_questions.append({
+            "id": f"fallback_mc_{idx+1}",
+            "text": f"“{term.term}”的释义是？",
+            "type": "multiple_choice",
+            "options": options,
+            "correctAnswer": term.definition or term.term,
+        })
+
+    tf_questions = []
+    for idx, term in enumerate(top_terms[5:8]):
+        tf_questions.append({
+            "id": f"fallback_tf_{idx+1}",
+            "text": f"“{term.term}”是此学习集中的术语。",
+            "type": "true_false",
+            "correctAnswer": "T",
+        })
+
+    written_questions = []
+    for idx, term in enumerate(top_terms[8:]):
+        written_questions.append({
+            "id": f"fallback_w_{idx+1}",
+            "text": f"写出“{term.term}”的释义或用法。",
+            "type": "written",
+            "correctAnswer": term.definition or "",
+        })
+
+    return ExamPaper(
+        title=f"{study_set.title} 测试卷（自动生成）",
+        gradeLevel="适用当前学习集",
+        subject=study_set.description or "综合",
+        sections=[
+            {
+                "title": "Section 1: 选择题",
+                "description": "根据释义选择正确术语。",
+                "questions": mc_questions,
+            },
+            {
+                "title": "Section 2: 判断题",
+                "description": "判断表述是否属于本学习集。",
+                "questions": tf_questions,
+            },
+            {
+                "title": "Section 3: 填空题",
+                "description": "根据提示填写释义。",
+                "questions": written_questions,
+            },
+        ],
+    )
 
 def serialize_study_set(study_set: StudySet, current_user=None, db: Session = None) -> StudySetResponse:
     is_owner = bool(current_user and study_set.author_id == current_user.id)
@@ -367,7 +432,7 @@ def clone_study_set(
     return serialize_study_set(new_set, current_user, db)
 
 
-@router.post("/{study_set_id:int}/ai-exam", response_model=ExamPaper)
+@router.post("/{study_set_id:int}/ai-exam")
 def generate_ai_exam(
     study_set_id: int,
     db: Session = Depends(get_db),
@@ -394,7 +459,7 @@ def generate_ai_exam(
     context_preview = "；".join(term_pairs)[:4000]
 
     prompt = f"""
-你是一名资深命题专家，请基于以下学习集内容生成一份正式试卷，必须用 JSON 输出，遵循提供的 Schema。
+你是一名资深命题专家，请基于以下学习集内容生成一份正式试卷，直接以 Markdown 文本输出，不要使用代码块，也不要输出 JSON。
 
 学习集标题: "{study_set.title}"
 描述: "{study_set.description or ''}"
@@ -407,28 +472,8 @@ def generate_ai_exam(
    - Section 2: true_false（判断题）
    - Section 3: written（填空/简答）
 3. 每个部分生成 3-5 道高质量“变形题”，不要直接问释义。
-4. 题目要给出正确答案与简短解释，填在 correctAnswer 字段。
-5. 返回值必须是纯 JSON，符合以下 Schema，不能包含 Markdown、额外文字或代码块：
-{{
-  "title": "string",
-  "gradeLevel": "string",
-  "subject": "string",
-  "sections": [
-    {{
-      "title": "string",
-      "description": "string",
-      "questions": [
-        {{
-          "id": "string",
-          "text": "string",
-          "type": "multiple_choice|true_false|written",
-          "options": ["string"], // 仅 multiple_choice 提供
-          "correctAnswer": "string"
-        }}
-      ]
-    }}
-  ]
-}}
+4. 题目要给出正确答案与简短解释。
+5. 按 Markdown 排版：用二级标题写 Section 标题，题目用有序列表，选项用缩进无序列表，答案用 “> 答案：xxx”。
 """
 
     raw = call_active_ai(
@@ -437,7 +482,7 @@ def generate_ai_exam(
         messages=[
             {
                 "role": "system",
-                "content": "你是一名考试命题专家，请只输出 JSON，符合给定的 Schema，不要添加额外说明。",
+                "content": "你是一名考试命题专家，返回 Markdown 试卷，不要输出 JSON，也不要使用代码块。",
             },
             {"role": "user", "content": prompt},
         ],
@@ -445,23 +490,8 @@ def generate_ai_exam(
         request_type="ai_exam",
     )
 
-    def _clean_json(text: str) -> str:
-        cleaned = text.strip()
-        if cleaned.startswith("```"):
-            cleaned = cleaned.lstrip("`")
-            cleaned = cleaned.replace("json", "", 1).strip()
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3].strip()
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3].strip()
-        return cleaned
-
-    try:
-        parsed = json.loads(_clean_json(raw))
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Failed to parse AI response: {e}")
-
-    return ExamPaper(**parsed)
+    # If AI returns anything, hand it to the frontend; fallback is still available
+    return {"markdown": raw, "fallback": build_fallback_exam(study_set, terms).dict()}
 
 
 @router.patch("/terms/{term_id:int}/star", response_model=TermResponse)
