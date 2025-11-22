@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 from datetime import datetime
+import json
 from app.core.deps import get_current_user
 from app.db.session import get_db
 from app.models.study_set import StudySet, Term
@@ -11,6 +12,8 @@ from app.schemas.study_set import (
     TermResponse,
     StudySetCloneRequest,
 )
+from app.schemas.ai_exam import ExamPaper
+from app.api.endpoints.learning import call_active_ai
 
 
 router = APIRouter()
@@ -362,6 +365,103 @@ def clone_study_set(
     )
 
     return serialize_study_set(new_set, current_user, db)
+
+
+@router.post("/{study_set_id:int}/ai-exam", response_model=ExamPaper)
+def generate_ai_exam(
+    study_set_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    study_set = (
+        db.query(StudySet)
+        .options(selectinload(StudySet.terms))
+        .filter(StudySet.id == study_set_id)
+        .first()
+    )
+    if not study_set:
+        raise HTTPException(status_code=404, detail="Study set not found")
+
+    is_owner = study_set.author_id == current_user.id
+    if not is_owner and not study_set.is_public:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this study set")
+
+    terms = study_set.terms or []
+    if not terms:
+        raise HTTPException(status_code=400, detail="Study set has no terms to generate an exam")
+
+    term_pairs = [f"{t.term}（{t.definition}）" for t in terms]
+    context_preview = "；".join(term_pairs)[:4000]
+
+    prompt = f"""
+你是一名资深命题专家，请基于以下学习集内容生成一份正式试卷，必须用 JSON 输出，遵循提供的 Schema。
+
+学习集标题: "{study_set.title}"
+描述: "{study_set.description or ''}"
+术语示例: {context_preview}
+
+要求：
+1. 严格使用中文命题，匹配术语语言。
+2. 结构固定为 3 个部分：
+   - Section 1: multiple_choice（4 个选项，1 个正确）
+   - Section 2: true_false（判断题）
+   - Section 3: written（填空/简答）
+3. 每个部分生成 3-5 道高质量“变形题”，不要直接问释义。
+4. 题目要给出正确答案与简短解释，填在 correctAnswer 字段。
+5. 返回值必须是纯 JSON，符合以下 Schema，不能包含 Markdown、额外文字或代码块：
+{{
+  "title": "string",
+  "gradeLevel": "string",
+  "subject": "string",
+  "sections": [
+    {{
+      "title": "string",
+      "description": "string",
+      "questions": [
+        {{
+          "id": "string",
+          "text": "string",
+          "type": "multiple_choice|true_false|written",
+          "options": ["string"], // 仅 multiple_choice 提供
+          "correctAnswer": "string"
+        }}
+      ]
+    }}
+  ]
+}}
+"""
+
+    raw = call_active_ai(
+        db,
+        current_user,
+        messages=[
+            {
+                "role": "system",
+                "content": "你是一名考试命题专家，请只输出 JSON，符合给定的 Schema，不要添加额外说明。",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        max_tokens=900,
+        request_type="ai_exam",
+    )
+
+    def _clean_json(text: str) -> str:
+        cleaned = text.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.lstrip("`")
+            cleaned = cleaned.replace("json", "", 1).strip()
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3].strip()
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3].strip()
+        return cleaned
+
+    try:
+        parsed = json.loads(_clean_json(raw))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to parse AI response: {e}")
+
+    return ExamPaper(**parsed)
 
 
 @router.patch("/terms/{term_id:int}/star", response_model=TermResponse)

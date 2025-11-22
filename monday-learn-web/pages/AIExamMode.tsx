@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MOCK_SET } from '../constants';
-import { GoogleGenAI, Type } from "@google/genai";
-import { Printer, ArrowLeft, Sparkles, RefreshCw, FileText, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Printer, ArrowLeft, Sparkles, RefreshCw, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { api } from '../utils/api';
+import { StudySet, Term } from '../types';
+import { normalizeStudySet } from '../utils/studySet';
 
 // Define the expected structure of the AI response
 interface ExamQuestion {
@@ -32,124 +33,107 @@ export const AIExamMode: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'generating' | 'complete' | 'error'>('idle');
   const [examData, setExamData] = useState<ExamData | null>(null);
   const [showAnswers, setShowAnswers] = useState(false);
+  const [studySet, setStudySet] = useState<StudySet | null>(null);
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [loadingSet, setLoadingSet] = useState(true);
+  const [setError, setSetError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Helper to clean markdown code blocks from JSON response
-  const cleanJson = (text: string) => {
-    // Remove markdown code blocks if present (e.g. ```json ... ``` or just ``` ... ```)
-    let cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
-    return cleaned;
-  };
+  // Load study set details
+  useEffect(() => {
+    const fetchSet = async () => {
+      setLoadingSet(true);
+      setSetError('');
+      try {
+        const data = await api.get<any>(`/study-sets/${id}`);
+        const normalized = normalizeStudySet(data);
+        const preparedTerms: Term[] = (normalized.terms || []).map((term: any, index: number) => ({
+          id: term.id,
+          term: term.term,
+          definition: term.definition,
+          imageUrl: term.image_url,
+          status: term.status || 'not_started',
+          order: term.order ?? index,
+          starred: term.starred,
+        }));
+
+        setStudySet({ ...normalized, terms: preparedTerms });
+        setTerms(preparedTerms);
+      } catch (err: any) {
+        setSetError(err.message || '无法加载学习集');
+      } finally {
+        setLoadingSet(false);
+      }
+    };
+
+    fetchSet();
+  }, [id]);
 
   // Initialize Gemini
   const generateExam = async () => {
+    if (!studySet) {
+      return;
+    }
+    if (!terms.length) {
+      setErrorMessage('学习集没有可用术语，无法生成试卷。');
+      setStatus('error');
+      return;
+    }
+
     setStatus('generating');
     setExamData(null);
     setShowAnswers(false);
+    setErrorMessage('');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-      // Prepare context from the current set
-      const termsContext = MOCK_SET.terms.map(t => `${t.term} (${t.definition})`).join(', ');
-
-      const prompt = `
-        Analyze the following study set and act as an expert teacher to create a professional exam paper.
-        
-        Study Set Info:
-        - Title: "${MOCK_SET.title}"
-        - Description: "${MOCK_SET.description || ''}"
-        - Content Preview: ${termsContext.substring(0, 1500)}...
-
-        Requirements:
-        1. **Analyze Context**: Determine the appropriate Subject and Grade Level based on the terms.
-        2. **Structure**: Create exactly 3 sections:
-           - Section 1: Multiple Choice (Concept understanding, 4 options).
-           - Section 2: True/False (Logic or fact checking).
-           - Section 3: Application/Written (Fill in the blanks, use word in sentence, or short answer).
-        3. **Question Quality**: 
-           - DO NOT just ask "What is the definition of X?". 
-           - Create "Deformed Questions" that test mastery (e.g., "Which word describes...", "Fill in the blank...").
-           - Ensure options for Multiple Choice are plausible distractors.
-        4. **Quantity**: Generate 3-5 high-quality questions per section.
-        5. **Language**: The exam language must match the language of the Terms (e.g., if terms are Chinese, use Chinese).
-        
-        Output strictly in JSON format matching the requested schema.
-      `;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING, description: "A creative title for the exam paper" },
-              gradeLevel: { type: Type.STRING, description: "Target audience, e.g., 'Grade 1' or 'Advanced'" },
-              subject: { type: Type.STRING },
-              sections: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    title: { type: Type.STRING },
-                    description: { type: Type.STRING },
-                    questions: {
-                      type: Type.ARRAY,
-                      items: {
-                        type: Type.OBJECT,
-                        properties: {
-                          id: { type: Type.STRING },
-                          text: { type: Type.STRING, description: "The question prompt" },
-                          type: { type: Type.STRING, enum: ["multiple_choice", "true_false", "written"] },
-                          options: {
-                            type: Type.ARRAY,
-                            items: { type: Type.STRING },
-                            description: "Array of 4 options for multiple choice, empty otherwise"
-                          },
-                          correctAnswer: {
-                            type: Type.STRING,
-                            description: "The correct answer and a brief explanation"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
-
-      if (response.text) {
-        const cleanedText = cleanJson(response.text);
-        try {
-          const data = JSON.parse(cleanedText) as ExamData;
-          setExamData(data);
-          setStatus('complete');
-        } catch (parseError) {
-          console.error("JSON Parse Error:", parseError);
-          console.log("Raw text:", response.text);
-          setStatus('error');
-        }
-      } else {
-        throw new Error("No data returned from AI");
-      }
-
-    } catch (error) {
+      const data = await api.post<ExamData>(`/study-sets/${id}/ai-exam`, {});
+      setExamData(data);
+      setStatus('complete');
+    } catch (error: any) {
       console.error("Error generating exam:", error);
+      setErrorMessage(error?.message || '生成试卷失败，请稍后重试。');
       setStatus('error');
     }
   };
 
   useEffect(() => {
-    generateExam();
-  }, []);
+    if (studySet) {
+      generateExam();
+    }
+  }, [studySet]);
 
   const handlePrint = () => {
     window.print();
   };
+
+  if (loadingSet) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-dark-blue">
+        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+          正在加载学习集...
+        </div>
+      </div>
+    );
+  }
+
+  if (setError || !studySet) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-dark-blue text-center px-4">
+        <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4">
+          <AlertTriangle className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">无法加载学习集</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">{setError || '请稍后重试。'}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors"
+        >
+          返回
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-dark-blue print:bg-white font-serif md:font-sans transition-colors duration-200">
@@ -215,7 +199,9 @@ export const AIExamMode: React.FC = () => {
               <AlertTriangle className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">生成失败</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6 text-center">AI 服务暂时无法响应，请检查网络连接或重试。</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-6 text-center">
+              {errorMessage || 'AI 服务暂时无法响应，请检查网络连接或重试。'}
+            </p>
             <button
               onClick={generateExam}
               className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors"

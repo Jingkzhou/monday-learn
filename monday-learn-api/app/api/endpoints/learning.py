@@ -104,7 +104,14 @@ def record_learning_log(
     return log
 
 
-def call_active_ai(db: Session, current_user: User, prompt: str, max_tokens: int = 600) -> str:
+def call_active_ai(
+    db: Session,
+    current_user: User,
+    messages: list[dict[str, str]],
+    *,
+    max_tokens: int = 600,
+    request_type: str = "generic",
+) -> str:
     config = db.query(AIConfig).filter(AIConfig.is_active.is_(True)).first()
     if not config:
         raise HTTPException(status_code=503, detail="No active AI model configured")
@@ -118,13 +125,7 @@ def call_active_ai(db: Session, current_user: User, prompt: str, max_tokens: int
     }
     payload = {
         "model": config.model_name,
-        "messages": [
-            {
-                "role": "system",
-                "content": "你是一名学习数据分析师，使用简洁的中文输出，并提供可执行的学习建议。",
-            },
-            {"role": "user", "content": prompt},
-        ],
+        "messages": messages,
         "max_tokens": max_tokens,
     }
 
@@ -173,7 +174,7 @@ def call_active_ai(db: Session, current_user: User, prompt: str, max_tokens: int
             config_id=config.id,
             user_id=current_user.id,
             tokens_used=total_tokens,
-            request_type="learning_report",
+            request_type=request_type,
         )
         db.add(log)
         db.add(config)
@@ -511,7 +512,18 @@ def generate_learning_report(
 """)
     prompt = "\n".join(prompt_lines)
 
-    ai_content = call_active_ai(db, current_user, prompt)
+    ai_content = call_active_ai(
+        db,
+        current_user,
+        messages=[
+            {
+                "role": "system",
+                "content": "你是一名学习数据分析师，使用简洁的中文输出，并提供可执行的学习建议。",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        request_type="learning_report",
+    )
 
     # Determine if we should suggest creating a study set
     # Logic: If there are at least 3 terms with mistakes
@@ -542,5 +554,3 @@ def generate_learning_report(
         report_id=report.id,
         suggestion_create_set=suggestion_create_set,
     )
-
-
