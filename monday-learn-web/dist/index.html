@@ -1,59 +1,73 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Monday - 开启快乐学习周</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#4255ff',
-              'primary-dark': '#2e3db2',
-              'bg-gray': '#f6f7fb',
-            },
-            fontFamily: {
-              sans: ['Inter', 'system-ui', 'sans-serif'],
-            }
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MondayQuizlet开启快乐学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4255ff',
+            'primary-dark': '#2e3db2',
+            'bg-gray': '#f6f7fb',
+            'dark-blue': '#0a092d',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
           }
         }
       }
-    </script>
-    
-    <!-- Favicon: A data URI version of the Monday SVG Logo -->
-    <link rel="icon" href="data:image/svg+xml,<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M15 85V35C15 23.9543 23.9543 15 35 15C42.5 15 48 20 50 25C52 20 57.5 15 65 15C76.0457 15 85 23.9543 85 35V85' stroke='%234255ff' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/><circle cx='50' cy='45' r='16' fill='%23FACC15'/><path d='M50 22V18' stroke='%23FACC15' stroke-width='4' stroke-linecap='round'/><path d='M68 35L71 33' stroke='%23FACC15' stroke-width='4' stroke-linecap='round'/><path d='M32 35L29 33' stroke='%23FACC15' stroke-width='4' stroke-linecap='round'/><circle cx='44' cy='43' r='2' fill='%23854D0E'/><circle cx='56' cy='43' r='2' fill='%23854D0E'/><path d='M46 48C46 48 48 50 50 50C52 50 54 48 54 48' stroke='%23854D0E' stroke-width='2' stroke-linecap='round'/></svg>">
+    }
+  </script>
 
-    <style>
-      /* Hide scrollbar for chrome/safari/opera */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      /* Hide scrollbar for IE, Edge and Firefox */
-      .no-scrollbar {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-      }
-      
-      /* 3D Flip Utilities */
-      .perspective-1000 {
-        perspective: 1000px;
-      }
-      .transform-style-3d {
-        transform-style: preserve-3d;
-      }
-      .backface-hidden {
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden; /* Safari */
-      }
-      .rotate-y-180 {
-        transform: rotateY(180deg);
-      }
-    </style>
+  <!-- Favicon: A data URI version of the Monday SVG Logo -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M15 85V35C15 23.9543 23.9543 15 35 15C42.5 15 48 20 50 25C52 20 57.5 15 65 15C76.0457 15 85 23.9543 85 35V85' stroke='%234255ff' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/><circle cx='50' cy='45' r='16' fill='%23FACC15'/><path d='M50 22V18' stroke='%23FACC15' stroke-width='4' stroke-linecap='round'/><path d='M68 35L71 33' stroke='%23FACC15' stroke-width='4' stroke-linecap='round'/><path d='M32 35L29 33' stroke='%23FACC15' stroke-width='4' stroke-linecap='round'/><circle cx='44' cy='43' r='2' fill='%23854D0E'/><circle cx='56' cy='43' r='2' fill='%23854D0E'/><path d='M46 48C46 48 48 50 50 50C52 50 54 48 54 48' stroke='%23854D0E' stroke-width='2' stroke-linecap='round'/></svg>">
 
-<link rel="stylesheet" href="/index.css">
+  <style>
+    /* Hide scrollbar for chrome/safari/opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    /* 3D Flip Utilities */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      /* Safari */
+    }
+
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  </style>
+
+  <link rel="stylesheet" href="/index.css">
   <script type="importmap">
 {
   "imports": {
@@ -67,9 +81,12 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/assets/index-DrB94xfj.js"></script>
+  <script type="module" crossorigin src="/assets/index-CkXl4sjR.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DOnzI3fN.css">
 </head>
-  <body class="bg-bg-gray text-gray-900">
-    <div id="root"></div>
+
+<body class="bg-bg-gray text-gray-900 dark:bg-dark-blue dark:text-white transition-colors duration-200">
+  <div id="root"></div>
 </body>
+
 </html>
