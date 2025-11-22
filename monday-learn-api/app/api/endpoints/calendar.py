@@ -109,26 +109,35 @@ def get_daily_detail(
     if summary and summary.total_time_ms:
         time_spent_ms = max(time_spent_ms, summary.total_time_ms)
 
+    # Group logs by study set and mode to avoid one-row-per-card noise
+    grouped: Dict[tuple, Dict[str, Any]] = {}
+    for log in logs:
+        key = (log.study_set_id, log.mode)
+        if key not in grouped:
+            grouped[key] = {
+                "count": 0,
+                "correct": 0,
+                "mode": log.mode,
+                "set_name": log.study_set.title if log.study_set else "Unknown Set",
+                "last_time": log.created_at,
+            }
+        grouped[key]["count"] += 1
+        grouped[key]["correct"] += 1 if log.is_correct else 0
+        grouped[key]["last_time"] = max(grouped[key]["last_time"], log.created_at)
+
     items = []
-    for log in reversed(logs):
-        time_str = log.created_at.strftime("%I:%M %p")
-        set_name = log.study_set.title if log.study_set else "Unknown Set"
-        
-        action = f"Studied [{set_name}]"
-        details = ""
-        
-        if log.mode == "learn":
-            details = f"Correct: {1 if log.is_correct else 0}"
-        elif log.mode == "test":
-             details = f"Score: {log.user_answer}" # Simplified
-        elif log.mode == "flashcard":
-             details = "Reviewed"
-        
+    for idx, group in enumerate(sorted(grouped.values(), key=lambda g: g["last_time"], reverse=True), start=1):
+        time_str = group["last_time"].strftime("%H:%M")
+        mode_label = "考试" if group["mode"] == "test" else "学习"
+        action = f"{mode_label} · [{group['set_name']}]"
+        accuracy = int((group["correct"] / group["count"]) * 100) if group["count"] else 0
+        details = f"{group['count']} 次，正确率 {accuracy}%"
+
         items.append(DailyDetailItem(
-            id=log.id,
+            id=idx,
             time=time_str,
             action=action,
-            mode=log.mode,
+            mode=group["mode"],
             details=details
         ))
 

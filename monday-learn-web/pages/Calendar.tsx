@@ -122,6 +122,8 @@ export function CalendarPage() {
             startDate={subDays(today, 180)}
             endDate={today}
             values={summaries}
+            weekdayLabels={['日', '一', '二', '三', '四', '五', '六']}
+            monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']}
             classForValue={(value) => {
               if (!value) {
                 return 'color-empty';
@@ -139,13 +141,13 @@ export function CalendarPage() {
           />
         </div>
         <div className="flex items-center justify-end mt-4 text-xs text-gray-500 gap-2">
-          <span>Less</span>
+          <span>少</span>
           <div className="w-3 h-3 bg-gray-100 rounded-sm"></div>
           <div className="w-3 h-3 bg-indigo-100 rounded-sm"></div>
           <div className="w-3 h-3 bg-indigo-300 rounded-sm"></div>
           <div className="w-3 h-3 bg-indigo-500 rounded-sm"></div>
           <div className="w-3 h-3 bg-indigo-700 rounded-sm"></div>
-          <span>More</span>
+          <span>多</span>
         </div>
       </div>
 
