@@ -322,7 +322,11 @@ def update_progress(
         progress.consecutive_correct = 0
         progress.total_incorrect = (progress.total_incorrect or 0) + 1
     
+    previous_status = current_status
     progress.last_reviewed = datetime.now()
+    became_mastered = previous_status != LearningStatus.MASTERED and progress.status == LearningStatus.MASTERED
+    if became_mastered and not progress.mastered_at:
+        progress.mastered_at = progress.last_reviewed
     record_learning_log(
         db,
         user_id=current_user.id,
@@ -538,6 +542,5 @@ def generate_learning_report(
         report_id=report.id,
         suggestion_create_set=suggestion_create_set,
     )
-
 
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import { format, subDays, startOfMonth, endOfMonth, parseISO } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, BookOpen, CheckCircle, AlertCircle, Trophy } from 'lucide-react';
 import { api } from '../utils/api';

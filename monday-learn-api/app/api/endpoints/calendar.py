@@ -7,6 +7,7 @@ from app.core import deps
 from app.models.user import User
 from app.models.daily_learning_summary import DailyLearningSummary
 from app.models.learning_progress_log import LearningProgressLog
+from app.models.learning_progress import LearningProgress, LearningStatus
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -79,7 +80,6 @@ def get_daily_detail(
         )
         .first()
     )
-    total_time = summary.total_time_ms if summary else 0
 
     # 2. Get Logs
     # We need to filter by date. Since created_at is datetime, we cast to date.
@@ -89,12 +89,28 @@ def get_daily_detail(
             LearningProgressLog.user_id == current_user.id,
             func.date(LearningProgressLog.created_at) == target_date
         )
-        .order_by(LearningProgressLog.created_at.desc())
+        .order_by(LearningProgressLog.created_at.asc())
         .all()
     )
 
+    # Aggregate realistic time spent: prefer explicit time_spent_ms, fallback to session window
+    time_spent_ms = sum(log.time_spent_ms or 0 for log in logs)
+    if logs:
+        start_time = logs[0].created_at
+        end_time = logs[-1].created_at
+        if start_time and end_time:
+            session_ms = int((end_time - start_time).total_seconds() * 1000)
+            # Avoid 0 when only one log exists
+            if session_ms <= 0:
+                session_ms = 60_000
+            time_spent_ms = max(time_spent_ms, session_ms)
+
+    # Respect any pre-aggregated summary time if higher
+    if summary and summary.total_time_ms:
+        time_spent_ms = max(time_spent_ms, summary.total_time_ms)
+
     items = []
-    for log in logs:
+    for log in reversed(logs):
         time_str = log.created_at.strftime("%I:%M %p")
         set_name = log.study_set.title if log.study_set else "Unknown Set"
         
@@ -116,13 +132,21 @@ def get_daily_detail(
             details=details
         ))
 
-    # 3. Mastered Count (Mock logic or complex query)
-    # For now return 0 or implement real logic if needed
-    mastered_count = 0 
+    # 3. Mastered Count: terms that first became mastered on this date
+    mastered_count = (
+        db.query(LearningProgress)
+        .filter(
+            LearningProgress.user_id == current_user.id,
+            LearningProgress.status == LearningStatus.MASTERED,
+            LearningProgress.mastered_at.isnot(None),
+            func.date(LearningProgress.mastered_at) == target_date,
+        )
+        .count()
+    )
 
     return DailyDetailResponse(
         date=target_date,
-        total_time_ms=total_time,
+        total_time_ms=time_spent_ms,
         items=items,
         mastered_count=mastered_count
     )

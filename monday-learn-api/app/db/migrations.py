@@ -60,8 +60,37 @@ def ensure_daily_learning_summary_table(engine) -> None:
     # We can just verify it here.
     pass
 
+
+def ensure_learning_progress_mastered_at(engine) -> None:
+    """
+    Add mastered_at column to learning_progress to track when a term is first mastered.
+    """
+    inspector = inspect(engine)
+    if "learning_progress" not in inspector.get_table_names():
+        logger.warning("learning_progress table missing; skipping mastered_at migration")
+        return
+
+    column_names = [col["name"] for col in inspector.get_columns("learning_progress")]
+    needs_column = "mastered_at" not in column_names
+    if needs_column:
+        logger.info("Adding mastered_at column to learning_progress table")
+    else:
+        logger.info("mastered_at column already present; ensuring backfill")
+
+    with engine.connect() as conn:
+        if needs_column:
+            conn.execute(text("ALTER TABLE learning_progress ADD COLUMN mastered_at DATETIME"))
+        # Backfill for any existing mastered records so historical data shows up
+        conn.execute(text("""
+            UPDATE learning_progress
+            SET mastered_at = COALESCE(last_reviewed, updated_at, created_at)
+            WHERE status = 'mastered' AND mastered_at IS NULL
+        """))
+        conn.commit()
+    logger.success("mastered_at column ensured and backfilled")
+
 def run_migrations(engine) -> None:
     ensure_ai_config_total_tokens(engine)
     ensure_learning_reports_utf8mb4(engine)
     # daily_learning_summaries is created by Base.metadata.create_all in main.py
-
+    ensure_learning_progress_mastered_at(engine)
