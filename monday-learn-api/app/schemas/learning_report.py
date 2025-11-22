@@ -9,3 +9,5 @@ class LearningReportRequest(BaseModel):
 class LearningReportResponse(BaseModel):
     content: str
     raw_stats: Optional[dict] = None
+    report_id: Optional[int] = None
+    suggestion_create_set: bool = False

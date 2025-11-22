@@ -20,6 +20,7 @@ from app.models.study_group import StudyGroup
 from app.models.class_member import class_members
 from app.models.ai_config import AIConfig
 from app.models.ai_usage_log import AIUsageLog
+from app.models.learning_report import LearningReport
 
 # Create tables
 Base.metadata.create_all(bind=engine)

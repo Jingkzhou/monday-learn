@@ -11,6 +11,7 @@ from app.models.learning_progress import LearningProgress, LearningStatus
 from app.models.learning_progress_log import LearningProgressLog
 from app.models.ai_config import AIConfig
 from app.models.ai_usage_log import AIUsageLog
+from app.models.learning_report import LearningReport
 from app.schemas.learning_progress import LearningProgressUpdate, LearningProgressResponse, LearningSession
 from app.schemas.learning_progress_log import LearningProgressLogCreate, LearningProgressLogResponse
 from app.schemas.learning_report import LearningReportRequest, LearningReportResponse
@@ -63,7 +64,8 @@ def call_active_ai(db: Session, current_user: User, prompt: str, max_tokens: int
         raise HTTPException(status_code=503, detail="No active AI model configured")
 
     base_url = config.base_url or "https://api.openai.com/v1"
-    url = f"{base_url.rstrip('/')}/chat/completions"
+    trimmed = base_url.rstrip("/")
+    url = trimmed if trimmed.endswith("/chat/completions") else f"{trimmed}/chat/completions"
     headers = {
         "Authorization": f"Bearer {config.api_key}",
         "Content-Type": "application/json",
@@ -100,6 +102,7 @@ def call_active_ai(db: Session, current_user: User, prompt: str, max_tokens: int
             "AI provider error",
             status=response.status_code,
             body=response.text[:1000],
+            url=url,
         )
         raise HTTPException(status_code=502, detail=f"AI provider error: {response.text}")
 
@@ -396,6 +399,7 @@ def generate_learning_report(
     top_mistakes = sorted(
         [
             {
+                "term_id": tid,
                 "term": term_names.get(tid, f"术语#{tid}"),
                 "incorrect": data["incorrect"],
                 "total": data["total"],
@@ -405,7 +409,7 @@ def generate_learning_report(
         ],
         key=lambda x: x["incorrect"],
         reverse=True,
-    )[:5]
+    )[:10]  # Increased to top 10 for better analysis
 
     prompt_lines = [
         f"时间范围: {payload.timeframe}",
@@ -414,20 +418,97 @@ def generate_learning_report(
         f"总体正确率: {accuracy}%",
     ]
     if top_mistakes:
-        prompt_lines.append("错题高频术语: " + "; ".join([f"{m['term']}({m['incorrect']}/{m['total']})" for m in top_mistakes]))
+        prompt_lines.append("错题高频术语: " + "; ".join([f"{m['term']}({m['incorrect']}/{m['total']})" for m in top_mistakes[:5]]))
 
     prompt_lines.append("请基于以上数据，用简洁中文输出：整体表现、主要薄弱点、3条具体可执行的训练建议，以及1句鼓励的话。")
     prompt = "\n".join(prompt_lines)
 
     ai_content = call_active_ai(db, current_user, prompt)
 
+    # Determine if we should suggest creating a study set
+    # Logic: If there are at least 3 terms with mistakes
+    suggestion_create_set = len(top_mistakes) >= 3
+
+    raw_stats = {
+        "timeframe": payload.timeframe,
+        "total": total,
+        "correct": correct,
+        "accuracy": accuracy,
+        "top_mistakes": top_mistakes,
+    }
+
+    # Save report to DB
+    report = LearningReport(
+        user_id=current_user.id,
+        content=ai_content,
+        raw_stats=raw_stats,
+        suggested_study_set_id=None, # Will be updated if user creates one
+    )
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+
     return LearningReportResponse(
         content=ai_content,
-        raw_stats={
-            "timeframe": payload.timeframe,
-            "total": total,
-            "correct": correct,
-            "accuracy": accuracy,
-            "top_mistakes": top_mistakes,
-        },
+        raw_stats=raw_stats,
+        report_id=report.id,
+        suggestion_create_set=suggestion_create_set,
     )
+
+
+@router.post("/create-set-from-mistakes/{report_id}", response_model=Dict[str, int])
+def create_set_from_mistakes(
+    report_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    # 1. Fetch the report
+    report = db.query(LearningReport).filter(LearningReport.id == report_id, LearningReport.user_id == current_user.id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    if report.suggested_study_set_id:
+        # Already created
+        return {"study_set_id": report.suggested_study_set_id}
+
+    # 2. Extract mistakes
+    raw_stats = report.raw_stats
+    if not raw_stats or "top_mistakes" not in raw_stats:
+        raise HTTPException(status_code=400, detail="No mistake data in report")
+
+    top_mistakes = raw_stats["top_mistakes"]
+    if not top_mistakes:
+        raise HTTPException(status_code=400, detail="No mistakes to create set from")
+
+    term_ids = [m["term_id"] for m in top_mistakes]
+    
+    # 3. Fetch original terms to copy
+    original_terms = db.query(Term).filter(Term.id.in_(term_ids)).all()
+    if not original_terms:
+        raise HTTPException(status_code=404, detail="Original terms not found")
+
+    # 4. Create new Study Set
+    new_set = StudySet(
+        title=f"错题集 - {datetime.now().strftime('%Y-%m-%d')}",
+        description=f"Based on AI Learning Diagnosis from {report.created_at.strftime('%Y-%m-%d')}",
+        user_id=current_user.id,
+        is_public=False,
+    )
+    db.add(new_set)
+    db.flush() # Get ID
+
+    # 5. Copy terms
+    for term in original_terms:
+        new_term = Term(
+            study_set_id=new_set.id,
+            term=term.term,
+            definition=term.definition,
+        )
+        db.add(new_term)
+
+    # 6. Update report
+    report.suggested_study_set_id = new_set.id
+    
+    db.commit()
+    
+    return {"study_set_id": new_set.id}
