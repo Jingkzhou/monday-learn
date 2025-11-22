@@ -38,7 +38,11 @@ def create_ai_config(
         db.query(AIConfig).update({AIConfig.is_active: False})
         db.flush()
 
-    config = AIConfig(**payload.dict())
+    payload_data = payload.dict()
+    token_limit = payload_data.get("token_limit")
+    payload_data["token_limit"] = int(token_limit) if token_limit is not None else None
+
+    config = AIConfig(**payload_data)
     db.add(config)
     db.commit()
     db.refresh(config)
@@ -61,7 +65,12 @@ def update_ai_config(
         db.query(AIConfig).filter(AIConfig.id != config_id).update({AIConfig.is_active: False})
         db.flush()
 
-    for key, value in payload.dict(exclude_unset=True).items():
+    payload_data = payload.dict(exclude_unset=True)
+    if "token_limit" in payload_data:
+        t = payload_data["token_limit"]
+        payload_data["token_limit"] = int(t) if t is not None else None
+
+    for key, value in payload_data.items():
         setattr(config, key, value)
 
     db.commit()

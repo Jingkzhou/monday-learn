@@ -9,6 +9,7 @@ class AIConfigBase(BaseModel):
     base_url: Optional[str] = None
     model_name: str = Field(..., min_length=1, max_length=255)
     is_active: bool = False
+    token_limit: Optional[int] = Field(None, ge=0, description="0 or None means no limit")
 
 class AIConfigCreate(AIConfigBase):
     pass

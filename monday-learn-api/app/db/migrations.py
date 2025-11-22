@@ -117,8 +117,31 @@ def ensure_ai_usage_logs_extra_fields(engine) -> None:
         conn.commit()
     logger.success("ai_usage_logs columns ensured")
 
+def ensure_ai_config_token_limit(engine) -> None:
+    """
+    Add token_limit column to ai_configs if missing.
+    """
+    inspector = inspect(engine)
+    if "ai_configs" not in inspector.get_table_names():
+        logger.warning("ai_configs table missing; skipping token_limit migration")
+        return
+
+    column_names = [col["name"] for col in inspector.get_columns("ai_configs")]
+    if "token_limit" in column_names:
+        logger.info("token_limit column already present on ai_configs; skipping")
+        return
+
+    logger.info("Adding token_limit column to ai_configs")
+    with engine.connect() as conn:
+        conn.execute(text("ALTER TABLE ai_configs ADD COLUMN token_limit INT NULL"))
+        conn.commit()
+    logger.success("Added token_limit column to ai_configs")
+
+
 def run_migrations(engine) -> None:
+    logger.info("Running lightweight migrations...")
     ensure_ai_config_total_tokens(engine)
+    ensure_ai_config_token_limit(engine)
     ensure_learning_reports_utf8mb4(engine)
     # daily_learning_summaries is created by Base.metadata.create_all in main.py
     ensure_learning_progress_mastered_at(engine)

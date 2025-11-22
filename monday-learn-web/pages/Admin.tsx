@@ -32,6 +32,7 @@ export const Admin: React.FC = () => {
         api_key: '',
         base_url: '',
         model_name: '',
+        token_limit: '',
     });
     const [testingConnection, setTestingConnection] = useState(false);
     const [testResult, setTestResult] = useState<{ status: 'success' | 'error'; latency?: string; message?: string } | null>(null);
@@ -57,10 +58,16 @@ export const Admin: React.FC = () => {
             alert('请先填写 API Key 和模型名称');
             return;
         }
-        const payload = {
+        const payload: any = {
             ...formData,
             config_id: editingConfig?.id, // ensure backend attributes tokens to the exact config
         };
+        // Normalize token_limit to number or undefined
+        if (payload.token_limit === '' || payload.token_limit === undefined) {
+            payload.token_limit = undefined;
+        } else {
+            payload.token_limit = Number(payload.token_limit) || 0;
+        }
         setTestingConnection(true);
         setTestResult(null);
         try {
@@ -139,10 +146,17 @@ export const Admin: React.FC = () => {
 
     const handleSaveAiConfig = async () => {
         try {
-            if (editingConfig) {
-                await api.put(`/admin/ai-configs/${editingConfig.id}`, formData);
+            const payload: any = { ...formData };
+            if (payload.token_limit === '' || payload.token_limit === undefined) {
+                payload.token_limit = undefined;
             } else {
-                await api.post('/admin/ai-configs', formData);
+                payload.token_limit = Number(payload.token_limit) || 0;
+            }
+
+            if (editingConfig) {
+                await api.put(`/admin/ai-configs/${editingConfig.id}`, payload);
+            } else {
+                await api.post('/admin/ai-configs', payload);
             }
             setShowAiModal(false);
             setEditingConfig(null);
@@ -152,6 +166,7 @@ export const Admin: React.FC = () => {
                 api_key: '',
                 base_url: '',
                 model_name: '',
+                token_limit: '',
             });
             fetchAiConfigs();
         } catch (err) {
@@ -168,6 +183,7 @@ export const Admin: React.FC = () => {
             api_key: config.api_key,
             base_url: config.base_url || '',
             model_name: config.model_name,
+            token_limit: config.token_limit ?? '',
         });
         setShowAiModal(true);
     };
@@ -180,6 +196,7 @@ export const Admin: React.FC = () => {
             api_key: '',
             base_url: '',
             model_name: '',
+            token_limit: '',
         });
         setShowAiModal(true);
     };
@@ -263,6 +280,13 @@ export const Admin: React.FC = () => {
                                                 <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium">
                                                     Tokens: {config.total_tokens.toLocaleString()}
                                                 </span>
+                                                {config.token_limit ? (
+                                                    <span className="flex items-center gap-1 text-red-600 dark:text-red-400 font-medium">
+                                                        限额: {config.token_limit.toLocaleString()}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-green-600 dark:text-green-400">不限额</span>
+                                                )}
                                                 {config.base_url && <span className="truncate max-w-[200px]">{config.base_url}</span>}
                                             </div>
                                         </div>
@@ -444,6 +468,17 @@ export const Admin: React.FC = () => {
                                     value={formData.model_name}
                                     onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
                                     placeholder="例如：gpt-4-turbo-preview"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white dark:bg-[#1a1b4b] text-gray-900 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Token 上限（0 或空为不限）</label>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    value={formData.token_limit}
+                                    onChange={(e) => setFormData({ ...formData, token_limit: e.target.value })}
+                                    placeholder="例如 500000"
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white dark:bg-[#1a1b4b] text-gray-900 dark:text-white"
                                 />
                             </div>

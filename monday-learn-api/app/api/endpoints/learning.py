@@ -119,6 +119,12 @@ def call_active_ai(
     if not config:
         raise HTTPException(status_code=503, detail="No active AI model configured")
 
+    # Enforce token limit if set
+    if config.token_limit is not None and config.token_limit > 0:
+        projected = (config.total_tokens or 0) + (extra_payload.get("max_tokens", max_tokens) if extra_payload else max_tokens)
+        if projected >= config.token_limit:
+            raise HTTPException(status_code=429, detail="AI token quota reached for this model")
+
     base_url = config.base_url or "https://api.openai.com/v1"
     trimmed = base_url.rstrip("/")
     url = trimmed if trimmed.endswith("/chat/completions") else f"{trimmed}/chat/completions"

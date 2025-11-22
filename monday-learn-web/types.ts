@@ -73,6 +73,7 @@ export interface AIConfig {
   base_url?: string;
   model_name: string;
   total_tokens: number;
+  token_limit?: number | null;
   is_active: boolean;
 }
 

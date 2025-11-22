@@ -12,6 +12,7 @@ class AIConfig(Base):
     base_url = Column(String(255), nullable=True)
     model_name = Column(String(100), nullable=False) # e.g., "gpt-4-turbo"
     total_tokens = Column(Integer, default=0)
+    token_limit = Column(Integer, nullable=True)
     is_active = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
