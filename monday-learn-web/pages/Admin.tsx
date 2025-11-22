@@ -147,10 +147,12 @@ export const Admin: React.FC = () => {
     const handleSaveAiConfig = async () => {
         try {
             const payload: any = { ...formData };
+            // Normalize token_limit
             if (payload.token_limit === '' || payload.token_limit === undefined) {
                 payload.token_limit = undefined;
             } else {
-                payload.token_limit = Number(payload.token_limit) || 0;
+                const n = Number(payload.token_limit);
+                payload.token_limit = Number.isFinite(n) ? n : undefined;
             }
 
             if (editingConfig) {
