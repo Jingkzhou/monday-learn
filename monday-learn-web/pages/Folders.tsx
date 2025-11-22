@@ -137,7 +137,7 @@ export const Folders: React.FC = () => {
     // --- RENDER: Detail View ---
     if (currentFolder) {
         return (
-            <div className="min-h-screen bg-bg-gray pt-20 px-4 md:px-8 md:ml-64 pb-20">
+            <div className="min-h-screen bg-bg-gray dark:bg-dark-blue pt-20 px-4 md:px-8 md:ml-64 pb-20 transition-colors duration-200">
                 {/* Header */}
                 <div className="mb-6">
                     <button
@@ -153,13 +153,13 @@ export const Folders: React.FC = () => {
                                 <FolderIcon className="w-4 h-4" />
                                 {currentFolder.set_count} 个学习集 • {currentFolder.study_sets.reduce((acc, set) => acc + (set.term_count || 0), 0)} 个词语
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentFolder.title}</h1>
-                            <p className="text-gray-600">{currentFolder.description}</p>
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{currentFolder.title}</h1>
+                            <p className="text-gray-600 dark:text-gray-300">{currentFolder.description}</p>
                             <div className="flex items-center gap-2 mt-4">
                                 <div className="w-6 h-6 bg-purple-500 rounded-full text-white flex items-center justify-center text-xs font-bold">
                                     {currentFolder.author_username.charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-sm font-bold text-gray-700">{currentFolder.author_username}</span>
+                                <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{currentFolder.author_username}</span>
                             </div>
                         </div>
                         <div className="flex gap-2">
@@ -188,16 +188,16 @@ export const Folders: React.FC = () => {
                             <div
                                 key={set.id}
                                 onClick={() => navigate(`/set/${set.id}`)}
-                                className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-primary cursor-pointer transition-colors group"
+                                className="bg-white dark:bg-[#15143c] p-4 rounded-xl shadow-sm border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary cursor-pointer transition-colors group"
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                        <div className="w-12 h-12 bg-gray-100 dark:bg-white/10 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500">
                                             <Copy className="w-6 h-6 transform rotate-90" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 group-hover:text-primary transition-colors">{set.title}</h3>
-                                            <div className="text-xs text-gray-500 font-medium mt-1">{set.term_count} 个词语 • {set.author_username}</div>
+                                            <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors">{set.title}</h3>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">{set.term_count} 个词语 • {set.author_username}</div>
                                         </div>
                                     </div>
                                     <button
@@ -214,10 +214,10 @@ export const Folders: React.FC = () => {
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-                            <FolderIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-bold text-gray-900">这个文件夹是空的</h3>
-                            <p className="text-gray-500 mb-6">添加学习集来整理您的内容</p>
+                        <div className="text-center py-20 bg-white dark:bg-[#15143c] rounded-xl border border-dashed border-gray-300 dark:border-white/10">
+                            <FolderIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">这个文件夹是空的</h3>
+                            <p className="text-gray-500 dark:text-gray-400 mb-6">添加学习集来整理您的内容</p>
                             <button
                                 onClick={() => setShowAddSetModal(true)}
                                 className="text-primary font-bold hover:underline"
@@ -230,16 +230,16 @@ export const Folders: React.FC = () => {
 
                 {/* Add Set Modal */}
                 {showAddSetModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-                            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                                <h3 className="font-bold text-gray-900">添加到文件夹</h3>
-                                <button onClick={() => setShowAddSetModal(false)} className="p-2 hover:bg-gray-100 rounded-full"><X className="w-5 h-5 text-gray-500" /></button>
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+                        <div className="bg-white dark:bg-[#1a1b4b] w-full max-w-lg rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+                            <div className="p-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
+                                <h3 className="font-bold text-gray-900 dark:text-white">添加到文件夹</h3>
+                                <button onClick={() => setShowAddSetModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full"><X className="w-5 h-5 text-gray-500 dark:text-gray-400" /></button>
                             </div>
-                            <div className="p-4 border-b border-gray-100">
+                            <div className="p-4 border-b border-gray-100 dark:border-white/10">
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input type="text" placeholder="搜索您的学习集" className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                                    <input type="text" placeholder="搜索您的学习集" className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white" />
                                 </div>
                             </div>
                             <div className="flex-1 overflow-y-auto p-2">
@@ -249,19 +249,19 @@ export const Folders: React.FC = () => {
                                         <div
                                             key={set.id}
                                             onClick={() => handleAddSetToFolder(set.id)}
-                                            className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer group"
+                                            className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg cursor-pointer group"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+                                                <div className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded flex items-center justify-center text-gray-400 dark:text-gray-500">
                                                     <Copy className="w-5 h-5 transform rotate-90" />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-sm text-gray-800">{set.title}</span>
-                                                    <span className="text-xs text-gray-500">{set.termCount || set.term_count} 个词语</span>
+                                                    <span className="font-bold text-sm text-gray-800 dark:text-white">{set.title}</span>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400">{set.termCount || set.term_count} 个词语</span>
                                                 </div>
                                             </div>
                                             <button
-                                                className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${isAdded ? 'bg-primary border-primary text-white' : 'border-gray-300 group-hover:border-primary'}`}
+                                                className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${isAdded ? 'bg-primary border-primary text-white' : 'border-gray-300 dark:border-white/20 group-hover:border-primary'}`}
                                             >
                                                 {isAdded && <Plus className="w-4 h-4 transform rotate-45" />}
                                                 {!isAdded && <Plus className="w-4 h-4 text-gray-400 group-hover:text-primary" />}
@@ -270,11 +270,11 @@ export const Folders: React.FC = () => {
                                     );
                                 })}
                             </div>
-                            <div className="p-4 border-t border-gray-100 flex justify-end">
-                                <button onClick={() => setShowAddSetModal(false)} className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark">
-                                    完成
-                                </button>
-                            </div>
+                        </div>
+                        <div className="p-4 border-t border-gray-100 dark:border-white/10 flex justify-end">
+                            <button onClick={() => setShowAddSetModal(false)} className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark">
+                                完成
+                            </button>
                         </div>
                     </div>
                 )}
@@ -284,13 +284,13 @@ export const Folders: React.FC = () => {
 
     // --- RENDER: List View ---
     return (
-        <div className="min-h-screen bg-bg-gray pt-20 px-4 md:px-8 md:ml-64 pb-20">
+        <div className="min-h-screen bg-bg-gray dark:bg-dark-blue pt-20 px-4 md:px-8 md:ml-64 pb-20 transition-colors duration-200">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-primary">
+                    <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center text-primary dark:text-indigo-400">
                         <FolderIcon className="w-6 h-6" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">您的文件夹</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">您的文件夹</h1>
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
@@ -311,22 +311,22 @@ export const Folders: React.FC = () => {
                         <div
                             key={folder.id}
                             onClick={() => setCurrentFolder(folder)}
-                            className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover:border-primary hover:shadow-md transition-all cursor-pointer group flex flex-col h-40 justify-between relative overflow-hidden"
+                            className="bg-white dark:bg-[#15143c] p-5 rounded-xl shadow-sm border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-primary hover:shadow-md transition-all cursor-pointer group flex flex-col h-40 justify-between relative overflow-hidden"
                         >
                             {/* Decor */}
-                            <div className="absolute -right-4 -top-4 w-20 h-20 bg-gray-50 rounded-full group-hover:bg-indigo-50 transition-colors"></div>
+                            <div className="absolute -right-4 -top-4 w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors"></div>
 
                             <div className="relative z-10">
                                 <div className="flex items-start justify-between mb-2">
-                                    <FolderIcon className="w-8 h-8 text-gray-400 group-hover:text-primary transition-colors" />
+                                    <FolderIcon className="w-8 h-8 text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-primary transition-colors" />
                                     {/* <MoreVertical className="w-5 h-5 text-gray-400 hover:text-gray-600" /> */}
                                 </div>
-                                <h3 className="font-bold text-lg text-gray-900 line-clamp-1">{folder.title}</h3>
-                                <p className="text-xs text-gray-500 mt-1 line-clamp-1">{folder.description || "无描述"}</p>
+                                <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">{folder.title}</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{folder.description || "无描述"}</p>
                             </div>
 
-                            <div className="relative z-10 flex items-center gap-2 text-xs font-bold text-gray-400 group-hover:text-gray-600">
-                                <div className="bg-gray-100 px-2 py-1 rounded group-hover:bg-white group-hover:shadow-sm transition-all">
+                            <div className="relative z-10 flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+                                <div className="bg-gray-100 dark:bg-white/10 px-2 py-1 rounded group-hover:bg-white dark:group-hover:bg-white/20 group-hover:shadow-sm transition-all">
                                     {folder.set_count} 个学习集 • {folder.study_sets.reduce((acc, set) => acc + (set.term_count || 0), 0)} 个词语
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -339,7 +339,7 @@ export const Folders: React.FC = () => {
                     {/* Create New Placeholder Card */}
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center text-gray-400 hover:text-primary hover:border-primary hover:bg-indigo-50/30 transition-all h-40"
+                        className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-5 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary hover:border-primary dark:hover:border-primary hover:bg-indigo-50/30 dark:hover:bg-indigo-500/10 transition-all h-40"
                     >
                         <FolderPlus className="w-8 h-8 mb-2" />
                         <span className="font-bold">新建文件夹</span>
@@ -349,10 +349,10 @@ export const Folders: React.FC = () => {
 
             {/* Create Folder Modal */}
             {showCreateModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <form onSubmit={handleCreateFolder} className="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm">
+                    <form onSubmit={handleCreateFolder} className="bg-white dark:bg-[#1a1b4b] w-full max-w-md rounded-xl shadow-2xl p-6 animate-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-gray-900">创建新文件夹</h2>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">创建新文件夹</h2>
                             <button type="button" onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-gray-100 rounded-full">
                                 <X className="w-6 h-6 text-gray-400" />
                             </button>
@@ -360,24 +360,24 @@ export const Folders: React.FC = () => {
 
                         <div className="space-y-4 mb-8">
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">标题</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">标题</label>
                                 <input
                                     type="text"
                                     value={newFolderTitle}
                                     onChange={(e) => setNewFolderTitle(e.target.value)}
                                     placeholder="输入文件夹标题"
-                                    className="w-full p-2 border-b-2 border-gray-200 focus:border-primary outline-none text-lg font-medium transition-colors"
+                                    className="w-full p-2 border-b-2 border-gray-200 dark:border-white/10 bg-transparent focus:border-primary outline-none text-lg font-medium transition-colors dark:text-white"
                                     autoFocus
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">描述（可选）</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">描述（可选）</label>
                                 <input
                                     type="text"
                                     value={newFolderDesc}
                                     onChange={(e) => setNewFolderDesc(e.target.value)}
                                     placeholder="输入描述..."
-                                    className="w-full p-2 border-b-2 border-gray-200 focus:border-primary outline-none transition-colors"
+                                    className="w-full p-2 border-b-2 border-gray-200 dark:border-white/10 bg-transparent focus:border-primary outline-none transition-colors dark:text-white"
                                 />
                             </div>
                         </div>

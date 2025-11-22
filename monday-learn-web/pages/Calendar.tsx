@@ -84,28 +84,28 @@ export function CalendarPage() {
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">学习足迹 👣</h1>
-        <p className="text-gray-600">记录你每一天的进步，积少成多。</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">学习足迹 👣</h1>
+        <p className="text-gray-600 dark:text-gray-400">记录你每一天的进步，积少成多。</p>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="text-sm text-gray-500 mb-1">本月学习天数</div>
-          <div className="text-3xl font-bold text-indigo-600">
+        <div className="bg-white dark:bg-[#15143c] p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">本月学习天数</div>
+          <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
             {summaries.filter(s => s.date.startsWith(format(today, 'yyyy-MM')) && s.count > 0).length}
             <span className="text-sm text-gray-400 ml-2 font-normal">天</span>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="text-sm text-gray-500 mb-1">累计复习单词</div>
-          <div className="text-3xl font-bold text-emerald-600">
+        <div className="bg-white dark:bg-[#15143c] p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">累计复习单词</div>
+          <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
             {summaries.reduce((acc, curr) => acc + curr.total_words, 0)}
             <span className="text-sm text-gray-400 ml-2 font-normal">个</span>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="text-sm text-gray-500 mb-1">当前连续打卡</div>
+        <div className="bg-white dark:bg-[#15143c] p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">当前连续打卡</div>
           <div className="text-3xl font-bold text-orange-500">
             {/* Mock streak for now, or calculate from summaries */}
             3
@@ -115,8 +115,8 @@ export function CalendarPage() {
       </div>
 
       {/* Heatmap */}
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 mb-8 overflow-x-auto">
-        <h2 className="text-lg font-semibold mb-6">活跃度热力图</h2>
+      <div className="bg-white dark:bg-[#15143c] p-8 rounded-xl shadow-sm border border-gray-100 dark:border-white/10 mb-8 overflow-x-auto">
+        <h2 className="text-lg font-semibold mb-6 text-gray-900 dark:text-white">活跃度热力图</h2>
         <div className="min-w-[800px]">
           <CalendarHeatmap
             startDate={subDays(today, 180)}
@@ -167,20 +167,20 @@ export function CalendarPage() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 p-6 overflow-y-auto"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white dark:bg-[#15143c] shadow-2xl z-50 p-6 overflow-y-auto border-l border-gray-100 dark:border-white/10"
             >
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {format(parseISO(selectedDate), 'MM月dd日', { locale: zhCN })}
                   </h2>
-                  <p className="text-gray-500">{format(parseISO(selectedDate), 'yyyy年 EEEE', { locale: zhCN })}</p>
+                  <p className="text-gray-500 dark:text-gray-400">{format(parseISO(selectedDate), 'yyyy年 EEEE', { locale: zhCN })}</p>
                 </div>
                 <button
                   onClick={() => setSelectedDate(null)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
                 >
-                  <X className="w-6 h-6 text-gray-500" />
+                  <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                 </button>
               </div>
 
@@ -192,22 +192,22 @@ export function CalendarPage() {
                 <div className="space-y-8">
                   {/* Daily Summary */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-indigo-50 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 text-indigo-600 mb-1">
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-1">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm font-medium">学习时长</span>
                       </div>
-                      <div className="text-2xl font-bold text-indigo-900">
+                      <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">
                         {(dailyDetail.total_time_ms / 60000).toFixed(0)}
                         <span className="text-sm font-normal ml-1">分钟</span>
                       </div>
                     </div>
-                    <div className="bg-emerald-50 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 text-emerald-600 mb-1">
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1">
                         <Trophy className="w-4 h-4" />
                         <span className="text-sm font-medium">掌握新词</span>
                       </div>
-                      <div className="text-2xl font-bold text-emerald-900">
+                      <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
                         {dailyDetail.mastered_count}
                         <span className="text-sm font-normal ml-1">个</span>
                       </div>
@@ -216,32 +216,32 @@ export function CalendarPage() {
 
                   {/* Timeline */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
                       <BookOpen className="w-5 h-5 text-gray-400" />
                       活动记录
                     </h3>
 
                     {dailyDetail.items.length === 0 ? (
-                      <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                      <div className="text-center py-8 text-gray-400 bg-gray-50 dark:bg-white/5 rounded-lg border border-dashed border-gray-200 dark:border-white/10">
                         当日没有学习记录
                       </div>
                     ) : (
-                      <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                      <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100 dark:before:bg-white/10">
                         {dailyDetail.items.map((item) => (
                           <div key={item.id} className="relative pl-8">
-                            <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-indigo-400 z-10"></div>
+                            <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white dark:bg-slate-700 border-2 border-indigo-400 z-10"></div>
                             <div className="flex flex-col">
                               <span className="text-xs text-gray-400 font-mono mb-1">{item.time}</span>
-                              <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                <div className="font-medium text-gray-900">{item.action}</div>
+                              <div className="bg-white dark:bg-white/5 p-3 rounded-lg border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="font-medium text-gray-900 dark:text-white">{item.action}</div>
                                 <div className="flex items-center gap-3 mt-2 text-sm">
                                   <span className={`px-2 py-0.5 rounded text-xs font-medium
-                                    ${item.mode === 'learn' ? 'bg-blue-100 text-blue-700' :
-                                      item.mode === 'test' ? 'bg-purple-100 text-purple-700' :
-                                        'bg-gray-100 text-gray-700'}`}>
+                                    ${item.mode === 'learn' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                      item.mode === 'test' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+                                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
                                     {item.mode.toUpperCase()}
                                   </span>
-                                  <span className="text-gray-500">{item.details}</span>
+                                  <span className="text-gray-500 dark:text-gray-400">{item.details}</span>
                                 </div>
                               </div>
                             </div>
@@ -267,11 +267,22 @@ export function CalendarPage() {
           fill: #aaa;
         }
         .react-calendar-heatmap .color-empty { fill: #f3f4f6; }
+        .dark .react-calendar-heatmap .color-empty { fill: #374151; }
+        
         .react-calendar-heatmap .color-scale-1 { fill: #e0e7ff; }
+        .dark .react-calendar-heatmap .color-scale-1 { fill: #312e81; }
+        
         .react-calendar-heatmap .color-scale-2 { fill: #a5b4fc; }
+        .dark .react-calendar-heatmap .color-scale-2 { fill: #4338ca; }
+        
         .react-calendar-heatmap .color-scale-3 { fill: #6366f1; }
+        .dark .react-calendar-heatmap .color-scale-3 { fill: #6366f1; }
+        
         .react-calendar-heatmap .color-scale-4 { fill: #4338ca; }
+        .dark .react-calendar-heatmap .color-scale-4 { fill: #818cf8; }
+        
         .react-calendar-heatmap rect:hover { stroke: #555; stroke-width: 1px; }
+        .dark .react-calendar-heatmap rect:hover { stroke: #fff; }
       `}</style>
     </div>
   );

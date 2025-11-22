@@ -152,26 +152,26 @@ export const MergeSets: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-32">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#0a092d] pb-32">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+            <div className="bg-white dark:bg-[#15143c] border-b border-gray-200 dark:border-white/10 sticky top-0 z-20 shadow-sm">
                 <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-4">
-                    <button onClick={() => id ? navigate(`/set/${id}`) : navigate(-1)} className="text-gray-500 hover:text-gray-900 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                    <button onClick={() => id ? navigate(`/set/${id}`) : navigate(-1)} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                         <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="text-lg font-bold text-gray-900">合并学习集</h1>
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">合并学习集</h1>
                 </div>
             </div>
 
             <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
                 {/* Description */}
-                <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-indigo-800 text-sm">
+                <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/50 text-indigo-800 dark:text-indigo-200 text-sm">
                     选择多个学习集，将它们的术语合并到一个新的学习集中。
                 </div>
 
                 {/* Filters Section */}
                 <div>
-                    <h2 className="text-xs font-bold text-gray-500 uppercase mb-3 flex items-center gap-2 px-1">
+                    <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-3 flex items-center gap-2 px-1">
                         <Filter className="w-3 h-3" />
                         筛选
                     </h2>
@@ -184,7 +184,7 @@ export const MergeSets: React.FC = () => {
                                 onClick={() => toggleFolderSelection(folder.id)}
                                 className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all flex items-center gap-2 ${selectedFolderIds.has(folder.id)
                                     ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
-                                    : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 <FolderIcon className={`w-3.5 h-3.5 ${selectedFolderIds.has(folder.id) ? 'text-white' : 'text-gray-400'}`} />
@@ -213,18 +213,18 @@ export const MergeSets: React.FC = () => {
                                 setSelectedSetIds(newSelection);
                             }
                         }}
-                        className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-indigo-200 transition-colors group"
+                        className="flex items-center justify-between bg-white dark:bg-[#15143c] p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm cursor-pointer hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-colors group"
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${mergeStarredOnly ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${mergeStarredOnly ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'}`}>
                                 <Star className={`w-5 h-5 ${mergeStarredOnly ? 'fill-current' : ''}`} />
                             </div>
                             <div>
-                                <h3 className="font-medium text-gray-900">仅合并星标词卡</h3>
-                                <p className="text-xs text-gray-500">只包含选定学习集中的星标术语</p>
+                                <h3 className="font-medium text-gray-900 dark:text-white">仅合并星标词卡</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">只包含选定学习集中的星标术语</p>
                             </div>
                         </div>
-                        <div className={`w-11 h-6 rounded-full transition-colors relative ${mergeStarredOnly ? 'bg-indigo-600' : 'bg-gray-200'
+                        <div className={`w-11 h-6 rounded-full transition-colors relative ${mergeStarredOnly ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
                             }`}>
                             <div className={`w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 transition-transform ${mergeStarredOnly ? 'left-[calc(100%-1.375rem)]' : 'left-0.5'
                                 }`} />
@@ -234,12 +234,12 @@ export const MergeSets: React.FC = () => {
 
                 {/* Study Sets List */}
                 <div>
-                    <h2 className="text-xs font-bold text-gray-500 uppercase mb-3 px-1">
+                    <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-3 px-1">
                         选择学习集 ({selectedSetIds.size})
                     </h2>
                     <div className="space-y-3">
                         {filteredSets.length === 0 ? (
-                            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300 text-gray-500">
+                            <div className="text-center py-12 bg-white dark:bg-[#15143c] rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400">
                                 没有找到符合条件的学习集
                             </div>
                         ) : (
@@ -253,16 +253,16 @@ export const MergeSets: React.FC = () => {
                                         key={set.id}
                                         onClick={() => !isDisabled && toggleSelection(Number(set.id))}
                                         className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between group ${isDisabled
-                                            ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                            ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 opacity-50 cursor-not-allowed'
                                             : isSelected
-                                                ? 'border-indigo-600 bg-indigo-50 shadow-sm'
-                                                : 'border-gray-200 bg-white hover:border-indigo-200 hover:shadow-sm cursor-pointer'
+                                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 shadow-sm'
+                                                : 'border-gray-200 dark:border-white/10 bg-white dark:bg-[#15143c] hover:border-indigo-200 dark:hover:border-indigo-900/50 hover:shadow-sm cursor-pointer'
                                             }`}
                                     >
                                         <div>
-                                            <h3 className={`font-bold mb-1 ${isSelected ? 'text-indigo-900' : 'text-gray-900'}`}>{set.title}</h3>
-                                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${isSelected ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
+                                            <h3 className={`font-bold mb-1 ${isSelected ? 'text-indigo-900 dark:text-indigo-300' : 'text-gray-900 dark:text-white'}`}>{set.title}</h3>
+                                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${isSelected ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                                                     }`}>
                                                     {displayCount} 词
                                                 </span>
@@ -272,10 +272,10 @@ export const MergeSets: React.FC = () => {
                                         </div>
 
                                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isDisabled
-                                            ? 'border-gray-200 bg-gray-100'
+                                            ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800'
                                             : isSelected
                                                 ? 'border-indigo-600 bg-indigo-600 text-white'
-                                                : 'border-gray-300 group-hover:border-indigo-400'
+                                                : 'border-gray-300 dark:border-gray-600 group-hover:border-indigo-400'
                                             }`}>
                                             {isSelected && <CheckCircle2 className="w-4 h-4" />}
                                         </div>
@@ -288,15 +288,15 @@ export const MergeSets: React.FC = () => {
             </div>
 
             {/* Fixed Bottom Action Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-20 pb-safe">
+            <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#15143c] border-t border-gray-200 dark:border-white/10 p-4 z-20 pb-safe">
                 <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
-                    <div className="text-sm text-gray-500 hidden sm:block">
-                        已选择 <span className="font-bold text-gray-900">{selectedSetIds.size}</span> 个学习集
+                    <div className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                        已选择 <span className="font-bold text-gray-900 dark:text-white">{selectedSetIds.size}</span> 个学习集
                     </div>
                     <div className="flex items-center gap-3 flex-1 sm:flex-none justify-end w-full sm:w-auto">
                         <button
                             onClick={() => id ? navigate(`/set/${id}`) : navigate(-1)}
-                            className="px-6 h-12 rounded-full font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                            className="px-6 h-12 rounded-full font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                         >
                             取消
                         </button>

@@ -116,7 +116,7 @@ export const WordCards: React.FC = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 md:pl-64 pt-20">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#0a092d] pb-20 md:pl-64 pt-20">
             <div className="max-w-5xl mx-auto px-4 md:px-8">
                 {/* Header */}
 
@@ -131,7 +131,7 @@ export const WordCards: React.FC = () => {
                     <div className="space-y-8">
                         {orderedGroups.map(group => (
                             <section key={group.title}>
-                                <h2 className="text-sm font-bold text-gray-500 mb-4 sticky top-20 bg-gray-50 py-2 z-10">
+                                <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4 sticky top-20 bg-gray-50 dark:bg-[#0a092d] py-2 z-10">
                                     {group.title}
                                 </h2>
                                 <div className="space-y-3">
@@ -139,11 +139,11 @@ export const WordCards: React.FC = () => {
                                         <div
                                             key={set.id}
                                             onClick={() => navigate(`/set/${set.id}`)}
-                                            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
+                                            className="bg-white dark:bg-[#15143c] rounded-xl p-4 border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                                                    <span className="font-medium text-gray-900">{set.term_count || 0}个词语</span>
+                                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                                    <span className="font-medium text-gray-900 dark:text-white">{set.term_count || 0}个词语</span>
                                                     <span>•</span>
                                                     <div className="flex items-center gap-1">
                                                         {set.authorUsername ? (
@@ -156,7 +156,7 @@ export const WordCards: React.FC = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                                     {set.title}
                                                 </h3>
                                             </div>

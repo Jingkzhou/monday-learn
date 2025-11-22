@@ -276,7 +276,7 @@ export const SetView: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
+      <div className="min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-400 bg-bg-gray dark:bg-dark-blue">
         <Loader2 className="w-6 h-6 animate-spin mr-2" />
         正在加载学习集...
       </div>
@@ -285,10 +285,10 @@ export const SetView: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 text-gray-700">
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 text-gray-700 dark:text-gray-300 bg-bg-gray dark:bg-dark-blue">
         <AlertCircle className="w-10 h-10 text-red-500 mb-3" />
         <p className="font-bold text-lg mb-2">无法加载学习集</p>
-        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{error}</p>
         <button
           onClick={() => navigate('/create')}
           className="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary-dark transition-colors"
@@ -304,27 +304,27 @@ export const SetView: React.FC = () => {
   }
 
   return (
-    <div className="pt-20 pb-10 px-4 md:px-8 max-w-7xl mx-auto ml-0 md:ml-64">
+    <div className="pt-20 pb-10 px-4 md:px-8 max-w-7xl mx-auto ml-0 md:ml-64 bg-bg-gray dark:bg-dark-blue min-h-screen transition-colors duration-200">
       {/* Header Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{studySet.title}</h1>
-        {studySet.description && <p className="text-gray-500 mb-4">{studySet.description}</p>}
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{studySet.title}</h1>
+        {studySet.description && <p className="text-gray-500 dark:text-gray-400 mb-4">{studySet.description}</p>}
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-indigo-100 text-primary font-bold flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-primary dark:text-indigo-400 font-bold flex items-center justify-center">
               {authorName?.[0]?.toUpperCase() || 'U'}
             </div>
-            <span className="text-sm font-semibold text-gray-700 hover:underline cursor-pointer">
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:underline cursor-pointer">
               {authorName}
             </span>
-            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-md">教师</span>
+            <span className="px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-md">教师</span>
           </div>
 
           <div className="flex items-center gap-2 relative">
             <button
               onClick={() => setShowMoreMenu(!showMoreMenu)}
-              className="p-2.5 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors"
+              className="p-2.5 border border-gray-300 dark:border-white/20 rounded-full hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-gray-300 transition-colors"
               title="更多"
             >
               <MoreHorizontal className="w-5 h-5" />
@@ -336,50 +336,50 @@ export const SetView: React.FC = () => {
                   className="fixed inset-0 z-10"
                   onClick={() => setShowMoreMenu(false)}
                 ></div>
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-20 overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1a1b4b] rounded-xl shadow-lg border border-gray-100 dark:border-white/10 py-2 z-20 overflow-hidden">
                   <button
                     onClick={() => {
                       navigate('/folders');
                       setShowMoreMenu(false);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
                   >
-                    <FolderPlus className="w-4 h-4 text-gray-500" />
+                    <FolderPlus className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     添加到文件夹
                   </button>
-                                    <div className="h-px bg-gray-100 my-1"></div>
+                  <div className="h-px bg-gray-100 dark:bg-white/10 my-1"></div>
                   <button
-                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
                     onClick={() => setShowMoreMenu(false)}
                   >
-                    <Share2 className="w-4 h-4 text-gray-500" />
+                    <Share2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     分享
                   </button>
-                  <div className="h-px bg-gray-100 my-1"></div>
+                  <div className="h-px bg-gray-100 dark:bg-white/10 my-1"></div>
                   <button
                     onClick={() => {
                       handleEditClick();
                       setShowMoreMenu(false);
                     }}
                     disabled={editInProgress}
-                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors disabled:opacity-50"
                   >
-                    {editInProgress ? <Loader2 className="w-4 h-4 animate-spin text-primary" /> : <PenSquare className="w-4 h-4 text-gray-500" />}
+                    {editInProgress ? <Loader2 className="w-4 h-4 animate-spin text-primary" /> : <PenSquare className="w-4 h-4 text-gray-500 dark:text-gray-400" />}
                     {studySet.isOwner ? "编辑学习集" : "保存副本并编辑"}
                   </button>
-                  <div className="h-px bg-gray-100 my-1"></div>
+                  <div className="h-px bg-gray-100 dark:bg-white/10 my-1"></div>
                   <button
                     onClick={() => {
                       navigate(`/set/${id}/merge`);
                       setShowMoreMenu(false);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
                   >
-                    
-                    <Merge className="w-4 h-4 text-gray-500" />
+
+                    <Merge className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     合并学习集
                   </button>
-                                    <div className="h-px bg-gray-100 my-1"></div>
+                  <div className="h-px bg-gray-100 dark:bg-white/10 my-1"></div>
 
                   {studySet.isOwner && (
                     <>
@@ -398,7 +398,7 @@ export const SetView: React.FC = () => {
                         )}
                         删除学习集
                       </button>
-                      <div className="h-px bg-gray-100 my-1"></div>
+                      <div className="h-px bg-gray-100 dark:bg-white/10 my-1"></div>
                     </>
                   )}
 
@@ -407,7 +407,7 @@ export const SetView: React.FC = () => {
                       handleResetProgress();
                       setShowMoreMenu(false);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                    className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
                   >
                     <RotateCcw className="w-4 h-4 text-red-500" />
                     重置学习进度
@@ -423,63 +423,63 @@ export const SetView: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         <button
           onClick={() => navigate(`/set/${id}/flashcards`)}
-          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 transition-all group"
+          className="flex items-center justify-center gap-4 p-4 bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500/50 transition-all group"
         >
           <div className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Copy className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">单词卡</span>
+          <span className="font-bold text-gray-700 dark:text-gray-200 text-lg group-hover:text-gray-900 dark:group-hover:text-white">单词卡</span>
         </button>
 
         <button
           onClick={() => navigate(`/set/${id}/learn`)}
-          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 transition-all group"
+          className="flex items-center justify-center gap-4 p-4 bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all group"
         >
           <div className="w-10 h-10 rounded-lg bg-indigo-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Sparkles className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">学习</span>
+          <span className="font-bold text-gray-700 dark:text-gray-200 text-lg group-hover:text-gray-900 dark:group-hover:text-white">学习</span>
         </button>
 
         <button
           onClick={() => navigate(`/set/${id}/test`)}
-          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group"
+          className="flex items-center justify-center gap-4 p-4 bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-500/50 transition-all group"
         >
           <div className="w-10 h-10 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <ScrollText className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">测试</span>
+          <span className="font-bold text-gray-700 dark:text-gray-200 text-lg group-hover:text-gray-900 dark:group-hover:text-white">测试</span>
         </button>
 
         <button
           onClick={() => navigate(`/set/${id}/match`)}
-          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-purple-300 transition-all group"
+          className="flex items-center justify-center gap-4 p-4 bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-500/50 transition-all group"
         >
           <div className="w-10 h-10 rounded-lg bg-purple-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Gamepad2 className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">配对</span>
+          <span className="font-bold text-gray-700 dark:text-gray-200 text-lg group-hover:text-gray-900 dark:group-hover:text-white">配对</span>
         </button>
 
         <button
           onClick={() => navigate(`/set/${id}/blast`)}
-          className="flex items-center justify-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-pink-300 transition-all group"
+          className="flex items-center justify-center gap-4 p-4 bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md hover:border-pink-300 dark:hover:border-pink-500/50 transition-all group"
         >
           <div className="w-10 h-10 rounded-lg bg-pink-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <Rocket className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-700 text-lg group-hover:text-gray-900">Blast</span>
+          <span className="font-bold text-gray-700 dark:text-gray-200 text-lg group-hover:text-gray-900 dark:group-hover:text-white">Blast</span>
         </button>
 
         <button
           onClick={() => navigate(`/set/${id}/ai-exam`)}
-          className="flex items-center justify-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 transition-all group relative overflow-hidden"
+          className="flex items-center justify-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-500/30 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all group relative overflow-hidden"
         >
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform z-10">
             <FileText className="w-5 h-5" />
           </div>
           <div className="flex flex-col z-10">
-            <span className="font-bold text-gray-800 text-lg group-hover:text-gray-900 flex items-center gap-2">
+            <span className="font-bold text-gray-800 dark:text-gray-200 text-lg group-hover:text-gray-900 dark:group-hover:text-white flex items-center gap-2">
               AI 试卷
               <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">New</span>
             </span>
@@ -508,11 +508,11 @@ export const SetView: React.FC = () => {
                   className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
                   title={isAutoPlaying ? "暂停自动播放" : "自动朗读"}
                 >
-                  <div className="border-2 border-gray-400 rounded-full w-8 h-8 flex items-center justify-center">
+                  <div className="border-2 border-gray-400 dark:border-gray-500 rounded-full w-8 h-8 flex items-center justify-center">
                     {isAutoPlaying ? (
-                      <Pause className="w-4 h-4 text-gray-700" />
+                      <Pause className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                     ) : (
-                      <Play className="w-4 h-4 text-gray-700" />
+                      <Play className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                     )}
                   </div>
                 </button>
@@ -522,13 +522,13 @@ export const SetView: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-6">
-                <button onClick={prevCard} className="p-3 rounded-full bg-white border border-gray-200 hover:bg-gray-50 shadow-sm text-primary disabled:opacity-50">
+                <button onClick={prevCard} className="p-3 rounded-full bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 shadow-sm text-primary disabled:opacity-50">
                   <ArrowLeft className="w-6 h-6" />
                 </button>
-                <span className="font-bold text-gray-600 min-w-[60px] text-center">
+                <span className="font-bold text-gray-600 dark:text-gray-400 min-w-[60px] text-center">
                   {currentCardIndex + 1} / {terms.length}
                 </span>
-                <button onClick={nextCard} className="p-3 rounded-full bg-white border border-gray-200 hover:bg-gray-50 shadow-sm text-primary">
+                <button onClick={nextCard} className="p-3 rounded-full bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 shadow-sm text-primary">
                   <ArrowRight className="w-6 h-6" />
                 </button>
               </div>
@@ -544,7 +544,7 @@ export const SetView: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="bg-white border border-dashed border-gray-300 rounded-xl p-10 text-center text-gray-500">
+          <div className="bg-white dark:bg-[#15143c] border border-dashed border-gray-300 dark:border-white/10 rounded-xl p-10 text-center text-gray-500 dark:text-gray-400">
             暂无卡片，请在编辑页添加一些术语。
           </div>
         )}
@@ -554,14 +554,14 @@ export const SetView: React.FC = () => {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-2">
           <img src="https://picsum.photos/seed/user/30/30" className="w-8 h-8 rounded-full" alt="Current User" />
-          <span className="font-bold text-gray-900">本学习集中的术语 ({terms.length})</span>
+          <span className="font-bold text-gray-900 dark:text-white">本学习集中的术语 ({terms.length})</span>
         </div>
         <div className="flex gap-4 text-sm md:text-base items-center">
           <button
             onClick={() => setFilterStarred(!filterStarred)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors text-sm font-medium ${filterStarred
-              ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
-              : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              ? 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20 text-yellow-700 dark:text-yellow-500'
+              : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10'
               }`}
           >
             <Star className={`w-4 h-4 ${filterStarred ? 'fill-yellow-400 text-yellow-400' : ''}`} />
@@ -572,8 +572,8 @@ export const SetView: React.FC = () => {
             onClick={() => navigate(`/set/${id}/learn?starredOnly=true`)}
             disabled={starredCount === 0}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border ${starredCount === 0
-              ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
-              : 'bg-indigo-50 text-primary border-indigo-100 hover:bg-indigo-100'
+              ? 'bg-gray-50 dark:bg-white/5 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-white/5 cursor-not-allowed'
+              : 'bg-indigo-50 dark:bg-indigo-500/10 text-primary dark:text-indigo-400 border-indigo-100 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
               }`}
             title="仅练习星标术语，不影响整体进度"
           >
@@ -584,32 +584,32 @@ export const SetView: React.FC = () => {
       </div>
 
       {/* Terms Status Banner */}
-      <div className="bg-indigo-50 rounded-lg p-4 mb-6 flex items-center gap-3">
-        <div className="text-primary font-bold whitespace-nowrap">术语总数 {terms.length}</div>
-        <div className="text-gray-500 text-sm line-clamp-1">加油！坚持练习能带来最大的收获。</div>
+      <div className="bg-indigo-50 dark:bg-indigo-500/10 rounded-lg p-4 mb-6 flex items-center gap-3">
+        <div className="text-primary dark:text-indigo-400 font-bold whitespace-nowrap">术语总数 {terms.length}</div>
+        <div className="text-gray-500 dark:text-gray-400 text-sm line-clamp-1">加油！坚持练习能带来最大的收获。</div>
       </div>
 
       {/* Term List */}
       <div className="space-y-3">
         {(filterStarred ? terms.filter(t => t.starred) : terms).map((term) => (
-          <div key={term.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row items-start md:items-center justify-between group hover:border-gray-300 transition-colors gap-4 md:gap-0">
-            <div className="flex-1 w-full md:w-auto md:pr-4 md:border-r border-gray-100 border-b md:border-b-0 pb-2 md:pb-0">
-              <div className="text-lg text-gray-800">{term.term}</div>
+          <div key={term.id} className="bg-white dark:bg-[#15143c] rounded-lg shadow-sm border border-gray-200 dark:border-white/10 p-4 flex flex-col md:flex-row items-start md:items-center justify-between group hover:border-gray-300 dark:hover:border-white/20 transition-colors gap-4 md:gap-0">
+            <div className="flex-1 w-full md:w-auto md:pr-4 md:border-r border-gray-100 dark:border-white/10 border-b md:border-b-0 pb-2 md:pb-0">
+              <div className="text-lg text-gray-800 dark:text-gray-200">{term.term}</div>
             </div>
             <div className="flex-1 w-full md:w-auto md:pl-4 flex items-center justify-between">
-              <div className="text-lg text-gray-800">{term.definition}</div>
+              <div className="text-lg text-gray-800 dark:text-gray-200">{term.definition}</div>
               <div className="flex gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleToggleStar(term.id)}
-                  className={`p-2 rounded-full transition-colors opacity-0 group-hover:opacity-100 ${term.starred ? 'text-yellow-400 opacity-100' : 'text-gray-400 hover:text-primary hover:bg-gray-50'}`}
+                  className={`p-2 rounded-full transition-colors opacity-0 group-hover:opacity-100 ${term.starred ? 'text-yellow-400 opacity-100' : 'text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-white/5'}`}
                   title={term.starred ? "取消星标" : "标记星号"}
                 >
                   <Star className={`w-5 h-5 ${term.starred ? 'fill-current' : ''}`} />
                 </button>
-                <button className="p-2 text-gray-400 hover:text-primary hover:bg-gray-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" title="播放音频">
+                <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" title="播放音频">
                   <Volume2 className="w-5 h-5" />
                 </button>
-                <button className="p-2 text-gray-400 hover:text-primary hover:bg-gray-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" title="编辑">
+                <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" title="编辑">
                   <PenLine className="w-5 h-5" />
                 </button>
               </div>
@@ -618,10 +618,10 @@ export const SetView: React.FC = () => {
         ))}
 
         {filterStarred && terms.filter(t => t.starred).length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-            <Star className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900">没有找到星标术语</h3>
-            <p className="text-gray-500 mt-1">点击术语旁边的星星图标来收藏重点内容</p>
+          <div className="text-center py-12 bg-white dark:bg-[#15143c] rounded-xl border border-dashed border-gray-300 dark:border-white/10">
+            <Star className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">没有找到星标术语</h3>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">点击术语旁边的星星图标来收藏重点内容</p>
             <button
               onClick={() => setFilterStarred(false)}
               className="mt-4 text-primary font-bold hover:underline"

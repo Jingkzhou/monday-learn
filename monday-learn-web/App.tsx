@@ -27,6 +27,7 @@ import { Classes } from './pages/Classes';
 import { CalendarPage } from './pages/Calendar';
 import { MergeSets } from './pages/MergeSets';
 import { AnalysisPage } from './pages/AnalysisPage';
+import { Achievements } from './pages/Achievements';
 import ChatBot from './components/ChatBot';
 
 // Layout wrapper for pages that have the standard sidebar/topbar
@@ -161,6 +162,14 @@ const App: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <CalendarPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/achievements" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Achievements />
             </MainLayout>
           </ProtectedRoute>
         } />

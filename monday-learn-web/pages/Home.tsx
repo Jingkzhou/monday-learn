@@ -354,7 +354,9 @@ export const Home: React.FC = () => {
                         <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">单词卡</span>
                     </div>
 
-                    <div className="bg-white dark:bg-[#1a1b4b] hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
+                    <div
+                        onClick={() => navigate('/achievements')}
+                        className="bg-white dark:bg-[#1a1b4b] hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
                     >
                         <div className="w-12 h-12 rounded-2xl bg-yellow-50 dark:bg-yellow-500/10 flex items-center justify-center group-hover:bg-yellow-100 dark:group-hover:bg-yellow-500/20 transition-colors">
                             <Trophy className="w-6 h-6 text-yellow-500" />

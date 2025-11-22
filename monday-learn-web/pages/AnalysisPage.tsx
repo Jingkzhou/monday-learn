@@ -44,12 +44,12 @@ export const AnalysisPage: React.FC = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Learning Analysis</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Learning Analysis</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Daily Activity Chart */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 className="text-xl font-semibold mb-4">Daily Activity (Last 7 Days)</h2>
+                <div className="bg-white dark:bg-[#15143c] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-white/10">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Daily Activity (Last 7 Days)</h2>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={dailyActivity}>
@@ -67,8 +67,8 @@ export const AnalysisPage: React.FC = () => {
                 </div>
 
                 {/* Progress Distribution */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 className="text-xl font-semibold mb-4">Progress Distribution</h2>
+                <div className="bg-white dark:bg-[#15143c] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-white/10">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Progress Distribution</h2>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -93,8 +93,8 @@ export const AnalysisPage: React.FC = () => {
                 </div>
 
                 {/* Forgetting Curve */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:col-span-2">
-                    <h2 className="text-xl font-semibold mb-4">Retention Rate (Forgetting Curve)</h2>
+                <div className="bg-white dark:bg-[#15143c] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-white/10 lg:col-span-2">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Retention Rate (Forgetting Curve)</h2>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={forgettingCurve}>
@@ -107,7 +107,7 @@ export const AnalysisPage: React.FC = () => {
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
-                    <p className="text-sm text-gray-500 mt-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
                         * This curve shows your retention rate based on review intervals. Higher is better.
                     </p>
                 </div>

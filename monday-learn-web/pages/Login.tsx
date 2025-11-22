@@ -42,35 +42,35 @@ export const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        <div className="min-h-screen bg-white dark:bg-dark-blue flex flex-col transition-colors duration-200">
             {/* Header */}
             <div className="px-4 py-4">
                 <button
                     onClick={() => navigate('/welcome')}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
                 >
-                    <ArrowLeft className="w-6 h-6 text-gray-600" />
+                    <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                 </button>
             </div>
 
             <div className="flex-1 px-6 max-w-md mx-auto w-full pt-4">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">登录</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">登录</h1>
 
                 {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm font-medium">
+                    <div className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 p-3 rounded-lg mb-4 text-sm font-medium">
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase hidden">电子邮件或用户名</label>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase hidden">电子邮件或用户名</label>
                         <input
                             type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="电子邮件地址或用户名"
-                            className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 text-gray-900 placeholder-gray-500 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium"
+                            className="w-full bg-gray-50 dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-lg p-4 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:bg-white dark:focus:bg-[#1a1b4b] focus:border-gray-900 dark:focus:border-white focus:ring-0 outline-none transition-all font-medium"
                         />
                     </div>
 
@@ -80,7 +80,7 @@ export const Login: React.FC = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="密码"
-                            className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 text-gray-900 placeholder-gray-500 focus:bg-white focus:border-gray-900 focus:ring-0 outline-none transition-all font-medium pr-12"
+                            className="w-full bg-gray-50 dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-lg p-4 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:bg-white dark:focus:bg-[#1a1b4b] focus:border-gray-900 dark:focus:border-white focus:ring-0 outline-none transition-all font-medium pr-12"
                         />
                         <button
                             type="button"
@@ -100,7 +100,7 @@ export const Login: React.FC = () => {
                     </button>
 
                     <div className="text-center pt-2">
-                        <button type="button" className="text-primary font-bold text-sm hover:underline">
+                        <button type="button" className="text-primary dark:text-indigo-400 font-bold text-sm hover:underline">
                             忘记密码？
                         </button>
                     </div>

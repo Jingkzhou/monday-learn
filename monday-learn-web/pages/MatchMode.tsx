@@ -128,7 +128,7 @@ export const MatchMode: React.FC = () => {
           gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
           oscillator.start(now);
           oscillator.stop(now + 0.3);
-          
+
           // Second harmony note
           const osc2 = ctx.createOscillator();
           const gain2 = ctx.createGain();
@@ -176,15 +176,15 @@ export const MatchMode: React.FC = () => {
           });
           break;
         case 'timeout':
-           // Descending failure sound
-           oscillator.type = 'sawtooth';
-           oscillator.frequency.setValueAtTime(400, now);
-           oscillator.frequency.linearRampToValueAtTime(100, now + 0.5);
-           gainNode.gain.setValueAtTime(0.1, now);
-           gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
-           oscillator.start(now);
-           oscillator.stop(now + 0.5);
-           break;
+          // Descending failure sound
+          oscillator.type = 'sawtooth';
+          oscillator.frequency.setValueAtTime(400, now);
+          oscillator.frequency.linearRampToValueAtTime(100, now + 0.5);
+          gainNode.gain.setValueAtTime(0.1, now);
+          gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+          oscillator.start(now);
+          oscillator.stop(now + 0.5);
+          break;
       }
     } catch (e) {
       console.error("Audio play error", e);
@@ -251,20 +251,20 @@ export const MatchMode: React.FC = () => {
     if (gameStatus === 'playing') {
       timerRef.current = window.setInterval(() => {
         const now = Date.now();
-        
+
         if (timerMode === 'stopwatch') {
-            setCurrentTime(now - startTime);
+          setCurrentTime(now - startTime);
         } else {
-            const elapsed = now - startTime;
-            const remaining = (countdownDuration * 1000) - elapsed;
-            
-            if (remaining <= 0) {
-                setCurrentTime(0);
-                setGameStatus('timeout');
-                playSound('timeout');
-            } else {
-                setCurrentTime(remaining);
-            }
+          const elapsed = now - startTime;
+          const remaining = (countdownDuration * 1000) - elapsed;
+
+          if (remaining <= 0) {
+            setCurrentTime(0);
+            setGameStatus('timeout');
+            playSound('timeout');
+          } else {
+            setCurrentTime(remaining);
+          }
         }
       }, 100);
     } else {
@@ -287,9 +287,9 @@ export const MatchMode: React.FC = () => {
 
   const handleCardClick = (clickedCard: MatchCard) => {
     if (
-      gameStatus !== 'playing' || 
-      isProcessing || 
-      clickedCard.state === 'matched' || 
+      gameStatus !== 'playing' ||
+      isProcessing ||
+      clickedCard.state === 'matched' ||
       clickedCard.state === 'selected'
     ) {
       return;
@@ -299,8 +299,8 @@ export const MatchMode: React.FC = () => {
 
     const newSelectedIds = [...selectedCardIds, clickedCard.id];
     setSelectedCardIds(newSelectedIds);
-    
-    setCards(prev => prev.map(c => 
+
+    setCards(prev => prev.map(c =>
       c.id === clickedCard.id ? { ...c, state: 'selected' } : c
     ));
 
@@ -308,7 +308,7 @@ export const MatchMode: React.FC = () => {
       setIsProcessing(true);
       const firstCardId = newSelectedIds[0];
       const secondCardId = newSelectedIds[1];
-      
+
       const firstCard = cards.find(c => c.id === firstCardId);
       const secondCard = clickedCard;
 
@@ -316,7 +316,7 @@ export const MatchMode: React.FC = () => {
         if (firstCard.termId === secondCard.termId) {
           setTimeout(() => {
             playSound('match');
-            setCards(prev => prev.map(c => 
+            setCards(prev => prev.map(c =>
               newSelectedIds.includes(c.id) ? { ...c, state: 'matched' } : c
             ));
             setSelectedCardIds([]);
@@ -325,12 +325,12 @@ export const MatchMode: React.FC = () => {
         } else {
           setTimeout(() => {
             playSound('mismatch');
-            setCards(prev => prev.map(c => 
+            setCards(prev => prev.map(c =>
               newSelectedIds.includes(c.id) ? { ...c, state: 'mismatch' } : c
             ));
 
             setTimeout(() => {
-              setCards(prev => prev.map(c => 
+              setCards(prev => prev.map(c =>
                 newSelectedIds.includes(c.id) ? { ...c, state: 'default' } : c
               ));
               setSelectedCardIds([]);
@@ -345,189 +345,189 @@ export const MatchMode: React.FC = () => {
   const formatTime = (ms: number) => (Math.max(0, ms) / 1000).toFixed(1);
 
   return (
-    <div className="h-screen w-screen bg-bg-gray flex flex-col overflow-hidden">
+    <div className="h-screen w-screen bg-bg-gray dark:bg-[#0a092d] flex flex-col overflow-hidden">
       {/* Header - Fixed Height */}
-      <div className="flex-none bg-white px-4 py-3 flex items-center justify-between shadow-sm z-20 h-16 border-b border-gray-200">
+      <div className="flex-none bg-white dark:bg-[#15143c] px-4 py-3 flex items-center justify-between shadow-sm z-20 h-16 border-b border-gray-200 dark:border-white/10">
         <div className="flex-1">
-             <button 
-                onClick={() => navigate(`/set/${id}`)}
-                className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
-            >
-                <X className="w-6 h-6" />
-            </button>
+          <button
+            onClick={() => navigate(`/set/${id}`)}
+            className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
-        
+
         <div className="flex-1 flex justify-center">
-             <div className={`text-2xl font-bold flex items-center gap-1 font-mono ${timerMode === 'countdown' && currentTime < 10000 ? 'text-red-500 animate-pulse' : 'text-gray-700'}`}>
-                {gameStatus === 'intro' 
-                    ? (timerMode === 'stopwatch' ? '0.0' : `${countdownDuration}.0`) 
-                    : formatTime(currentTime)
-                } 
-                <span className="text-sm font-bold text-gray-400 mt-1">秒</span>
-             </div>
+          <div className={`text-2xl font-bold flex items-center gap-1 font-mono ${timerMode === 'countdown' && currentTime < 10000 ? 'text-red-500 animate-pulse' : 'text-gray-700 dark:text-gray-300'}`}>
+            {gameStatus === 'intro'
+              ? (timerMode === 'stopwatch' ? '0.0' : `${countdownDuration}.0`)
+              : formatTime(currentTime)
+            }
+            <span className="text-sm font-bold text-gray-400 mt-1">秒</span>
+          </div>
         </div>
 
         <div className="flex-1 flex justify-end gap-2">
-            <button 
-                onClick={() => setIsMuted(!isMuted)}
-                className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
-                title={isMuted ? "开启声音" : "静音"}
-            >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </button>
-            
-            {/* Settings Toggle */}
-            <div className="relative" ref={settingsRef}>
-                <button 
-                    onClick={() => setShowSettings(!showSettings)}
-                    className={`p-2 rounded-full transition-colors ${showSettings ? 'bg-indigo-50 text-primary' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
-                    <Settings className="w-5 h-5" />
-                </button>
-                
-                {showSettings && (
-                    <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
-                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <Settings className="w-4 h-4" /> 游戏设置
-                        </h3>
-                        
-                        <div className="mb-5">
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">计时模式</label>
-                            <div className="flex bg-gray-100 p-1 rounded-lg">
-                                <button 
-                                    onClick={() => { setTimerMode('stopwatch'); setGameStatus('intro'); }}
-                                    className={`flex-1 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${timerMode === 'stopwatch' ? 'bg-white shadow-sm text-primary ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    <Timer className="w-4 h-4" /> 正计时
-                                </button>
-                                <button 
-                                    onClick={() => { setTimerMode('countdown'); setGameStatus('intro'); }}
-                                    className={`flex-1 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${timerMode === 'countdown' ? 'bg-white shadow-sm text-primary ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    <Hourglass className="w-4 h-4" /> 倒计时
-                                </button>
-                            </div>
-                        </div>
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full"
+            title={isMuted ? "开启声音" : "静音"}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </button>
 
-                        {timerMode === 'countdown' && (
-                            <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">时间限制 (秒)</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[30, 60, 90].map(sec => (
-                                        <button
-                                            key={sec}
-                                            onClick={() => { setCountdownDuration(sec); setGameStatus('intro'); }}
-                                            className={`py-2 text-sm font-bold rounded-md border transition-all ${countdownDuration === sec ? 'border-primary bg-indigo-50 text-primary' : 'border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-                                        >
-                                            {sec}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+          {/* Settings Toggle */}
+          <div className="relative" ref={settingsRef}>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className={`p-2 rounded-full transition-colors ${showSettings ? 'bg-indigo-50 dark:bg-indigo-900/30 text-primary dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10'}`}
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+
+            {showSettings && (
+              <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-[#15143c] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Settings className="w-4 h-4" /> 游戏设置
+                </h3>
+
+                <div className="mb-5">
+                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">计时模式</label>
+                  <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                    <button
+                      onClick={() => { setTimerMode('stopwatch'); setGameStatus('intro'); }}
+                      className={`flex-1 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${timerMode === 'stopwatch' ? 'bg-white dark:bg-gray-700 shadow-sm text-primary dark:text-indigo-400 ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                    >
+                      <Timer className="w-4 h-4" /> 正计时
+                    </button>
+                    <button
+                      onClick={() => { setTimerMode('countdown'); setGameStatus('intro'); }}
+                      className={`flex-1 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1.5 ${timerMode === 'countdown' ? 'bg-white dark:bg-gray-700 shadow-sm text-primary dark:text-indigo-400 ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                    >
+                      <Hourglass className="w-4 h-4" /> 倒计时
+                    </button>
+                  </div>
+                </div>
+
+                {timerMode === 'countdown' && (
+                  <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">时间限制 (秒)</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[30, 60, 90].map(sec => (
+                        <button
+                          key={sec}
+                          onClick={() => { setCountdownDuration(sec); setGameStatus('intro'); }}
+                          className={`py-2 text-sm font-bold rounded-md border transition-all ${countdownDuration === sec ? 'border-primary bg-indigo-50 dark:bg-indigo-900/30 text-primary dark:text-indigo-400' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                        >
+                          {sec}
+                        </button>
+                      ))}
                     </div>
+                  </div>
                 )}
-            </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Game Area - Fills remaining space */}
       <div className="flex-1 relative p-2 md:p-4 flex items-center justify-center w-full h-full">
-        
+
         {gameStatus === 'intro' && (
-            <div className="text-center animate-in fade-in zoom-in duration-300">
-                <h1 className="text-4xl font-black text-gray-800 mb-6">准备好了吗？</h1>
-                {error && (
-                  <div className="flex items-center justify-center gap-2 text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-sm font-medium max-w-xl mx-auto mb-3">
-                    <AlertCircle className="w-4 h-4" />
-                    {error}
-                  </div>
-                )}
-                {loading && (
-                  <div className="text-gray-500 mb-4">正在加载学习集...</div>
-                )}
-                <div className="mb-8 inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-sm font-medium text-gray-600">
-                    {timerMode === 'stopwatch' ? <Timer className="w-4 h-4" /> : <Hourglass className="w-4 h-4" />}
-                    模式: {timerMode === 'stopwatch' ? '正计时挑战' : `限时 ${countdownDuration} 秒`}
-                </div>
-                <br />
-                <button 
-                    onClick={initializeGame}
-                    disabled={loading || !!error || allTerms.length === 0}
-                    className="bg-primary text-white text-xl font-bold py-4 px-12 rounded-xl hover:bg-primary-dark shadow-lg hover:shadow-xl transition-all active:scale-95"
-                >
-                    开始游戏
-                </button>
-                {allTerms.length === 0 && !loading && !error && (
-                  <p className="mt-4 text-gray-500 font-medium">暂无可用术语</p>
-                )}
-                <p className="mt-4 text-gray-500 font-medium">匹配所有术语和定义</p>
+          <div className="text-center animate-in fade-in zoom-in duration-300">
+            <h1 className="text-4xl font-black text-gray-800 dark:text-white mb-6">准备好了吗？</h1>
+            {error && (
+              <div className="flex items-center justify-center gap-2 text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-sm font-medium max-w-xl mx-auto mb-3">
+                <AlertCircle className="w-4 h-4" />
+                {error}
+              </div>
+            )}
+            {loading && (
+              <div className="text-gray-500 dark:text-gray-400 mb-4">正在加载学习集...</div>
+            )}
+            <div className="mb-8 inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300">
+              {timerMode === 'stopwatch' ? <Timer className="w-4 h-4" /> : <Hourglass className="w-4 h-4" />}
+              模式: {timerMode === 'stopwatch' ? '正计时挑战' : `限时 ${countdownDuration} 秒`}
             </div>
+            <br />
+            <button
+              onClick={initializeGame}
+              disabled={loading || !!error || allTerms.length === 0}
+              className="bg-primary text-white text-xl font-bold py-4 px-12 rounded-xl hover:bg-primary-dark shadow-lg hover:shadow-xl transition-all active:scale-95"
+            >
+              开始游戏
+            </button>
+            {allTerms.length === 0 && !loading && !error && (
+              <p className="mt-4 text-gray-500 dark:text-gray-400 font-medium">暂无可用术语</p>
+            )}
+            <p className="mt-4 text-gray-500 dark:text-gray-400 font-medium">匹配所有术语和定义</p>
+          </div>
         )}
 
         {/* Playing Grid - Responsive 4x3 (Desktop) or 3x4 (Mobile) */}
         {gameStatus === 'playing' && (
-             <div className="w-full max-w-6xl h-full flex flex-col">
-                 <div className="grid grid-cols-3 grid-rows-4 md:grid-cols-4 md:grid-rows-3 gap-2 md:gap-4 h-full w-full">
-                    {cards.map((card) => {
-                        let baseStyles = "w-full h-full rounded-xl p-2 md:p-4 flex items-center justify-center text-center cursor-pointer transition-all duration-200 shadow-sm border-2 select-none font-medium break-words";
-                        let stateStyles = "bg-white border-gray-200 hover:border-gray-300 hover:shadow-md text-gray-700";
-                        let textClass = "text-sm sm:text-base md:text-xl"; // Responsive text size
+          <div className="w-full max-w-6xl h-full flex flex-col">
+            <div className="grid grid-cols-3 grid-rows-4 md:grid-cols-4 md:grid-rows-3 gap-2 md:gap-4 h-full w-full">
+              {cards.map((card) => {
+                let baseStyles = "w-full h-full rounded-xl p-2 md:p-4 flex items-center justify-center text-center cursor-pointer transition-all duration-200 shadow-sm border-2 select-none font-medium break-words";
+                let stateStyles = "bg-white dark:bg-[#15143c] border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:shadow-md text-gray-700 dark:text-gray-300";
+                let textClass = "text-sm sm:text-base md:text-xl"; // Responsive text size
 
-                        // Quizlet Visual Styles
-                        if (card.state === 'selected') {
-                            stateStyles = "bg-blue-50 border-blue-500 text-blue-800 shadow-md";
-                        } else if (card.state === 'matched') {
-                            stateStyles = "bg-green-50 border-green-500 text-green-800 opacity-0 pointer-events-none transform scale-90";
-                        } else if (card.state === 'mismatch') {
-                            stateStyles = "bg-red-50 border-red-500 text-red-800 animate-shake";
-                        }
+                // Quizlet Visual Styles
+                if (card.state === 'selected') {
+                  stateStyles = "bg-blue-50 dark:bg-blue-900/30 border-blue-500 dark:border-blue-400 text-blue-800 dark:text-blue-200 shadow-md";
+                } else if (card.state === 'matched') {
+                  stateStyles = "bg-green-50 dark:bg-green-900/30 border-green-500 dark:border-green-400 text-green-800 dark:text-green-200 opacity-0 pointer-events-none transform scale-90";
+                } else if (card.state === 'mismatch') {
+                  stateStyles = "bg-red-50 dark:bg-red-900/30 border-red-500 dark:border-red-400 text-red-800 dark:text-red-200 animate-shake";
+                }
 
-                        return (
-                            <div 
-                                key={card.id}
-                                onClick={() => handleCardClick(card)}
-                                className={`${baseStyles} ${stateStyles} ${textClass}`}
-                            >
-                                {card.content}
-                            </div>
-                        );
-                    })}
-                 </div>
-             </div>
+                return (
+                  <div
+                    key={card.id}
+                    onClick={() => handleCardClick(card)}
+                    className={`${baseStyles} ${stateStyles} ${textClass}`}
+                  >
+                    {card.content}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         {(gameStatus === 'finished' || gameStatus === 'timeout') && (
-            <div className="text-center max-w-md animate-in fade-in zoom-in duration-500 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-                 <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${gameStatus === 'finished' ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'}`}>
-                    {gameStatus === 'finished' ? <Trophy className="w-10 h-10" /> : <Clock className="w-10 h-10" />}
-                </div>
-                <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">
-                    {gameStatus === 'finished' ? '干得好！' : '时间到！'}
-                </div>
-                <h1 className={`text-5xl font-black mb-2 ${gameStatus === 'finished' ? 'text-primary' : 'text-gray-800'}`}>
-                    {gameStatus === 'finished' ? formatTime(currentTime) : '0.0'} 
-                    <span className="text-2xl font-bold text-gray-500"> 秒</span>
-                </h1>
-                <p className="text-gray-500 mb-8">
-                    {gameStatus === 'finished' ? '你完成了所有配对！' : '别灰心，再试一次吧！'}
-                </p>
-                
-                <div className="flex flex-col gap-3">
-                    <button 
-                        onClick={initializeGame}
-                        className="bg-primary text-white text-lg font-bold py-3 px-8 rounded-xl hover:bg-primary-dark shadow-md transition-colors flex items-center justify-center gap-2"
-                    >
-                        <RotateCcw className="w-5 h-5" /> 再玩一次
-                    </button>
-                    <button 
-                        onClick={() => navigate(`/set/${id}`)}
-                        className="bg-gray-50 border border-gray-200 text-gray-700 text-lg font-bold py-3 px-8 rounded-xl hover:bg-gray-100 transition-colors"
-                    >
-                        返回学习集
-                    </button>
-                </div>
+          <div className="text-center max-w-md animate-in fade-in zoom-in duration-500 bg-white dark:bg-[#15143c] p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-white/10">
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${gameStatus === 'finished' ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'}`}>
+              {gameStatus === 'finished' ? <Trophy className="w-10 h-10" /> : <Clock className="w-10 h-10" />}
             </div>
+            <div className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              {gameStatus === 'finished' ? '干得好！' : '时间到！'}
+            </div>
+            <h1 className={`text-5xl font-black mb-2 ${gameStatus === 'finished' ? 'text-primary dark:text-indigo-400' : 'text-gray-800 dark:text-white'}`}>
+              {gameStatus === 'finished' ? formatTime(currentTime) : '0.0'}
+              <span className="text-2xl font-bold text-gray-500 dark:text-gray-400"> 秒</span>
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mb-8">
+              {gameStatus === 'finished' ? '你完成了所有配对！' : '别灰心，再试一次吧！'}
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={initializeGame}
+                className="bg-primary text-white text-lg font-bold py-3 px-8 rounded-xl hover:bg-primary-dark shadow-md transition-colors flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-5 h-5" /> 再玩一次
+              </button>
+              <button
+                onClick={() => navigate(`/set/${id}`)}
+                className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-lg font-bold py-3 px-8 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                返回学习集
+              </button>
+            </div>
+          </div>
         )}
 
       </div>

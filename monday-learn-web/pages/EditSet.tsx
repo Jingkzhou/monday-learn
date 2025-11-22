@@ -216,7 +216,7 @@ export const EditSet: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
+      <div className="min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-400 bg-white dark:bg-[#0a092d]">
         <Loader2 className="w-6 h-6 animate-spin mr-2" />
         正在加载学习集...
       </div>
@@ -224,13 +224,13 @@ export const EditSet: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-[#0a092d]">
       {/* Editor Header */}
-      <header className="sticky top-0 bg-white z-40 px-4 md:px-8 py-4 border-b border-gray-200 flex items-center justify-between">
+      <header className="sticky top-0 bg-white dark:bg-[#15143c] z-40 px-4 md:px-8 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900"
+            className="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
             <ArrowLeft className="w-4 h-4" />
             返回学习集
@@ -257,7 +257,7 @@ export const EditSet: React.FC = () => {
           </div>
         )}
         {successMessage && (
-          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 p-3 rounded-lg mb-4 text-sm font-medium">
+          <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 p-3 rounded-lg mb-4 text-sm font-medium">
             <CheckCircle2 className="w-4 h-4" />
             {successMessage}
           </div>
@@ -266,38 +266,38 @@ export const EditSet: React.FC = () => {
         {/* Title Info */}
         <div className="mb-8 space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">标题</label>
+            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">标题</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full text-lg pb-2 border-b-2 border-gray-300 focus:border-yellow-400 outline-none transition-colors font-medium"
+              className="w-full text-lg pb-2 border-b-2 border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white focus:border-yellow-400 outline-none transition-colors font-medium"
               placeholder='输入标题，例如“生物 - 第22章：进化”'
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">描述</label>
+            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">描述</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full text-base pb-2 border-b-2 border-gray-300 focus:border-yellow-400 outline-none transition-colors"
+              className="w-full text-base pb-2 border-b-2 border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white focus:border-yellow-400 outline-none transition-colors"
               placeholder='添加描述...'
             />
           </div>
         </div>
 
         {/* Options Bar */}
-        <div className="flex items-center justify-between mb-8 sticky top-20 bg-white py-4 z-30">
+        <div className="flex items-center justify-between mb-8 sticky top-20 bg-white dark:bg-[#0a092d] py-4 z-30">
           <button
             onClick={handleAddCard}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-300 shadow-sm hover:bg-gray-50 font-bold text-gray-700 text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-[#15143c] border border-gray-300 dark:border-white/10 shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 font-bold text-gray-700 dark:text-white text-sm"
           >
             + 添加卡片
           </button>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-700 text-sm font-bold">
+            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 text-sm font-bold">
               <span>所有人可见</span>
               <div className="w-10 h-6 bg-primary rounded-full relative cursor-pointer">
                 <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
@@ -308,7 +308,7 @@ export const EditSet: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-                className="p-2 text-gray-400 hover:bg-gray-100 rounded-full"
+                className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full"
               >
                 <Settings className="w-5 h-5" />
               </button>
@@ -319,13 +319,13 @@ export const EditSet: React.FC = () => {
                     className="fixed inset-0 z-10"
                     onClick={() => setShowSettingsMenu(false)}
                   ></div>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-20 py-1">
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#15143c] rounded-lg shadow-xl border border-gray-100 dark:border-white/10 z-20 py-1">
                     <button
                       onClick={() => {
                         setShowImportModal(true);
                         setShowSettingsMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                     >
                       <Upload className="w-4 h-4" />
                       导入
@@ -339,7 +339,7 @@ export const EditSet: React.FC = () => {
         </div>
 
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Create a new study set</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Create a new study set</h1>
           <button
             onClick={() => setIsAiModalOpen(true)}
             className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white px-4 py-2 rounded-full font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm"
@@ -352,11 +352,11 @@ export const EditSet: React.FC = () => {
         {/* Cards List */}
         <div className="space-y-6">
           {terms.map((term, index) => (
-            <div key={term.id} className="bg-white rounded-lg shadow-sm hover:shadow-md border border-gray-200 transition-all">
-              <div className="flex items-center justify-between p-3 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+            <div key={term.id} className="bg-white dark:bg-[#15143c] rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-white/10 transition-all">
+              <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 rounded-t-lg">
                 <span className="font-bold text-gray-400 pl-2">{index + 1}</span>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-gray-400 hover:text-gray-600 cursor-move">
+                  <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-move">
                     <GripVertical className="w-5 h-5" />
                   </button>
                   <button onClick={() => handleDeleteTerm(term.id)} className="p-2 text-gray-400 hover:text-red-500">
@@ -371,7 +371,7 @@ export const EditSet: React.FC = () => {
                     type="text"
                     value={term.term}
                     onChange={(e) => handleTermChange(term.id, 'term', e.target.value)}
-                    className="w-full pb-2 border-b-2 border-gray-300 focus:border-yellow-400 outline-none transition-colors text-gray-800 bg-transparent"
+                    className="w-full pb-2 border-b-2 border-gray-300 dark:border-gray-700 focus:border-yellow-400 outline-none transition-colors text-gray-800 dark:text-white bg-transparent"
                     placeholder='输入术语'
                   />
                   <span className="text-xs text-gray-400 font-bold uppercase">术语</span>
@@ -383,10 +383,10 @@ export const EditSet: React.FC = () => {
                       type="text"
                       value={term.definition}
                       onChange={(e) => handleTermChange(term.id, 'definition', e.target.value)}
-                      className="w-full pb-2 border-b-2 border-gray-300 focus:border-yellow-400 outline-none transition-colors text-gray-800 bg-transparent"
+                      className="w-full pb-2 border-b-2 border-gray-300 dark:border-gray-700 focus:border-yellow-400 outline-none transition-colors text-gray-800 dark:text-white bg-transparent"
                       placeholder='输入定义'
                     />
-                    <button className="p-2 border border-gray-300 border-dashed rounded-md text-gray-400 hover:text-gray-600 hover:border-gray-400 flex flex-col items-center justify-center min-w-[60px]">
+                    <button className="p-2 border border-gray-300 dark:border-gray-600 border-dashed rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:border-gray-400 flex flex-col items-center justify-center min-w-[60px]">
                       <ImageIcon className="w-5 h-5" />
                       <span className="text-[10px] uppercase font-bold">图片</span>
                     </button>
@@ -401,7 +401,7 @@ export const EditSet: React.FC = () => {
         <div className="mt-10 text-center pb-20">
           <button
             onClick={handleAddCard}
-            className="px-8 py-4 bg-white border-2 border-gray-200 hover:border-gray-400 font-bold text-gray-700 rounded-lg transition-colors uppercase tracking-wide w-full"
+            className="px-8 py-4 bg-white dark:bg-[#15143c] border-2 border-gray-200 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/30 font-bold text-gray-700 dark:text-white rounded-lg transition-colors uppercase tracking-wide w-full"
           >
             + 添加卡片
           </button>
@@ -410,52 +410,52 @@ export const EditSet: React.FC = () => {
 
       {/* Import Modal - Light Theme Full Screen */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 bg-white text-gray-900 flex flex-col">
+        <div className="fixed inset-0 z-50 bg-white dark:bg-[#15143c] text-gray-900 dark:text-white flex flex-col">
           {/* Modal Header */}
-          <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200">
+          <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-white/10">
             <h2 className="text-lg font-bold">导入你的数据。</h2>
             <button
               onClick={() => setShowImportModal(false)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 md:px-12 md:py-8">
-            <p className="text-sm text-gray-600 mb-4 font-medium">在此复制并粘贴你的数据（从Word、Excel、Google文档等复制）</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 font-medium">在此复制并粘贴你的数据（从Word、Excel、Google文档等复制）</p>
 
             <textarea
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
-              className="w-full h-64 bg-white border-2 border-gray-300 rounded-lg p-4 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none resize-none font-mono text-sm leading-relaxed"
+              className="w-full h-64 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg p-4 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:outline-none resize-none font-mono text-sm leading-relaxed"
               placeholder={`单词1\t定义1\n单词2\t定义2\n单词3\t定义3`}
             />
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-12">
               {/* Term Delimiter Options */}
               <div>
-                <h3 className="font-bold mb-4 text-sm text-gray-700">词语和定义之间</h3>
+                <h3 className="font-bold mb-4 text-sm text-gray-700 dark:text-gray-300">词语和定义之间</h3>
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${termDelimiter === 'tab' ? 'border-indigo-600' : 'border-gray-400 group-hover:border-gray-600'}`}>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${termDelimiter === 'tab' ? 'border-indigo-600' : 'border-gray-400 dark:border-gray-600 group-hover:border-gray-600 dark:group-hover:border-gray-400'}`}>
                       {termDelimiter === 'tab' && <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />}
                     </div>
                     <input type="radio" name="termDelimiter" className="hidden" checked={termDelimiter === 'tab'} onChange={() => setTermDelimiter('tab')} />
-                    <span className={termDelimiter === 'tab' ? 'font-bold text-gray-900' : 'text-gray-600'}>Tab</span>
+                    <span className={termDelimiter === 'tab' ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}>Tab</span>
                   </label>
 
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${termDelimiter === 'comma' ? 'border-indigo-600' : 'border-gray-400 group-hover:border-gray-600'}`}>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${termDelimiter === 'comma' ? 'border-indigo-600' : 'border-gray-400 dark:border-gray-600 group-hover:border-gray-600 dark:group-hover:border-gray-400'}`}>
                       {termDelimiter === 'comma' && <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />}
                     </div>
                     <input type="radio" name="termDelimiter" className="hidden" checked={termDelimiter === 'comma'} onChange={() => setTermDelimiter('comma')} />
-                    <span className={termDelimiter === 'comma' ? 'font-bold text-gray-900' : 'text-gray-600'}>逗号</span>
+                    <span className={termDelimiter === 'comma' ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}>逗号</span>
                   </label>
 
                   <div className="flex items-center gap-3">
                     <label className="flex items-center gap-3 cursor-pointer group">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${termDelimiter === 'custom' ? 'border-indigo-600' : 'border-gray-400 group-hover:border-gray-600'}`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${termDelimiter === 'custom' ? 'border-indigo-600' : 'border-gray-400 dark:border-gray-600 group-hover:border-gray-600 dark:group-hover:border-gray-400'}`}>
                         {termDelimiter === 'custom' && <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />}
                       </div>
                       <input type="radio" name="termDelimiter" className="hidden" checked={termDelimiter === 'custom'} onChange={() => setTermDelimiter('custom')} />
@@ -468,7 +468,7 @@ export const EditSet: React.FC = () => {
                         setTermDelimiter('custom');
                       }}
                       placeholder="自定义"
-                      className={`bg-gray-50 border border-gray-300 rounded px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none transition-colors w-32 ${termDelimiter === 'custom' ? 'text-gray-900' : 'text-gray-500'}`}
+                      className={`bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none transition-colors w-32 ${termDelimiter === 'custom' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
                     />
                   </div>
                 </div>
@@ -476,27 +476,27 @@ export const EditSet: React.FC = () => {
 
               {/* Card Delimiter Options */}
               <div>
-                <h3 className="font-bold mb-4 text-sm text-gray-700">单词卡之间</h3>
+                <h3 className="font-bold mb-4 text-sm text-gray-700 dark:text-gray-300">单词卡之间</h3>
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cardDelimiter === 'newline' ? 'border-indigo-600' : 'border-gray-400 group-hover:border-gray-600'}`}>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cardDelimiter === 'newline' ? 'border-indigo-600' : 'border-gray-400 dark:border-gray-600 group-hover:border-gray-600 dark:group-hover:border-gray-400'}`}>
                       {cardDelimiter === 'newline' && <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />}
                     </div>
                     <input type="radio" name="cardDelimiter" className="hidden" checked={cardDelimiter === 'newline'} onChange={() => setCardDelimiter('newline')} />
-                    <span className={cardDelimiter === 'newline' ? 'font-bold text-gray-900' : 'text-gray-600'}>新一行</span>
+                    <span className={cardDelimiter === 'newline' ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}>新一行</span>
                   </label>
 
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cardDelimiter === 'semicolon' ? 'border-indigo-600' : 'border-gray-400 group-hover:border-gray-600'}`}>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cardDelimiter === 'semicolon' ? 'border-indigo-600' : 'border-gray-400 dark:border-gray-600 group-hover:border-gray-600 dark:group-hover:border-gray-400'}`}>
                       {cardDelimiter === 'semicolon' && <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />}
                     </div>
                     <input type="radio" name="cardDelimiter" className="hidden" checked={cardDelimiter === 'semicolon'} onChange={() => setCardDelimiter('semicolon')} />
-                    <span className={cardDelimiter === 'semicolon' ? 'font-bold text-gray-900' : 'text-gray-600'}>分号</span>
+                    <span className={cardDelimiter === 'semicolon' ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}>分号</span>
                   </label>
 
                   <div className="flex items-center gap-3">
                     <label className="flex items-center gap-3 cursor-pointer group">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cardDelimiter === 'custom' ? 'border-indigo-600' : 'border-gray-400 group-hover:border-gray-600'}`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cardDelimiter === 'custom' ? 'border-indigo-600' : 'border-gray-400 dark:border-gray-600 group-hover:border-gray-600 dark:group-hover:border-gray-400'}`}>
                         {cardDelimiter === 'custom' && <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" />}
                       </div>
                       <input type="radio" name="cardDelimiter" className="hidden" checked={cardDelimiter === 'custom'} onChange={() => setCardDelimiter('custom')} />
@@ -509,7 +509,7 @@ export const EditSet: React.FC = () => {
                         setCardDelimiter('custom');
                       }}
                       placeholder="自定义"
-                      className={`bg-gray-50 border border-gray-300 rounded px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none transition-colors w-32 ${cardDelimiter === 'custom' ? 'text-gray-900' : 'text-gray-500'}`}
+                      className={`bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none transition-colors w-32 ${cardDelimiter === 'custom' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
                     />
                   </div>
                 </div>
@@ -518,16 +518,16 @@ export const EditSet: React.FC = () => {
 
             {/* Preview Section */}
             <div className="mt-10">
-              <h3 className="font-bold mb-4 text-sm text-gray-700">预览 {previewTerms.length} 张单词卡</h3>
+              <h3 className="font-bold mb-4 text-sm text-gray-700 dark:text-gray-300">预览 {previewTerms.length} 张单词卡</h3>
               {previewTerms.length === 0 ? (
-                <p className="text-gray-500 text-sm">尚无内容可预览。</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">尚无内容可预览。</p>
               ) : (
                 <div className="space-y-2">
                   {previewTerms.map((pt, idx) => (
-                    <div key={idx} className="flex items-center gap-4 p-3 bg-gray-50 rounded border border-gray-200">
-                      <div className="flex-1 font-medium text-gray-900">{pt.term}</div>
-                      <div className="w-px h-4 bg-gray-300"></div>
-                      <div className="flex-1 text-gray-600">{pt.definition}</div>
+                    <div key={idx} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+                      <div className="flex-1 font-medium text-gray-900 dark:text-white">{pt.term}</div>
+                      <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
+                      <div className="flex-1 text-gray-600 dark:text-gray-300">{pt.definition}</div>
                     </div>
                   ))}
                 </div>
@@ -536,10 +536,10 @@ export const EditSet: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-4 bg-white">
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 flex justify-end gap-4 bg-white dark:bg-[#15143c]">
             <button
               onClick={() => setShowImportModal(false)}
-              className="px-6 py-2.5 rounded-lg font-bold text-gray-600 hover:bg-gray-100 transition-colors"
+              className="px-6 py-2.5 rounded-lg font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
             >
               取消导入
             </button>

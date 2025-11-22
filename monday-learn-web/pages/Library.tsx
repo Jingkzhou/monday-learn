@@ -171,19 +171,19 @@ export const Library: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-bg-gray pt-20 px-4 md:px-8 md:ml-64 pb-20">
+        <div className="min-h-screen bg-bg-gray dark:bg-dark-blue pt-20 px-4 md:px-8 md:ml-64 pb-20 transition-colors duration-200">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+                    <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                         <HardDrive className="w-6 h-6" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">我的资料库</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">我的资料库</h1>
                 </div>
             </div>
 
             {/* Upload Area */}
             <div
-                className={`bg-white border-2 border-dashed rounded-2xl p-10 mb-8 text-center transition-colors ${uploading ? 'border-indigo-300 bg-indigo-50' : 'border-gray-300 hover:border-indigo-400 hover:bg-gray-50'}`}
+                className={`bg-white dark:bg-[#15143c] border-2 border-dashed rounded-2xl p-10 mb-8 text-center transition-all duration-200 ${uploading ? 'border-indigo-300 dark:border-indigo-500/50 bg-indigo-50 dark:bg-indigo-500/10' : 'border-gray-300 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-400 hover:bg-gray-50 dark:hover:bg-white/5'}`}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
@@ -197,16 +197,16 @@ export const Library: React.FC = () => {
 
                 {uploading ? (
                     <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-                        <p className="text-indigo-600 font-medium">正在上传文件...</p>
+                        <Loader2 className="w-10 h-10 text-indigo-600 dark:text-indigo-400 animate-spin" />
+                        <p className="text-indigo-600 dark:text-indigo-400 font-medium">正在上传文件...</p>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center gap-3 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                        <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-2">
-                            <Upload className="w-8 h-8 text-indigo-600" />
+                        <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-2">
+                            <Upload className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900">点击或拖拽上传文件</h3>
-                        <p className="text-gray-500 text-sm">支持 PDF, Word, Excel, TXT 等格式</p>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">点击或拖拽上传文件</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">支持 PDF, Word, Excel, TXT 等格式</p>
                     </div>
                 )}
             </div>
@@ -219,9 +219,9 @@ export const Library: React.FC = () => {
             )}
 
             {/* File List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                    <h3 className="font-bold text-gray-700">已上传文件 ({materials.length})</h3>
+            <div className="bg-white dark:bg-[#15143c] rounded-xl shadow-sm border border-gray-200 dark:border-white/10 overflow-hidden transition-colors duration-200">
+                <div className="px-6 py-4 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 flex justify-between items-center">
+                    <h3 className="font-bold text-gray-700 dark:text-gray-200">已上传文件 ({materials.length})</h3>
                 </div>
 
                 {loading ? (
@@ -232,19 +232,19 @@ export const Library: React.FC = () => {
                 ) : materials.length > 0 ? (
                     <div className="divide-y divide-gray-100">
                         {materials.map((file) => (
-                            <div key={file.id} className="p-4 hover:bg-gray-50 flex items-center justify-between group transition-colors">
+                            <div key={file.id} className="p-4 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center justify-between group transition-colors border-b border-gray-100 dark:border-white/5 last:border-0">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-gray-50 dark:bg-white/10 rounded-lg flex items-center justify-center">
                                         {getFileIcon(file.filename)}
                                     </div>
                                     <div>
                                         <h4
-                                            className="font-bold text-gray-900 mb-1 cursor-pointer hover:text-indigo-600 hover:underline"
+                                            className="font-bold text-gray-900 dark:text-white mb-1 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline"
                                             onClick={() => handlePreview(file)}
                                         >
                                             {file.filename}
                                         </h4>
-                                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                                        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                                             <span>{formatSize(file.file_size)}</span>
                                             <span>•</span>
                                             <span>{new Date(file.upload_date).toLocaleDateString()}</span>

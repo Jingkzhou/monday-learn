@@ -195,8 +195,8 @@ export const FlashcardMode: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-bg-gray">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="min-h-screen flex items-center justify-center bg-bg-gray dark:bg-[#0a092d]">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
             </div>
         );
     }
@@ -204,28 +204,28 @@ export const FlashcardMode: React.FC = () => {
     if (!currentTerm) return null;
 
     return (
-        <div className="min-h-screen bg-bg-gray flex flex-col">
+        <div className="min-h-screen bg-bg-gray dark:bg-[#0a092d] flex flex-col">
             {/* Header */}
-            <header className="h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between shadow-sm z-10">
+            <header className="h-16 bg-white dark:bg-[#15143c] border-b border-gray-200 dark:border-white/10 px-4 flex items-center justify-between shadow-sm z-10">
                 <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 rounded-lg text-indigo-700 font-bold text-sm cursor-pointer hover:bg-indigo-100 transition-colors">
-                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-700 dark:text-indigo-300 font-bold text-sm cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 dark:bg-indigo-400"></span>
                         单词卡
                     </div>
                 </div>
 
                 <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center">
-                    <span className="text-sm font-bold text-gray-900">{currentIndex + 1} / {terms.length}</span>
-                    <span className="text-xs text-gray-500">{studySet?.title}</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white">{currentIndex + 1} / {terms.length}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{studySet?.title}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+                    <button className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors">
                         <Settings className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => navigate(`/set/${id}`)}
-                        className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+                        className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -241,7 +241,7 @@ export const FlashcardMode: React.FC = () => {
                     <div className={`w-full h-full transition-transform duration-500 transform-style-3d relative ${isFlipped ? 'rotate-y-180' : ''}`}>
 
                         {/* Front Face */}
-                        <div className="absolute inset-0 bg-white rounded-3xl shadow-xl border border-gray-100 backface-hidden flex flex-col items-center justify-center p-8 md:p-16 hover:shadow-2xl hover:border-indigo-100 transition-all">
+                        <div className="absolute inset-0 bg-white dark:bg-[#15143c] rounded-3xl shadow-xl border border-gray-100 dark:border-white/10 backface-hidden flex flex-col items-center justify-center p-8 md:p-16 hover:shadow-2xl hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-all">
                             <div className="absolute top-6 left-6 flex items-center gap-2 text-gray-400 text-sm font-bold uppercase tracking-wider">
                                 <Lightbulb className="w-4 h-4" />
                                 显示提示
@@ -250,20 +250,20 @@ export const FlashcardMode: React.FC = () => {
                             <div className="absolute top-6 right-6 flex gap-3">
                                 <button
                                     onClick={(e) => handlePlayAudio(e, currentTerm.term)}
-                                    className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+                                    className="p-2 text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-full transition-colors"
                                 >
                                     <Volume2 className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={handleToggleStar}
-                                    className={`p-2 rounded-full transition-colors ${currentTerm.starred ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400 hover:bg-yellow-50'}`}
+                                    className={`p-2 rounded-full transition-colors ${currentTerm.starred ? 'text-yellow-400' : 'text-gray-400 dark:text-gray-500 hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'}`}
                                 >
                                     <Star className={`w-5 h-5 ${currentTerm.starred ? 'fill-current' : ''}`} />
                                 </button>
                             </div>
 
                             <div className="text-center space-y-6">
-                                <h2 className="text-4xl md:text-6xl font-bold text-gray-900 font-serif">
+                                <h2 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white font-serif">
                                     {currentTerm.term}
                                 </h2>
 
@@ -272,7 +272,7 @@ export const FlashcardMode: React.FC = () => {
                                     {!mnemonic && !isGeneratingMnemonic && (
                                         <button
                                             onClick={generateMnemonic}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-sm font-bold hover:bg-indigo-100 transition-colors"
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-sm font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
                                         >
                                             <Sparkles className="w-4 h-4" />
                                             AI 助记
@@ -285,7 +285,7 @@ export const FlashcardMode: React.FC = () => {
                                         </div>
                                     )}
                                     {mnemonic && (
-                                        <div className="mt-4 p-4 bg-indigo-50 rounded-xl text-indigo-800 text-lg font-medium max-w-lg mx-auto animate-in fade-in zoom-in duration-300">
+                                        <div className="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-800 dark:text-indigo-200 text-lg font-medium max-w-lg mx-auto animate-in fade-in zoom-in duration-300">
                                             ✨ {mnemonic}
                                         </div>
                                     )}
@@ -298,7 +298,7 @@ export const FlashcardMode: React.FC = () => {
                         </div>
 
                         {/* Back Face */}
-                        <div className="absolute inset-0 bg-white rounded-3xl shadow-xl border border-gray-100 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-8 md:p-16 hover:shadow-2xl hover:border-indigo-100 transition-all">
+                        <div className="absolute inset-0 bg-white dark:bg-[#15143c] rounded-3xl shadow-xl border border-gray-100 dark:border-white/10 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-8 md:p-16 hover:shadow-2xl hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-all">
                             <div className="absolute top-6 left-6 flex items-center gap-2 text-gray-400 text-sm font-bold uppercase tracking-wider">
                                 定义
                             </div>
@@ -306,20 +306,20 @@ export const FlashcardMode: React.FC = () => {
                             <div className="absolute top-6 right-6 flex gap-3">
                                 <button
                                     onClick={(e) => handlePlayAudio(e, currentTerm.definition)}
-                                    className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+                                    className="p-2 text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-full transition-colors"
                                 >
                                     <Volume2 className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={handleToggleStar}
-                                    className={`p-2 rounded-full transition-colors ${currentTerm.starred ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400 hover:bg-yellow-50'}`}
+                                    className={`p-2 rounded-full transition-colors ${currentTerm.starred ? 'text-yellow-400' : 'text-gray-400 dark:text-gray-500 hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'}`}
                                 >
                                     <Star className={`w-5 h-5 ${currentTerm.starred ? 'fill-current' : ''}`} />
                                 </button>
                             </div>
 
                             <div className="text-center">
-                                <h2 className="text-3xl md:text-5xl font-medium text-gray-800">
+                                <h2 className="text-3xl md:text-5xl font-medium text-gray-800 dark:text-gray-100">
                                     {currentTerm.definition}
                                 </h2>
                             </div>
@@ -333,11 +333,11 @@ export const FlashcardMode: React.FC = () => {
             </main>
 
             {/* Footer Controls */}
-            <footer className="h-20 bg-white border-t border-gray-200 px-4 md:px-8 flex items-center justify-between z-10">
+            <footer className="h-20 bg-white dark:bg-[#15143c] border-t border-gray-200 dark:border-white/10 px-4 md:px-8 flex items-center justify-between z-10">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={toggleAutoPlay}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-colors ${isAutoPlaying ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-gray-100 text-gray-600'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-colors ${isAutoPlaying ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400'}`}
                     >
                         {isAutoPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                         <span className="hidden md:inline">{isAutoPlaying ? '暂停' : '播放'}</span>
@@ -345,7 +345,7 @@ export const FlashcardMode: React.FC = () => {
 
                     <button
                         onClick={toggleShuffle}
-                        className={`p-2 rounded-full transition-colors ${isShuffled ? 'bg-indigo-100 text-indigo-700' : 'hover:bg-gray-100 text-gray-400'}`}
+                        className={`p-2 rounded-full transition-colors ${isShuffled ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400'}`}
                         title="随机播放"
                     >
                         <Shuffle className="w-5 h-5" />
@@ -355,7 +355,7 @@ export const FlashcardMode: React.FC = () => {
                 <div className="flex items-center gap-6">
                     <button
                         onClick={handlePrev}
-                        className="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-colors"
+                        className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors"
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
@@ -368,7 +368,7 @@ export const FlashcardMode: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+                    <button className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors">
                         <Maximize2 className="w-5 h-5" />
                     </button>
                 </div>

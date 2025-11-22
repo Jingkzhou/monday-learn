@@ -139,7 +139,13 @@ export const TopBar: React.FC = () => {
 
               {/* Menu Items */}
               <div className="py-2">
-                <button className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-left group">
+                <button
+                  onClick={() => {
+                    navigate('/achievements');
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-left group"
+                >
                   <Trophy className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">成就</span>
                 </button>

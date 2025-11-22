@@ -96,7 +96,7 @@ export const LearnMode: React.FC = () => {
             const filteredTerms = starredOnly
                 ? filteredTermsRaw.map(term => ({
                     ...term,
-                    learning_status: 'not_started',
+                    learning_status: 'not_started' as const,
                     consecutive_correct: 0,
                 }))
                 : filteredTermsRaw;
@@ -383,16 +383,16 @@ export const LearnMode: React.FC = () => {
     }, [showFeedback, isCorrect]);
 
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-400 bg-bg-gray dark:bg-dark-blue">Loading...</div>;
 
     if (starredOnly && session && session.terms.length === 0) {
         return (
-            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mb-6">
+            <div className="min-h-screen bg-white dark:bg-dark-blue flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-20 h-20 bg-yellow-50 dark:bg-yellow-500/10 rounded-full flex items-center justify-center mb-6">
                     <Star className="w-10 h-10 text-yellow-500" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">没有星标内容可以学习</h2>
-                <p className="text-gray-600 mb-8">请返回学习集为想要重点复习的术语添加星标。</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">没有星标内容可以学习</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">请返回学习集为想要重点复习的术语添加星标。</p>
                 <button
                     onClick={() => navigate(`/set/${id}`)}
                     className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
@@ -405,12 +405,12 @@ export const LearnMode: React.FC = () => {
 
     if (roundComplete) {
         return (
-            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-                    <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+            <div className="min-h-screen bg-white dark:bg-dark-blue flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-500" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">这一轮完成了！</h2>
-                <p className="text-gray-600 mb-8">您已经掌握了这批词条。准备好继续了吗？</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">这一轮完成了！</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">您已经掌握了这批词条。准备好继续了吗？</p>
                 <button
                     onClick={fetchSession}
                     className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
@@ -419,7 +419,7 @@ export const LearnMode: React.FC = () => {
                 </button>
                 <button
                     onClick={() => navigate(`/set/${id}`)}
-                    className="mt-4 text-gray-500 font-bold hover:text-gray-900"
+                    className="mt-4 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-900 dark:hover:text-white"
                 >
                     返回学习集
                 </button>
@@ -431,18 +431,18 @@ export const LearnMode: React.FC = () => {
         // If session is null (error) or empty (no terms), show appropriate message
         if (!session) {
             return (
-                <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+                <div className="min-h-screen bg-white dark:bg-dark-blue flex flex-col items-center justify-center p-6 text-center">
                     <h2 className="text-2xl font-bold text-red-600 mb-2">无法加载学习内容</h2>
-                    <p className="text-gray-600 mb-8">请检查网络连接或稍后再试。</p>
+                    <p className="text-gray-600 dark:text-gray-400 mb-8">请检查网络连接或稍后再试。</p>
                     <button
                         onClick={fetchSession}
-                        className="px-8 py-3 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-8 py-3 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
                     >
                         重试
                     </button>
                     <button
                         onClick={() => navigate(`/set/${id}`)}
-                        className="mt-4 text-gray-500 font-bold hover:text-gray-900 block"
+                        className="mt-4 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-900 dark:hover:text-white block"
                     >
                         返回学习集
                     </button>
@@ -451,9 +451,9 @@ export const LearnMode: React.FC = () => {
         }
 
         return (
-            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">太棒了！</h2>
-                <p className="text-gray-600 mb-8">您已经掌握了所有词条！</p>
+            <div className="min-h-screen bg-white dark:bg-dark-blue flex flex-col items-center justify-center p-6 text-center">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">太棒了！</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">您已经掌握了所有词条！</p>
                 <button
                     onClick={() => navigate(`/set/${id}`)}
                     className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors"
@@ -465,12 +465,12 @@ export const LearnMode: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        <div className="min-h-screen bg-white dark:bg-dark-blue flex flex-col">
             {/* Header */}
-            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 relative">
+            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-white/10 relative">
                 <div className="flex items-center gap-4 flex-1">
-                    <div className="flex items-center text-primary font-bold gap-2 cursor-pointer" onClick={() => navigate(-1)}>
-                        <div className="w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center">
+                    <div className="flex items-center text-primary dark:text-indigo-400 font-bold gap-2 cursor-pointer" onClick={() => navigate(-1)}>
+                        <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-white/10 flex items-center justify-center">
                             <span className="text-sm">←</span>
                         </div>
                         <span>学习</span>
@@ -478,10 +478,10 @@ export const LearnMode: React.FC = () => {
                 </div>
 
                 <div className="flex-1 flex flex-col items-center">
-                    <div className="text-xs font-bold text-gray-500 mb-1">
+                    <div className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">
                         {counts.mastered} 已掌握 · {counts.familiar} 熟悉 · {counts.new} 未学习
                     </div>
-                    <div className="w-full max-w-md h-1.5 bg-gray-100 rounded-full overflow-hidden flex">
+                    <div className="w-full max-w-md h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden flex">
                         <div className="bg-emerald-500 h-full" style={{ width: `${(counts.mastered) / (counts.new + counts.familiar + counts.mastered || 1) * 100}%` }}></div>
                         <div className="bg-amber-400 h-full" style={{ width: `${(counts.familiar) / (counts.new + counts.familiar + counts.mastered || 1) * 100}%` }}></div>
                     </div>
@@ -489,14 +489,14 @@ export const LearnMode: React.FC = () => {
 
                 <div className="flex-1 flex justify-end gap-4">
                     {starredOnly && (
-                        <div className="px-3 py-1.5 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold flex items-center gap-2">
+                        <div className="px-3 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20 text-yellow-700 dark:text-yellow-500 text-xs font-bold flex items-center gap-2">
                             <Star className="w-4 h-4 fill-current" />
                             星标练习模式（不记录进度）
                         </div>
                     )}
                     <div className="relative">
                         <button
-                            className={`p-2 rounded-full ${showSettings ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                            className={`p-2 rounded-full ${showSettings ? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
                             title="设置"
                             onClick={() => setShowSettings(!showSettings)}
                         >
@@ -588,19 +588,19 @@ export const LearnMode: React.FC = () => {
                         )}
                     </div>
 
-                    <button onClick={() => navigate(`/set/${id}`)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="关闭">
+                    <button onClick={() => navigate(`/set/${id}`)} className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full" title="关闭">
                         <X className="w-6 h-6" />
                     </button>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col items-center justify-center p-6 bg-bg-gray" onClick={() => setShowSettings(false)}>
+            <div className="flex-1 flex flex-col items-center justify-center p-6 bg-bg-gray dark:bg-dark-blue" onClick={() => setShowSettings(false)}>
 
                 {/* Question Card */}
-                <div className="w-full max-w-3xl bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-12 mb-8 relative min-h-[200px] flex flex-col justify-center">
-                    <div className="absolute top-6 left-6 text-gray-500 text-sm font-medium flex items-center gap-2">
-                        术语 <Volume2 className="w-4 h-4 cursor-pointer hover:text-primary" />
+                <div className="w-full max-w-3xl bg-white dark:bg-[#15143c] rounded-xl shadow-sm border border-gray-200 dark:border-white/10 p-6 md:p-12 mb-8 relative min-h-[200px] flex flex-col justify-center">
+                    <div className="absolute top-6 left-6 text-gray-500 dark:text-gray-400 text-sm font-medium flex items-center gap-2">
+                        术语 <Volume2 className="w-4 h-4 cursor-pointer hover:text-primary dark:hover:text-indigo-400" />
                     </div>
                     <div className="absolute top-6 right-6">
                         <button
@@ -608,24 +608,24 @@ export const LearnMode: React.FC = () => {
                                 e.stopPropagation();
                                 handleToggleStar();
                             }}
-                            className={`p-2 rounded-full transition-colors ${currentTerm?.starred ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400 hover:bg-yellow-50'}`}
+                            className={`p-2 rounded-full transition-colors ${currentTerm?.starred ? 'text-yellow-400' : 'text-gray-400 dark:text-gray-500 hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-500/10'}`}
                             title={currentTerm?.starred ? "取消星标" : "标记星号"}
                         >
                             <Star className={`w-5 h-5 ${currentTerm?.starred ? 'fill-current' : ''}`} />
                         </button>
                     </div>
-                    <h2 className="text-4xl text-center font-serif text-gray-800">
+                    <h2 className="text-4xl text-center font-serif text-gray-800 dark:text-white">
                         {questionType === 'flashcard' && isFlipped ? currentTerm.definition : currentTerm.term}
                     </h2>
                     {questionType === 'flashcard' && (
                         <div
-                            className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl"
+                            className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors rounded-xl"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setIsFlipped(!isFlipped);
                             }}
                         >
-                            {!isFlipped && <div className="text-gray-400 text-sm mt-32">点击翻转</div>}
+                            {!isFlipped && <div className="text-gray-400 dark:text-gray-500 text-sm mt-32">点击翻转</div>}
                         </div>
                     )}
                 </div>
@@ -635,7 +635,7 @@ export const LearnMode: React.FC = () => {
                     {questionType === 'written' && (
                         // Written Question
                         <div className="space-y-4">
-                            <div className="text-gray-500 font-medium mb-2">输入定义</div>
+                            <div className="text-gray-500 dark:text-gray-400 font-medium mb-2">输入定义</div>
                             <form
                                 onSubmit={(e) => {
                                     e.preventDefault();
@@ -651,16 +651,16 @@ export const LearnMode: React.FC = () => {
                                     disabled={showFeedback}
                                     className={`w-full p-4 text-lg border-2 rounded-xl focus:outline-none transition-colors ${showFeedback
                                         ? isCorrect
-                                            ? "border-emerald-500 bg-emerald-50 text-emerald-900"
-                                            : "border-red-500 bg-red-50 text-red-900"
-                                        : "border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                                            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-100"
+                                            : "border-red-500 bg-red-50 dark:bg-red-500/20 text-red-900 dark:text-red-100"
+                                        : "border-gray-200 dark:border-white/10 bg-white dark:bg-[#1a1b4b] text-gray-900 dark:text-white focus:border-primary dark:focus:border-indigo-500 focus:ring-4 focus:ring-primary/10 dark:focus:ring-indigo-500/20"
                                         }`}
                                     placeholder="输入答案..."
                                 />
                                 {!showFeedback && (
                                     <button
                                         type="submit"
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 bg-gray-100 text-gray-600 font-bold rounded-lg hover:bg-gray-200"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-white/20"
                                     >
                                         回答
                                     </button>
@@ -668,23 +668,23 @@ export const LearnMode: React.FC = () => {
                             </form>
 
                             {showFeedback && !isCorrect && (
-                                <div className="bg-white border border-gray-200 rounded-xl p-6 mt-4 animate-in fade-in slide-in-from-top-2">
+                                <div className="bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 rounded-xl p-6 mt-4 animate-in fade-in slide-in-from-top-2">
                                     <div className="flex items-start gap-4 mb-4">
-                                        <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                                             <X className="w-6 h-6 text-red-500" />
                                         </div>
                                         <div>
-                                            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">正确答案</div>
-                                            <div className="text-lg font-medium text-gray-900">{currentTerm.definition}</div>
+                                            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">正确答案</div>
+                                            <div className="text-lg font-medium text-gray-900 dark:text-white">{currentTerm.definition}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
-                                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                            <AlertCircle className="w-6 h-6 text-gray-500" />
+                                        <div className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <AlertCircle className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                                         </div>
                                         <div>
-                                            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">您说</div>
-                                            <div className="text-lg font-medium text-gray-500 line-through">{typedAnswer}</div>
+                                            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">您说</div>
+                                            <div className="text-lg font-medium text-gray-500 dark:text-gray-400 line-through">{typedAnswer}</div>
                                         </div>
                                     </div>
                                     <button
@@ -712,15 +712,15 @@ export const LearnMode: React.FC = () => {
                         // Multiple Choice
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {options.map((opt, idx) => {
-                                let btnClass = "bg-white border border-gray-200 hover:border-primary hover:bg-gray-50 text-gray-700";
+                                let btnClass = "bg-white dark:bg-[#15143c] border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-indigo-400 hover:bg-gray-50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200";
 
                                 if (showFeedback) {
                                     if (opt === currentTerm.definition) {
-                                        btnClass = "bg-emerald-50 border-emerald-500 text-emerald-700";
+                                        btnClass = "bg-emerald-50 dark:bg-emerald-500/20 border-emerald-500 text-emerald-700 dark:text-emerald-400";
                                     } else if (opt === selectedAnswer && !isCorrect) {
-                                        btnClass = "bg-red-50 border-red-500 text-red-700";
+                                        btnClass = "bg-red-50 dark:bg-red-500/20 border-red-500 text-red-700 dark:text-red-400";
                                     } else {
-                                        btnClass = "bg-gray-50 border-gray-200 text-gray-400 opacity-50";
+                                        btnClass = "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-400 dark:text-gray-500 opacity-50";
                                     }
                                 }
 
@@ -732,7 +732,7 @@ export const LearnMode: React.FC = () => {
                                         className={`p-6 rounded-xl text-left transition-all duration-200 text-lg font-medium flex items-center justify-between group ${btnClass} shadow-sm`}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border ${showFeedback && opt === currentTerm.definition ? 'border-emerald-500 bg-emerald-100' : 'border-gray-200 bg-gray-50 group-hover:bg-white'
+                                            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border ${showFeedback && opt === currentTerm.definition ? 'border-emerald-500 bg-emerald-100 dark:bg-emerald-500/30' : 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 group-hover:bg-white dark:group-hover:bg-white/10'
                                                 }`}>
                                                 {idx + 1}
                                             </span>
@@ -752,13 +752,13 @@ export const LearnMode: React.FC = () => {
                         <div className="flex gap-4 justify-center mt-8 animate-in fade-in slide-in-from-bottom-4">
                             <button
                                 onClick={() => handleFlashcardGrade(false)}
-                                className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all w-40"
+                                className="px-8 py-4 bg-white dark:bg-[#15143c] border-2 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-white/20 transition-all w-40"
                             >
                                 仍需学习
                             </button>
                             <button
                                 onClick={() => handleFlashcardGrade(true)}
-                                className="px-8 py-4 bg-emerald-100 text-emerald-700 font-bold rounded-xl hover:bg-emerald-200 transition-all w-40"
+                                className="px-8 py-4 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl hover:bg-emerald-200 dark:hover:bg-emerald-500/30 transition-all w-40"
                             >
                                 我知道了
                             </button>
@@ -767,12 +767,12 @@ export const LearnMode: React.FC = () => {
                 </div>
 
                 <div className="mt-8 flex justify-between w-full max-w-3xl">
-                    <button className="text-gray-400 hover:text-gray-600 font-medium text-sm">
+                    <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 font-medium text-sm">
                         选项
                     </button>
                     <button
                         onClick={() => handleAnswer("unknown")}
-                        className="text-primary font-bold text-sm hover:underline"
+                        className="text-primary dark:text-indigo-400 font-bold text-sm hover:underline"
                     >
                         不知道？
                     </button>

@@ -8,16 +8,16 @@ export const Welcome: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900">
+    <div className="min-h-screen bg-white dark:bg-dark-blue font-sans text-gray-900 dark:text-white transition-colors duration-200">
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-4 md:px-8 py-3 border-b border-gray-100 sticky top-0 bg-white z-50">
+      <nav className="flex items-center justify-between px-4 md:px-8 py-3 border-b border-gray-100 dark:border-white/10 sticky top-0 bg-white dark:bg-dark-blue z-50">
         <div className="flex items-center gap-8">
           <div className="cursor-pointer" onClick={() => navigate('/')}>
             <Logo />
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
-            <button className="hover:text-gray-900">学习工具 <span className="text-xs">▼</span></button>
-            <button className="hover:text-gray-900">科目 <span className="text-xs">▼</span></button>
+          <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600 dark:text-gray-300">
+            <button className="hover:text-gray-900 dark:hover:text-white">学习工具 <span className="text-xs">▼</span></button>
+            <button className="hover:text-gray-900 dark:hover:text-white">科目 <span className="text-xs">▼</span></button>
           </div>
         </div>
 
@@ -27,7 +27,7 @@ export const Welcome: React.FC = () => {
 
           <button
             onClick={() => navigate('/login')}
-            className="px-4 py-2 text-gray-600 font-bold hover:bg-gray-50 rounded-md transition-colors"
+            className="px-4 py-2 text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-white/10 rounded-md transition-colors"
           >
             登录
           </button>
@@ -42,10 +42,10 @@ export const Welcome: React.FC = () => {
 
       {/* Hero Section */}
       <section className="pt-16 pb-12 px-4 text-center max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">
           您想如何学习？
         </h1>
-        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
           通过MondayQuizlet的互动式单词卡、模拟测试和学习活动，掌握所学知识。
         </p>
       </section>
@@ -130,13 +130,13 @@ export const Welcome: React.FC = () => {
       </section>
 
       {/* App Section */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-20 px-4 bg-white dark:bg-dark-blue">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1 text-left">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
               每堂课、每场考试，一个终极<br />学习应用程序
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
               创建自己的教学单词卡，或查找教师、学生和专家制作的学习集。使用我们的免费应用程序随时随地学习。
             </p>
             <div className="flex gap-4">
@@ -177,13 +177,13 @@ export const Welcome: React.FC = () => {
       </section>
 
       {/* Method Section */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-20 px-4 bg-white dark:bg-dark-blue">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row-reverse items-center gap-12">
           <div className="flex-1 text-left">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
               选择学习方式
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
               通过学习模式将单词卡转变为选择题等。通过配对等学习游戏巩固知识。
             </p>
             <button
@@ -219,11 +219,11 @@ export const Welcome: React.FC = () => {
       </section>
 
       {/* Teacher Section */}
-      <section className="py-20 px-4 bg-[#eef1ff]">
+      <section className="py-20 px-4 bg-[#eef1ff] dark:bg-[#15143c]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1 text-left">
-            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">教师</div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <div className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">教师</div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
               增强学生的能力
             </h2>
             <p className="text-lg text-gray-600 mb-8">
@@ -255,11 +255,11 @@ export const Welcome: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white pt-16 pb-8 px-4 border-t border-gray-100">
+      <footer className="bg-white dark:bg-dark-blue pt-16 pb-8 px-4 border-t border-gray-100 dark:border-white/10">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
           <div>
-            <h4 className="font-bold text-gray-900 mb-4">关于我们</h4>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-4">关于我们</h4>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li className="hover:text-[#4255ff] cursor-pointer">关于MondayQuizlet</li>
               <li className="hover:text-[#4255ff] cursor-pointer">工作机会</li>
               <li className="hover:text-[#4255ff] cursor-pointer">广告宣传</li>
@@ -267,8 +267,8 @@ export const Welcome: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 mb-4">学生</h4>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-4">学生</h4>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li className="hover:text-[#4255ff] cursor-pointer">单词卡</li>
               <li className="hover:text-[#4255ff] cursor-pointer">学习</li>
               <li className="hover:text-[#4255ff] cursor-pointer">解决方案</li>
@@ -276,8 +276,8 @@ export const Welcome: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 mb-4">对于老师</h4>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-4">对于老师</h4>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li className="hover:text-[#4255ff] cursor-pointer">Live</li>
               <li className="hover:text-[#4255ff] cursor-pointer">帮助中心</li>
               <li className="hover:text-[#4255ff] cursor-pointer">博客</li>
@@ -285,8 +285,8 @@ export const Welcome: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 mb-4">资源</h4>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-4">资源</h4>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li className="hover:text-[#4255ff] cursor-pointer">帮助中心</li>
               <li className="hover:text-[#4255ff] cursor-pointer">注册</li>
               <li className="hover:text-[#4255ff] cursor-pointer">行为准则</li>
@@ -294,14 +294,14 @@ export const Welcome: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 mb-4">语言</h4>
-            <select className="text-sm border-none bg-transparent font-semibold text-gray-600 focus:ring-0 cursor-pointer">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-4">语言</h4>
+            <select className="text-sm border-none bg-transparent font-semibold text-gray-600 dark:text-gray-400 focus:ring-0 cursor-pointer">
               <option>中文 (简体)</option>
               <option>English</option>
             </select>
             <div className="mt-8">
               {/* QR Code Placeholder */}
-              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="w-24 h-24 bg-gray-100 dark:bg-white/10 rounded-lg flex items-center justify-center">
                 <div className="w-20 h-20 border-4 border-black p-1">
                   <div className="w-full h-full bg-black/10 grid grid-cols-4 gap-0.5">
                     {[...Array(16)].map((_, i) => (
@@ -313,7 +313,7 @@ export const Welcome: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+        <div className="max-w-7xl mx-auto pt-8 border-t border-gray-100 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
           <div className="flex gap-4">
             <span>© 2025 MondayQuizlet, Inc.</span>
             <span className="hover:text-[#4255ff] cursor-pointer">隐私政策</span>
@@ -321,10 +321,10 @@ export const Welcome: React.FC = () => {
           </div>
           <div className="flex gap-4">
             {/* Social Icons */}
-            <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-            <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-            <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-            <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
+            <div className="w-6 h-6 bg-gray-200 dark:bg-white/20 rounded-full"></div>
+            <div className="w-6 h-6 bg-gray-200 dark:bg-white/20 rounded-full"></div>
+            <div className="w-6 h-6 bg-gray-200 dark:bg-white/20 rounded-full"></div>
+            <div className="w-6 h-6 bg-gray-200 dark:bg-white/20 rounded-full"></div>
           </div>
         </div>
       </footer>
