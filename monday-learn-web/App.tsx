@@ -31,7 +31,7 @@ import ChatBot from './components/ChatBot';
 
 // Layout wrapper for pages that have the standard sidebar/topbar
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="min-h-screen bg-bg-gray pb-20 md:pb-0">
+  <div className="min-h-screen bg-bg-gray dark:bg-dark-blue pb-20 md:pb-0 transition-colors duration-200">
     <TopBar />
     <Sidebar />
     {children}

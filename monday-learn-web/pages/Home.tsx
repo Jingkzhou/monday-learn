@@ -138,17 +138,17 @@ export const Home: React.FC = () => {
         return (
             <div
                 key={set.id}
-                className="relative min-w-[280px] max-w-[320px] bg-white rounded-2xl p-5 border border-gray-100 shadow-sm cursor-pointer hover:shadow-md hover:border-indigo-200 transition-all duration-300 group flex flex-col gap-4"
+                className="relative min-w-[280px] max-w-[320px] bg-white dark:bg-[#1a1b4b] rounded-2xl p-5 border border-gray-100 dark:border-white/10 shadow-sm cursor-pointer hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all duration-300 group flex flex-col gap-4"
                 onClick={() => navigate(`/set/${set.id}`)}
             >
                 <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Layers className="w-6 h-6 text-indigo-600" />
+                    <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Layers className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-gray-900 leading-tight mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors">{set.title}</h3>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-1 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{set.title}</h3>
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-500 text-xs font-medium border border-gray-200">
+                            <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-xs font-medium border border-gray-200 dark:border-white/10">
                                 {termCount} 个词语
                             </span>
                         </div>
@@ -156,13 +156,13 @@ export const Home: React.FC = () => {
                         {/* Mastery Progress */}
                         {(set.mastered_count || 0) > 0 && (
                             <div className="flex items-center gap-2">
-                                <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="flex-1 h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-green-500 rounded-full"
                                         style={{ width: `${Math.min(100, Math.round(((set.mastered_count || 0) / (termCount || 1)) * 100))}%` }}
                                     ></div>
                                 </div>
-                                <span className="text-[10px] font-bold text-green-600">
+                                <span className="text-[10px] font-bold text-green-600 dark:text-green-400">
                                     {Math.round(((set.mastered_count || 0) / (termCount || 1)) * 100)}%
                                 </span>
                             </div>
@@ -170,14 +170,14 @@ export const Home: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-gray-50 mt-auto">
+                <div className="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-white/10 mt-auto">
                     <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold">
+                        <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 flex items-center justify-center text-xs font-bold">
                             {set.authorUsername?.[0] || 'U'}
                         </div>
-                        <span className="text-xs text-gray-500 truncate max-w-[80px]">{set.authorUsername || 'User'}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[80px]">{set.authorUsername || 'User'}</span>
                     </div>
-                    <button className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                    <button className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
                         <ChevronRight className="w-4 h-4" />
                     </button>
                 </div>
@@ -212,14 +212,14 @@ export const Home: React.FC = () => {
                     <>
                         <button
                             onClick={() => scrollBy(ref, 'left')}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 p-2 rounded-full bg-white border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-all shadow-lg opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 p-2 rounded-full bg-white dark:bg-[#1a1b4b] border border-gray-100 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-lg opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
                             aria-label="上一页"
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </button>
                         <button
                             onClick={() => scrollBy(ref, 'right')}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 p-2 rounded-full bg-white border border-gray-100 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-all shadow-lg opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
+                            className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 p-2 rounded-full bg-white dark:bg-[#1a1b4b] border border-gray-100 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-lg opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
                             aria-label="下一页"
                         >
                             <ChevronRight className="w-5 h-5" />
@@ -239,7 +239,7 @@ export const Home: React.FC = () => {
                     ) : sets.length > 0 ? (
                         sets.map(renderCard)
                     ) : (
-                        <div className="bg-white text-gray-500 rounded-xl border border-dashed border-gray-200 p-6 min-w-[260px] flex flex-col items-center justify-center gap-2">
+                        <div className="bg-white dark:bg-[#1a1b4b] text-gray-500 dark:text-gray-400 rounded-xl border border-dashed border-gray-200 dark:border-white/10 p-6 min-w-[260px] flex flex-col items-center justify-center gap-2">
                             <span className="text-sm">暂无数据</span>
                         </div>
                     )}
@@ -249,18 +249,18 @@ export const Home: React.FC = () => {
     );
 
     return (
-        <main className="pt-24 px-4 md:px-10 md:ml-64 pb-24 md:pb-10 min-h-screen bg-bg-gray text-gray-900">
+        <main className="pt-24 px-4 md:px-10 md:ml-64 pb-24 md:pb-10 min-h-screen bg-bg-gray dark:bg-dark-blue text-gray-900 dark:text-white transition-colors duration-200">
 
             {/* Hero Section - Progress & Continue */}
             <section className="mb-10">
                 <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <Zap className="w-5 h-5 text-yellow-500 fill-current" />
                         继续学习
                     </h2>
                 </div>
                 {/* Hero Section */}
-                <section className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden mb-10">
+                <section className="bg-white dark:bg-[#1a1b4b] rounded-3xl p-6 md:p-8 border border-gray-100 dark:border-white/10 shadow-sm flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden mb-10 transition-colors duration-200">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
 
                     {loadingSets ? (
@@ -271,22 +271,22 @@ export const Home: React.FC = () => {
                     ) : heroSet ? (
                         <>
                             <div className="relative z-10 flex-1 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold mb-4">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-white/10 text-indigo-600 dark:text-indigo-300 text-xs font-bold mb-4">
                                     <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                                     今日学习目标
                                 </div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
                                     准备好开始今天的<br />
-                                    <span className="text-primary">单词挑战</span>了吗？
+                                    <span className="text-primary dark:text-indigo-400">单词挑战</span>了吗？
                                 </h1>
-                                <p className="text-gray-500 mb-8 max-w-md mx-auto md:mx-0">
-                                    你上次学习到了 <span className="font-bold text-gray-700">{heroSet.title}</span>。
+                                <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto md:mx-0">
+                                    你上次学习到了 <span className="font-bold text-gray-700 dark:text-gray-200">{heroSet.title}</span>。
                                     坚持每天 15 分钟，轻松掌握新词汇！
                                 </p>
                                 <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
                                     <button
                                         onClick={() => navigate(`/set/${heroSet.id}`)}
-                                        className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-primary-dark hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+                                        className="w-full sm:w-auto px-8 py-3 bg-primary text-white dark:bg-white dark:text-primary rounded-xl font-bold shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-primary-dark dark:hover:bg-gray-100 hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                                     >
                                         继续挑战
                                     </button>
@@ -313,7 +313,7 @@ export const Home: React.FC = () => {
                                     </defs>
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                    <span className="text-3xl font-bold text-gray-900">
+                                    <span className="text-3xl font-bold text-gray-900 dark:text-white">
                                         {Math.round(((heroSet.mastered_count || 0) / (heroSet.termCount || 1)) * 100)}%
                                     </span>
                                     <span className="text-xs text-gray-400 font-medium mt-1">已掌握</span>
@@ -322,14 +322,14 @@ export const Home: React.FC = () => {
                         </>
                     ) : (
                         <div className="relative z-10 flex-1 text-center py-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-4">欢迎来到
-                                <span className="text-gray-800">Monday</span>
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">欢迎来到
+                                <span className="text-gray-800 dark:text-gray-200">Monday</span>
                                 <span className="text-[#4255ff]">Quizlet</span></h1>
 
-                            <p className="text-gray-500 mb-8">创建你的第一个学习集，开始高效记忆！</p>
+                            <p className="text-gray-500 dark:text-gray-400 mb-8">创建你的第一个学习集，开始高效记忆！</p>
                             <button
                                 onClick={() => navigate('/create')}
-                                className="px-8 py-3 bg-primary text-white rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all"
+                                className="px-8 py-3 bg-primary text-white dark:bg-white dark:text-primary rounded-xl font-bold shadow-lg hover:bg-primary-dark dark:hover:bg-gray-100 transition-all"
                             >
                                 创建学习集
                             </button>
@@ -346,36 +346,36 @@ export const Home: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div
                         onClick={() => navigate('/word-cards')}
-                        className="bg-white hover:bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
+                        className="bg-white dark:bg-[#1a1b4b] hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
                     >
-                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 transition-colors">
                             <Layers className="w-6 h-6 text-blue-500" />
                         </div>
-                        <span className="font-bold text-gray-700 group-hover:text-gray-900">单词卡</span>
+                        <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">单词卡</span>
                     </div>
 
-                    <div className="bg-white hover:bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
+                    <div className="bg-white dark:bg-[#1a1b4b] hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
                     >
-                        <div className="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center group-hover:bg-yellow-100 transition-colors">
+                        <div className="w-12 h-12 rounded-2xl bg-yellow-50 dark:bg-yellow-500/10 flex items-center justify-center group-hover:bg-yellow-100 dark:group-hover:bg-yellow-500/20 transition-colors">
                             <Trophy className="w-6 h-6 text-yellow-500" />
                         </div>
-                        <span className="font-bold text-gray-700 group-hover:text-gray-900">成就奖章</span>
+                        <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">成就奖章</span>
                     </div>
 
-                    <div className="bg-white hover:bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
+                    <div className="bg-white dark:bg-[#1a1b4b] hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
                     >
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 transition-colors">
                             <BarChart2 className="w-6 h-6 text-emerald-500" />
                         </div>
-                        <span className="font-bold text-gray-700 group-hover:text-gray-900">学习统计</span>
+                        <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">学习统计</span>
                     </div>
 
-                    <div className="bg-white hover:bg-gray-50 border border-gray-100 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
+                    <div className="bg-white dark:bg-[#1a1b4b] hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all hover:-translate-y-1 shadow-sm group"
                     >
-                        <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                        <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors">
                             <Users className="w-6 h-6 text-purple-500" />
                         </div>
-                        <span className="font-bold text-gray-700 group-hover:text-gray-900">班级社区</span>
+                        <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">班级社区</span>
                     </div>
                 </div>
             </section>
@@ -386,19 +386,19 @@ export const Home: React.FC = () => {
                     onClick={() => setShowReportModal(true)}
                     className="group relative overflow-hidden rounded-3xl cursor-pointer active:scale-[0.99] transition-all shadow-lg shadow-indigo-100"
                 >
-                    <div className="relative bg-white rounded-[23px] p-6 md:p-8 overflow-hidden border border-indigo-100">
+                    <div className="relative bg-white dark:bg-[#1a1b4b] rounded-[23px] p-6 md:p-8 overflow-hidden border border-indigo-100 dark:border-white/10">
                         {/* Background Decoration */}
-                        <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-50 rounded-full blur-[60px] group-hover:bg-indigo-100 transition-colors"></div>
-                        <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-purple-50 rounded-full blur-[60px] group-hover:bg-purple-100 transition-colors"></div>
+                        <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-50 dark:bg-indigo-500/10 rounded-full blur-[60px] group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors"></div>
+                        <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-purple-50 dark:bg-purple-500/10 rounded-full blur-[60px] group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors"></div>
 
                         <div className="relative z-10 flex items-center justify-between">
                             <div>
                                 <div className="flex items-center gap-2 mb-3">
                                     <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
-                                    <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">AI Neural Analysis</span>
+                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">AI Neural Analysis</span>
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">生成学习总结报告</h3>
-                                <p className="text-gray-500 text-sm max-w-lg leading-relaxed">
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">生成学习总结报告</h3>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-lg leading-relaxed">
                                     连接至中央处理器。分析您的学习数据矩阵，识别薄弱节点，并生成最优化的神经强化路径。
                                 </p>
                             </div>
