@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { StudySet, Term } from '../types';
+import { StudySet, Term, Folder } from '../types';
 import { Flashcard } from '../components/Flashcard';
 import {
   MoreHorizontal,
@@ -27,7 +27,13 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Merge
+
+  Merge,
+  Plus,
+  Check,
+  X,
+  Search,
+  Folder as FolderIcon
 } from 'lucide-react';
 import { api } from '../utils/api';
 
@@ -48,6 +54,12 @@ export const SetView: React.FC = () => {
   const autoPlayTimeout = useRef<number | null>(null);
   const pauseTimeout = useRef<number | null>(null);
   const isAutoPlayingRef = useRef(isAutoPlaying);
+
+  // Add to Folder Modal State
+  const [showAddToFolderModal, setShowAddToFolderModal] = useState(false);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [loadingFolders, setLoadingFolders] = useState(false);
+  const [folderSearch, setFolderSearch] = useState('');
 
   useEffect(() => {
     const fetchStudySet = async () => {
@@ -272,6 +284,43 @@ export const SetView: React.FC = () => {
     } finally {
       setDeleteInProgress(false);
     }
+
+  };
+
+  const fetchFolders = async () => {
+    setLoadingFolders(true);
+    try {
+      const data = await api.get<Folder[]>('/folders/');
+      setFolders(data);
+    } catch (err) {
+      console.error("Failed to fetch folders", err);
+    } finally {
+      setLoadingFolders(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showAddToFolderModal) {
+      fetchFolders();
+    }
+  }, [showAddToFolderModal]);
+
+  const handleToggleFolder = async (folder: Folder) => {
+    if (!studySet) return;
+    const isAdded = folder.study_sets.some(s => s.id === Number(studySet.id));
+
+    try {
+      if (isAdded) {
+        await api.delete(`/folders/${folder.id}/sets/${studySet.id}`);
+      } else {
+        await api.post(`/folders/${folder.id}/sets/${studySet.id}`, {});
+      }
+      // Refresh folders to update UI
+      await fetchFolders();
+    } catch (err) {
+      console.error("Failed to toggle folder", err);
+      // Optionally show error toast
+    }
   };
 
   if (loading) {
@@ -339,7 +388,7 @@ export const SetView: React.FC = () => {
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1a1b4b] rounded-xl shadow-lg border border-gray-100 dark:border-white/10 py-2 z-20 overflow-hidden">
                   <button
                     onClick={() => {
-                      navigate('/folders');
+                      setShowAddToFolderModal(true);
                       setShowMoreMenu(false);
                     }}
                     className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
@@ -632,6 +681,108 @@ export const SetView: React.FC = () => {
         )}
       </div>
 
-    </div>
+
+
+      {/* Add to Folder Modal */}
+      {
+        showAddToFolderModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+            <div className="bg-white dark:bg-[#1a1b4b] w-full max-w-lg rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200">
+              <div className="p-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg">添加到文件夹</h3>
+                <button
+                  onClick={() => setShowAddToFolderModal(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
+
+              <div className="p-4 border-b border-gray-100 dark:border-white/10">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="搜索文件夹"
+                    value={folderSearch}
+                    onChange={(e) => setFolderSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-2">
+                {loadingFolders ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : folders.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <FolderIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>还没有文件夹</p>
+                    <button
+                      onClick={() => navigate('/folders')}
+                      className="text-primary font-bold hover:underline mt-2"
+                    >
+                      去创建文件夹
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {folders
+                      .filter(f => f.title.toLowerCase().includes(folderSearch.toLowerCase()))
+                      .map(folder => {
+                        const isAdded = folder.study_sets.some(s => s.id === Number(studySet?.id));
+                        return (
+                          <div
+                            key={folder.id}
+                            onClick={() => handleToggleFolder(folder)}
+                            className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg cursor-pointer group transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center text-primary dark:text-indigo-400">
+                                <FolderIcon className="w-5 h-5" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-bold text-sm text-gray-800 dark:text-white">{folder.title}</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{folder.set_count} 个学习集</span>
+                              </div>
+                            </div>
+                            <button
+                              className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-200 ${isAdded
+                                ? 'bg-primary border-primary text-white shadow-sm scale-105'
+                                : 'border-gray-300 dark:border-white/20 text-transparent group-hover:border-primary group-hover:text-primary/50'
+                                }`}
+                            >
+                              {isAdded ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                            </button>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 border-t border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-white/5">
+                <button
+                  onClick={() => navigate('/folders')}
+                  className="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  新建文件夹
+                </button>
+                <button
+                  onClick={() => setShowAddToFolderModal(false)}
+                  className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors shadow-sm"
+                >
+                  完成
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+    </div >
   );
 };
