@@ -1,10 +1,362 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, TrendingUp, AlertCircle, BrainCircuit, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, Zap, Activity, Folder, Trophy, BarChart2, Users, Layers } from 'lucide-react';
+import { Search, MoreVertical, Copy, PartyPopper, Sparkles, X, Calendar, TrendingUp, AlertCircle, BrainCircuit, Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, Zap, Activity, Folder, Trophy, BarChart2, Users, Layers, Clock, BookOpen, RefreshCw, Target, Flame, Compass, PlayCircle } from 'lucide-react';
 import { StudySet } from '../types';
 import { api } from '../utils/api';
 import { Logo } from '../components/Logo';
 import { normalizeStudySet } from '../utils/studySet';
+
+interface DailyPlan {
+    review_count: number;
+    consolidate_count: number;
+    new_count: number;
+    suggested_new: number;
+    total_items: number;
+    estimated_minutes: number;
+}
+
+interface SmartRecommendation {
+    study_set_id: number;
+    title: string;
+    description: string;
+    term_count: number;
+    mastery_percentage: number;
+    reason: 'needs_work' | 'not_started' | 'popular';
+}
+
+interface SmartRecommendData {
+    needs_work: SmartRecommendation[];
+    not_started: SmartRecommendation[];
+    popular: SmartRecommendation[];
+}
+
+interface WeakTerm {
+    term_id: number;
+    study_set_id: number;
+    term: string;
+    definition: string;
+    study_set_title: string;
+    error_rate: number;
+    hours_since_review: number;
+    weakness_score: number;
+}
+
+const DailyPlanCard: React.FC = () => {
+    const navigate = useNavigate();
+    const [plan, setPlan] = useState<DailyPlan | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const fetchPlan = async () => {
+            try {
+                const data = await api.get<DailyPlan>('/learning/daily-plan');
+                setPlan(data);
+            } catch (err: any) {
+                setError(err.message || '加载学习计划失败');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPlan();
+    }, []);
+
+    if (loading) {
+        return (
+            <section className="mb-10">
+                <div className="bg-white dark:bg-[#1a1b4b] rounded-2xl p-6 border border-gray-100 dark:border-white/10 shadow-sm flex items-center justify-center gap-2 text-gray-400">
+                    <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
+                    <span className="text-sm">正在加载学习计划...</span>
+                </div>
+            </section>
+        );
+    }
+
+    if (error || !plan) return null;
+
+    const hasWork = plan.total_items > 0;
+
+    return (
+        <section className="mb-10">
+            <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-indigo-500" />
+                    今日学习计划
+                </h2>
+                {hasWork && (
+                    <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        预计 {plan.estimated_minutes} 分钟
+                    </span>
+                )}
+            </div>
+
+            <div className="bg-white dark:bg-[#1a1b4b] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden relative">
+                {/* Decorative gradient */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 via-amber-400 to-emerald-400"></div>
+
+                {hasWork ? (
+                    <div className="p-6">
+                        <div className="grid grid-cols-3 gap-4 mb-6">
+                            {/* Due Reviews */}
+                            <div className="text-center p-4 rounded-xl bg-red-50/80 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20">
+                                <div className="text-3xl font-bold text-red-600 dark:text-red-400 mb-1">
+                                    {plan.review_count}
+                                </div>
+                                <div className="text-xs font-medium text-red-500/80 dark:text-red-400/70 flex items-center justify-center gap-1">
+                                    <RefreshCw className="w-3 h-3" />
+                                    待复习
+                                </div>
+                                {plan.review_count > 0 && (
+                                    <div className="text-[10px] text-red-400 dark:text-red-500 mt-1 font-medium">即将遗忘！</div>
+                                )}
+                            </div>
+
+                            {/* Consolidate */}
+                            <div className="text-center p-4 rounded-xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20">
+                                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">
+                                    {plan.consolidate_count}
+                                </div>
+                                <div className="text-xs font-medium text-amber-500/80 dark:text-amber-400/70 flex items-center justify-center gap-1">
+                                    <TrendingUp className="w-3 h-3" />
+                                    需巩固
+                                </div>
+                            </div>
+
+                            {/* New Terms */}
+                            <div className="text-center p-4 rounded-xl bg-emerald-50/80 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
+                                <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+                                    {plan.suggested_new}
+                                </div>
+                                <div className="text-xs font-medium text-emerald-500/80 dark:text-emerald-400/70 flex items-center justify-center gap-1">
+                                    <Sparkles className="w-3 h-3" />
+                                    新学习
+                                </div>
+                                {plan.new_count > plan.suggested_new && (
+                                    <div className="text-[10px] text-emerald-400 dark:text-emerald-500 mt-1 font-medium">共 {plan.new_count} 个可学</div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <button
+                            onClick={() => navigate('/word-cards')}
+                            className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                        >
+                            <Zap className="w-5 h-5 fill-current" />
+                            开始今日学习
+                            <span className="text-white/60 text-sm font-normal ml-1">({plan.total_items} 个词)</span>
+                        </button>
+                    </div>
+                ) : (
+                    <div className="p-6 text-center">
+                        <div className="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+                            <Trophy className="w-7 h-7 text-emerald-500" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">今日任务已完成！</h3>
+                        <p className="text-sm text-gray-400 dark:text-gray-500">明天再来继续保持学习节奏 🎉</p>
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
+const WeakTermsCard: React.FC<{ terms: WeakTerm[] }> = ({ terms }) => {
+    const navigate = useNavigate();
+
+    if (!terms || terms.length === 0) return null;
+
+    return (
+        <section className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+            <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-rose-500" />
+                    高频遗忘项
+                </h2>
+                <span className="text-xs font-medium text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-100 dark:border-rose-500/20">
+                    需重点关注
+                </span>
+            </div>
+
+            <div className="bg-white dark:bg-[#1a1b4b] rounded-2xl border border-rose-100 dark:border-rose-500/20 shadow-sm overflow-hidden">
+                <div className="divide-y divide-gray-50 dark:divide-white/5">
+                    {terms.slice(0, 3).map((term) => (
+                        <div key={term.term_id} className="p-4 flex items-center justify-between hover:bg-rose-50/30 dark:hover:bg-rose-500/5 transition-colors">
+                            <div className="flex-1 min-w-0 pr-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-bold text-gray-900 dark:text-white truncate">{term.term}</h4>
+                                    <span className="text-[10px] bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded flex items-center gap-1 shrink-0">
+                                        <Folder className="w-3 h-3" />
+                                        {term.study_set_title}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{term.definition}</p>
+                            </div>
+                            <div className="flex flex-col items-end shrink-0">
+                                <span className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded">
+                                    错误率 {term.error_rate}%
+                                </span>
+                                {term.hours_since_review > 24 && (
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                                        {Math.floor(term.hours_since_review / 24)} 天前复习
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {terms.length > 3 && (
+                    <div className="p-3 bg-gray-50 dark:bg-white/5 border-t border-gray-50 dark:border-white/5 text-center">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 cursor-default">
+                            还有 {terms.length - 3} 个易忘词汇，建议尽快复习哦
+                        </span>
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
+const SmartRecommendSection: React.FC = () => {
+    const navigate = useNavigate();
+    const [data, setData] = useState<SmartRecommendData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRec = async () => {
+            try {
+                const res = await api.get<SmartRecommendData>('/learning/smart-recommend');
+                setData(res);
+            } catch (err) {
+                console.error("Failed to load smart recommendations:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRec();
+    }, []);
+
+    if (loading || !data) return null;
+
+    const sections = [
+        {
+            title: "突破瓶颈",
+            icon: <Flame className="w-5 h-5 text-orange-500" />,
+            items: data.needs_work,
+            emptyText: "干得漂亮！你已经掌握了所有内容。"
+        },
+        {
+            title: "新目标",
+            icon: <Target className="w-5 h-5 text-indigo-500" />,
+            items: data.not_started,
+            emptyText: "你还没有待开始的学习集。"
+        },
+        {
+            title: "探索发现",
+            icon: <Compass className="w-5 h-5 text-purple-500" />,
+            items: data.popular,
+            emptyText: "暂无热门推荐。"
+        }
+    ];
+
+    const hasRecommendations = sections.some(s => s.items.length > 0);
+    if (!hasRecommendations) return null;
+
+    return (
+        <section className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-5">
+                <BrainCircuit className="w-5 h-5 text-indigo-500" />
+                智能学习推荐
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {sections.map((section, idx) => {
+                    if (section.items.length === 0 && idx === 2) return null; // Hide empty popular
+
+                    return (
+                        <div key={idx} className="flex flex-col gap-3">
+                            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5 ml-1">
+                                {section.icon}
+                                {section.title}
+                            </h3>
+
+                            {section.items.length > 0 ? (
+                                <div className="flex flex-col gap-3">
+                                    {section.items.slice(0, 2).map((item) => (
+                                        <div
+                                            key={item.study_set_id}
+                                            onClick={() => navigate(`/study-sets/${item.study_set_id}`)}
+                                            className="group bg-white dark:bg-[#1a1b4b] p-4 rounded-xl border border-gray-100 dark:border-white/10 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/30 cursor-pointer transition-all flex flex-col h-full relative overflow-hidden"
+                                        >
+                                            {item.reason === 'needs_work' && item.mastery_percentage < 30 && (
+                                                <div className="absolute top-0 right-0 overflow-hidden w-16 h-16 pointer-events-none">
+                                                    <div className="bg-orange-500 text-white text-[9px] font-bold uppercase tracking-wider text-center py-1 absolute top-[12px] right-[-16px] w-[60px] rotate-45 shadow-sm">
+                                                        Hard
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="flex justify-between items-start mb-2 pr-6">
+                                                <h4 className="font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                                    {item.title}
+                                                </h4>
+                                            </div>
+
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">
+                                                {item.description || '暂无描述'}
+                                            </p>
+
+                                            <div className="flex items-center justify-between mt-auto">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-medium bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 px-2 py-1 rounded-md flex items-center gap-1">
+                                                        <Layers className="w-3 h-3" />
+                                                        {item.term_count} 词
+                                                    </span>
+                                                    {item.reason === 'popular' && item.view_count !== undefined && (
+                                                        <span className="text-[10px] font-medium bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-md flex items-center gap-1">
+                                                            <Users className="w-3 h-3" />
+                                                            {item.view_count} 热度
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {item.reason === 'needs_work' && (
+                                                    <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-2 py-1 rounded-md text-[10px] font-bold">
+                                                        <span>掌握 {item.mastery_percentage}%</span>
+                                                    </div>
+                                                )}
+                                                {(item.reason === 'not_started' || item.reason === 'popular') && (
+                                                    <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors">
+                                                        <PlayCircle className="w-3 h-3" />
+                                                        开始
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {/* Progress Bar */}
+                                            {item.reason === 'needs_work' && (
+                                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-100 dark:bg-white/5">
+                                                    <div className="h-full bg-gradient-to-r from-orange-400 to-rose-400 transition-all duration-500" style={{ width: `${item.mastery_percentage}%` }}></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="h-full min-h-[120px] bg-gray-50/50 dark:bg-[#1a1b4b]/30 rounded-xl border border-dashed border-gray-200 dark:border-white/10 flex flex-col items-center justify-center p-4 text-center">
+                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-2">
+                                        <Sparkles className="w-4 h-4 text-gray-400" />
+                                    </div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{section.emptyText}</p>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+};
 
 export const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -17,9 +369,7 @@ export const Home: React.FC = () => {
     const [studySets, setStudySets] = useState<StudySet[]>([]);
     const [loadingSets, setLoadingSets] = useState(true);
     const [setsError, setSetsError] = useState('');
-    const [recommendedSets, setRecommendedSets] = useState<StudySet[]>([]);
-    const [loadingRecommended, setLoadingRecommended] = useState(true);
-    const [recommendedError, setRecommendedError] = useState('');
+    const [weakTerms, setWeakTerms] = useState<WeakTerm[]>([]);
     const recentRef = useRef<HTMLDivElement | null>(null);
     const recommendedRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,25 +399,17 @@ export const Home: React.FC = () => {
             }
         };
 
-        fetchSets();
-    }, []);
-
-    useEffect(() => {
-        const fetchRecommended = async () => {
-            setLoadingRecommended(true);
-            setRecommendedError('');
+        const fetchWeakTerms = async () => {
             try {
-                const data = await api.get<StudySet[]>('/study-sets/public/top?limit=5');
-                const normalized = (data || []).map(normalizeSet);
-                setRecommendedSets(normalized);
-            } catch (err: any) {
-                setRecommendedError(err.message || '加载推荐内容失败');
-            } finally {
-                setLoadingRecommended(false);
+                const res = await api.get<{ items: WeakTerm[] }>('/learning/weak-terms');
+                if (res && res.items) setWeakTerms(res.items);
+            } catch (err) {
+                console.error("Failed to load weak terms:", err);
             }
         };
 
-        fetchRecommended();
+        fetchSets();
+        fetchWeakTerms();
     }, []);
 
     const generateReport = async () => {
@@ -332,6 +674,15 @@ export const Home: React.FC = () => {
                     )}
                 </section>
             </section>
+
+            {/* Daily Learning Plan - SRS */}
+            <DailyPlanCard />
+
+            {/* Weak Terms Alert */}
+            <WeakTermsCard terms={weakTerms} />
+
+            {/* Smart Recommendations */}
+            <SmartRecommendSection />
 
             {/* Recent Content Carousel */}
             {renderCarousel('近期访问', studySets, loadingSets, setsError, recentRef)}

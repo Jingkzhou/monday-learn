@@ -18,7 +18,9 @@ def ensure_ai_config_total_tokens(engine) -> None:
 
     logger.info("Adding total_tokens column to ai_configs table")
     with engine.connect() as conn:
-        conn.execute(text("ALTER TABLE ai_configs ADD COLUMN total_tokens INT DEFAULT 0"))
+        conn.execute(
+            text("ALTER TABLE ai_configs ADD COLUMN total_tokens INT DEFAULT 0")
+        )
         conn.commit()
     logger.success("Added total_tokens column to ai_configs table")
 
@@ -33,9 +35,13 @@ def ensure_learning_reports_utf8mb4(engine) -> None:
 
     logger.info("Checking learning_reports charset...")
     with engine.connect() as conn:
-        # We just blindly run the alter command to ensure it's correct. 
+        # We just blindly run the alter command to ensure it's correct.
         # It's a cheap operation if it's already correct.
-        conn.execute(text("ALTER TABLE learning_reports CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"))
+        conn.execute(
+            text(
+                "ALTER TABLE learning_reports CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+            )
+        )
         conn.commit()
     logger.success("Ensured learning_reports is utf8mb4")
 
@@ -49,13 +55,13 @@ def ensure_daily_learning_summary_table(engine) -> None:
         return
 
     logger.info("Creating daily_learning_summaries table...")
-    # Since we are using Base.metadata.create_all(bind=engine) in main.py, 
-    # this function might be redundant if we just restart. 
+    # Since we are using Base.metadata.create_all(bind=engine) in main.py,
+    # this function might be redundant if we just restart.
     # However, create_all only creates tables that don't exist.
     # If we want to be explicit or if we were using Alembic properly we would do it there.
     # But given the pattern here, create_all in main.py should handle it.
     # Let's just log that we are relying on create_all, or we can force it if needed.
-    # Actually, main.py calls create_all BEFORE run_migrations. 
+    # Actually, main.py calls create_all BEFORE run_migrations.
     # So the table should already be created by the time this runs if the model is imported in main.py.
     # We can just verify it here.
     pass
@@ -67,7 +73,9 @@ def ensure_learning_progress_mastered_at(engine) -> None:
     """
     inspector = inspect(engine)
     if "learning_progress" not in inspector.get_table_names():
-        logger.warning("learning_progress table missing; skipping mastered_at migration")
+        logger.warning(
+            "learning_progress table missing; skipping mastered_at migration"
+        )
         return
 
     column_names = [col["name"] for col in inspector.get_columns("learning_progress")]
@@ -79,13 +87,19 @@ def ensure_learning_progress_mastered_at(engine) -> None:
 
     with engine.connect() as conn:
         if needs_column:
-            conn.execute(text("ALTER TABLE learning_progress ADD COLUMN mastered_at DATETIME"))
+            conn.execute(
+                text("ALTER TABLE learning_progress ADD COLUMN mastered_at DATETIME")
+            )
         # Backfill for any existing mastered records so historical data shows up
-        conn.execute(text("""
+        conn.execute(
+            text(
+                """
             UPDATE learning_progress
             SET mastered_at = COALESCE(last_reviewed, updated_at, created_at)
             WHERE status = 'mastered' AND mastered_at IS NULL
-        """))
+        """
+            )
+        )
         conn.commit()
     logger.success("mastered_at column ensured and backfilled")
 
@@ -117,6 +131,7 @@ def ensure_ai_usage_logs_extra_fields(engine) -> None:
         conn.commit()
     logger.success("ai_usage_logs columns ensured")
 
+
 def ensure_ai_config_token_limit(engine) -> None:
     """
     Add token_limit column to ai_configs if missing.
@@ -138,6 +153,39 @@ def ensure_ai_config_token_limit(engine) -> None:
     logger.success("Added token_limit column to ai_configs")
 
 
+def ensure_learning_progress_srs_fields(engine) -> None:
+    """
+    Add SRS (Spaced Repetition) fields to learning_progress table.
+    Fields: next_review_at, easiness_factor, review_interval_days, review_count.
+    """
+    inspector = inspect(engine)
+    if "learning_progress" not in inspector.get_table_names():
+        logger.warning("learning_progress table missing; skipping SRS migration")
+        return
+
+    column_names = [col["name"] for col in inspector.get_columns("learning_progress")]
+    alters = []
+    if "next_review_at" not in column_names:
+        alters.append("ADD COLUMN next_review_at DATETIME NULL")
+    if "easiness_factor" not in column_names:
+        alters.append("ADD COLUMN easiness_factor FLOAT DEFAULT 2.5")
+    if "review_interval_days" not in column_names:
+        alters.append("ADD COLUMN review_interval_days INT DEFAULT 0")
+    if "review_count" not in column_names:
+        alters.append("ADD COLUMN review_count INT DEFAULT 0")
+
+    if not alters:
+        logger.info("SRS fields already present on learning_progress; skipping")
+        return
+
+    alter_sql = "ALTER TABLE learning_progress " + ", ".join(alters)
+    logger.info("Adding SRS fields to learning_progress: {}", alter_sql)
+    with engine.connect() as conn:
+        conn.execute(text(alter_sql))
+        conn.commit()
+    logger.success("SRS fields added to learning_progress")
+
+
 def run_migrations(engine) -> None:
     logger.info("Running lightweight migrations...")
     ensure_ai_config_total_tokens(engine)
@@ -146,3 +194,4 @@ def run_migrations(engine) -> None:
     # daily_learning_summaries is created by Base.metadata.create_all in main.py
     ensure_learning_progress_mastered_at(engine)
     ensure_ai_usage_logs_extra_fields(engine)
+    ensure_learning_progress_srs_fields(engine)
