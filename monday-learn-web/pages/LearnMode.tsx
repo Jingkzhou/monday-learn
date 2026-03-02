@@ -7,6 +7,7 @@ import { X, Settings, Volume2, CheckCircle2, AlertCircle, ArrowRight, RotateCcw,
 interface LearningTerm extends Term {
     learning_status: 'not_started' | 'familiar' | 'mastered';
     consecutive_correct: number;
+    priority_score?: number;
 }
 
 interface LearningSession {
@@ -51,6 +52,9 @@ export const LearnMode: React.FC = () => {
     // Local counts state for real-time updates
     const [counts, setCounts] = useState({ new: 0, familiar: 0, mastered: 0 });
     const [allTerms, setAllTerms] = useState<LearningTerm[]>([]);
+
+    // Track consecutive wrong counts per term for adaptive spacing
+    const wrongCountsRef = useRef<{ [termId: number]: number }>({});
 
     const computeCounts = (termsList: LearningTerm[]) => {
         return termsList.reduce(
@@ -115,11 +119,13 @@ export const LearnMode: React.FC = () => {
                 familiar_count: updatedCounts.familiar,
                 mastered_count: updatedCounts.mastered
             });
+            // Initial queue is already sorted by backend (descending priority)
             setQueue(filteredTerms);
             setCounts(updatedCounts);
             setCurrentIndex(0);
             setRoundComplete(false);
             setIsFlipped(false);
+            wrongCountsRef.current = {}; // Reset wrong counts on new session
         } catch (err) {
             console.error("Failed to fetch session", err);
         } finally {
@@ -340,12 +346,36 @@ export const LearnMode: React.FC = () => {
                 updatedTerm.learning_status = 'not_started';
             }
 
-            // Move to end of queue
+            // Adaptive spacing logic based on wrong count
+            const currentWrongCount = (wrongCountsRef.current[updatedTerm.id] || 0) + 1;
+            wrongCountsRef.current[updatedTerm.id] = currentWrongCount;
+
             const newQueue = [...queue];
             newQueue.splice(currentIndex, 1);
-            newQueue.push(updatedTerm);
+
+            // Reinsert with spacing: min(queue_length, 2 + wrongCount)
+            // Example:
+            // 1st time wrong -> insert 3 slots away (index + 3)
+            // 2nd time wrong -> insert 4 slots away (index + 4)
+            if (newQueue.length > 0) {
+                const spacing = Math.min(newQueue.length, 2 + currentWrongCount);
+                // Insert after `spacing` elements starting from current position
+                // Wait, since we are moving the pointer to the next element (or wrap), it's relative to the start of remaining queue
+                let insertPos = currentIndex + spacing;
+                if (insertPos > newQueue.length) {
+                    insertPos = newQueue.length; // push to end if spacing too large
+                }
+                newQueue.splice(insertPos, 0, updatedTerm);
+            } else {
+                newQueue.push(updatedTerm);
+            }
+
             setQueue(newQueue);
-            if (currentIndex >= newQueue.length) setCurrentIndex(0);
+
+            // Advance pointer normally, but if we're at the end, wrap to start
+            if (currentIndex >= newQueue.length) {
+                setCurrentIndex(0);
+            }
         }
 
         console.log("New Counts:", newCounts);

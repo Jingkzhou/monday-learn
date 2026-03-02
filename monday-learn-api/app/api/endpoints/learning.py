@@ -25,6 +25,7 @@ from app.schemas.learning_progress_log import (
 from app.schemas.learning_report import LearningReportRequest, LearningReportResponse
 import httpx
 from app.schemas.study_set import TermResponse
+import random
 
 router = APIRouter()
 
@@ -233,6 +234,9 @@ def get_learning_session(
 
     # 2. Get all terms
     terms = db.query(Term).filter(Term.study_set_id == study_set_id).all()
+    if not terms:
+        return {"new_count": 0, "familiar_count": 0, "mastered_count": 0, "terms": []}
+
     term_map = {t.id: t for t in terms}
 
     # 3. Get existing progress
@@ -246,57 +250,130 @@ def get_learning_session(
     )
     progress_map = {p.term_id: p for p in progress_records}
 
-    # 4. Bucket terms
-    familiar_terms = []
-    new_terms = []
+    # 4. Filter out mastered terms, evaluate priorities for active learning
+    now = datetime.now()
+    review_pool = []  # Terms to review (due or familiar)
+    new_pool = []  # Terms not started
     mastered_count = 0
+
+    def _compute_priority(progress: LearningProgress) -> float:
+        """多维加权优先级评分（基于认知科学：间隔效应、难度自适应）"""
+        score = 0.0
+
+        # 1. 过期紧急度 (权重 0.35) — 超过 next_review_at 的时间越久，遗忘风险越大，优先级越高
+        if progress.next_review_at:
+            if progress.next_review_at.tzinfo is not None and now.tzinfo is None:
+                now_aware = datetime.now(progress.next_review_at.tzinfo)
+                overdue_hours = (
+                    now_aware - progress.next_review_at
+                ).total_seconds() / 3600
+            else:
+                overdue_hours = (now - progress.next_review_at).total_seconds() / 3600
+
+            # 过期时间归一化到1周（168小时）内
+            if overdue_hours > 0:
+                score += min(1.0, overdue_hours / 168) * 0.35
+            else:
+                # 还没到期，给予负分或很低分数（通常不会加入 review_pool，但这确保排序靠后）
+                score += -0.2
+
+        # 2. 难度系数 (权重 0.25) — EF 越低，说明词越难，优先级越高
+        ef = progress.easiness_factor or 2.5
+        # ef 的有效区间约 [1.3, 2.5]
+        difficulty = 1.0 - (ef - 1.3) / max(0.1, (2.5 - 1.3))
+        score += max(0, min(1, difficulty)) * 0.25
+
+        # 3. 错误率 (权重 0.25) — 历史错误率越高的越需要复习
+        total_attempts = (progress.total_correct or 0) + (progress.total_incorrect or 0)
+        error_rate = (progress.total_incorrect or 0) / max(total_attempts, 1)
+        score += float(error_rate) * 0.25
+
+        # 4. 时间衰减 (权重 0.15) — 距离上次复习越久，越应优先
+        if progress.last_reviewed:
+            if progress.last_reviewed.tzinfo is not None and now.tzinfo is None:
+                now_aware = datetime.now(progress.last_reviewed.tzinfo)
+                hours_since = (
+                    now_aware - progress.last_reviewed
+                ).total_seconds() / 3600
+            else:
+                hours_since = (now - progress.last_reviewed).total_seconds() / 3600
+            score += min(1.0, hours_since / 168) * 0.15
+        else:
+            score += 0.15  # 没复习过的（如刚变成 familiar 的）
+
+        return round(score, 4)
 
     for term in terms:
         progress = progress_map.get(term.id)
         if progress:
             if progress.status == LearningStatus.MASTERED:
                 mastered_count += 1
-            elif progress.status == LearningStatus.FAMILIAR:
-                familiar_terms.append(term)
-            else:  # NOT_STARTED
-                new_terms.append(term)
+            else:
+                priority = _compute_priority(progress)
+                review_pool.append(
+                    {
+                        "term": term,
+                        "priority": priority,
+                        "status": progress.status,
+                        "consecutive": progress.consecutive_correct or 0,
+                    }
+                )
         else:
-            new_terms.append(term)
+            new_pool.append(term)
 
-    # 5. Select Batch (Target 7 terms)
+    # 5. Build Final Session Batch (Target 7 terms)
     BATCH_SIZE = 7
     session_terms = []
 
-    # Prioritize Familiar terms (Review loop)
-    session_terms.extend(familiar_terms[:BATCH_SIZE])
+    # 5.1 Sort review pool by descending priority
+    review_pool.sort(key=lambda x: x["priority"], reverse=True)
 
-    # Fill with New terms if space remains
-    remaining_slots = BATCH_SIZE - len(session_terms)
-    if remaining_slots > 0:
-        session_terms.extend(new_terms[:remaining_slots])
+    # 5.2 Interleave Review and New Terms
+    # Ratio: roughly 2 review : 1 new (if available) for interleaved practice chunking
+    # This prevents cognitive overload from purely new material, and avoids boredom from purely review.
 
-    # Construct response
-    # We need to attach progress info to terms for the frontend
-    response_terms = []
-    for term in session_terms:
-        progress = progress_map.get(term.id)
-        consecutive = progress.consecutive_correct if progress else 0
-        status = progress.status if progress else LearningStatus.NOT_STARTED
+    r_idx = 0
+    n_idx = 0
 
-        # Create a composite dict/object.
-        # Since TermResponse doesn't have progress fields, we might need a custom schema or just return a list of dicts if Pydantic allows.
-        # Let's use a dynamic structure or extend TermResponse in the schema.
-        # For now, let's return a custom dict structure that matches what frontend needs.
-        t_dict = TermResponse.model_validate(term).model_dump()
-        t_dict["learning_status"] = status
-        t_dict["consecutive_correct"] = consecutive
-        response_terms.append(t_dict)
+    while len(session_terms) < BATCH_SIZE and (
+        r_idx < len(review_pool) or n_idx < len(new_pool)
+    ):
+        # Every 3rd word tries to be a new word (index 2, 5, etc.), if available
+        # OR if we run out of review words, just use new words
+        if (len(session_terms) % 3 == 2 and n_idx < len(new_pool)) or (
+            r_idx >= len(review_pool) and n_idx < len(new_pool)
+        ):
+            term = new_pool[n_idx]
+            n_idx += 1
+            t_dict = TermResponse.model_validate(term).model_dump()
+            t_dict["learning_status"] = LearningStatus.NOT_STARTED
+            t_dict["consecutive_correct"] = 0
+            t_dict["priority_score"] = (
+                1.0  # New items get a baseline synthetic priority
+            )
+            session_terms.append(t_dict)
+        elif r_idx < len(review_pool):
+            review_item = review_pool[r_idx]
+            r_idx += 1
+            term = review_item["term"]
+            t_dict = TermResponse.model_validate(term).model_dump()
+            t_dict["learning_status"] = review_item["status"]
+            t_dict["consecutive_correct"] = review_item["consecutive"]
+            t_dict["priority_score"] = review_item["priority"]
+            session_terms.append(t_dict)
+        else:
+            # Fallback (shouldn't really hit this due to while conditions but safe guard)
+            break
+
+    # For extra difficulty randomization, gently shuffle top-N to prevent predictable order?
+    # Not strictly necessary if priority is precise, but small jitter might help.
+    # Skipping jitter for now as score itself works as a decent entropy if weights differ.
 
     return {
-        "new_count": len(new_terms),
-        "familiar_count": len(familiar_terms),
+        "new_count": len(new_pool),
+        "familiar_count": len(review_pool),
         "mastered_count": mastered_count,
-        "terms": response_terms,
+        "terms": session_terms,
     }
 
 
@@ -476,9 +553,13 @@ def get_review_queue(
         if not term:
             continue
 
-        overdue_hours = (
-            (now - p.next_review_at).total_seconds() / 3600 if p.next_review_at else 0
-        )
+        # Handle potential timezone mismatch
+        p_next = p.next_review_at
+        if p_next and p_next.tzinfo is not None and now.tzinfo is None:
+            now_aware = datetime.now(p_next.tzinfo)
+            overdue_hours = (now_aware - p_next).total_seconds() / 3600
+        else:
+            overdue_hours = (now - p_next).total_seconds() / 3600 if p_next else 0
 
         result.append(
             {
@@ -639,14 +720,23 @@ def get_weak_terms(
     for row in results:
         error_rate = (row.error_count or 0) / max(row.total_attempts, 1)
         # Hours since last review (longer = weaker memory)
-        if row.last_reviewed:
-            hours_since = (now - row.last_reviewed).total_seconds() / 3600
+        # Handle potential timezone mismatch
+        row_lr = row.last_reviewed
+        if row_lr:
+            # If DB return aware datetime, we must use aware now for subtraction
+            if row_lr.tzinfo is not None and now.tzinfo is None:
+                now_cmp = datetime.now(row_lr.tzinfo)
+            else:
+                now_cmp = now
+            hours_since = (now_cmp - row_lr).total_seconds() / 3600
         else:
             hours_since = 999  # Never reviewed → very weak
 
         # Weakness score = error_rate * 0.6 + time_decay * 0.4
-        time_decay = min(1.0, hours_since / 168)  # Normalize to 1 week
-        weakness_score = error_rate * 0.6 + time_decay * 0.4
+        time_decay = float(min(1.0, hours_since / 168))  # Normalize to 1 week
+        # Ensure error_rate is float (can be Decimal from DB sum)
+        error_rate_f = float(error_rate)
+        weakness_score = error_rate_f * 0.6 + time_decay * 0.4
 
         scored.append(
             {
@@ -701,7 +791,7 @@ def get_smart_recommend(
     2. not_started: 用户拥有但尚未开始的学习集（新目标）
     3. popular: 热门公开学习集（探索发现）
     """
-    from sqlalchemy import func
+    from sqlalchemy import func, case
 
     # --- 1. Needs Work: Study sets with lowest mastery percentage ---
     # Get user's progress grouped by study_set
@@ -709,9 +799,9 @@ def get_smart_recommend(
         db.query(
             LearningProgress.study_set_id,
             func.count(LearningProgress.id).label("total"),
-            func.sum(func.IF(LearningProgress.status == "mastered", 1, 0)).label(
-                "mastered"
-            ),
+            func.sum(
+                case((LearningProgress.status == LearningStatus.MASTERED, 1), else_=0)
+            ).label("mastered"),
         )
         .filter(LearningProgress.user_id == current_user.id)
         .group_by(LearningProgress.study_set_id)
