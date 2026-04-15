@@ -44,19 +44,25 @@ export const RECENT_SETS: StudySet[] = [
 
 export const MOCK_FOLDERS: Folder[] = [
   {
-    id: '1',
+    id: 1,
     title: '一年级语文',
     description: '2025第一学期重点复习',
-    setIds: ['1105444813', '3'],
-    author: 'Linh_30_12',
-    createdAt: '2025-11-01'
+    author_id: 1,
+    author_username: 'Linh_30_12',
+    created_at: '2025-11-01',
+    updated_at: '2025-11-01',
+    study_sets: [],
+    set_count: 2
   },
   {
-    id: '2',
+    id: 2,
     title: '英语启蒙',
     description: 'Phonics and Sight Words',
-    setIds: ['2'],
-    author: 'Linh_30_12',
-    createdAt: '2025-11-05'
+    author_id: 1,
+    author_username: 'Linh_30_12',
+    created_at: '2025-11-05',
+    updated_at: '2025-11-05',
+    study_sets: [],
+    set_count: 1
   }
 ];
